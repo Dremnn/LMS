@@ -1,0 +1,3 @@
+db.url=jdbc:sqlserver://localhost:1433;databaseName=LMS_DB;encrypt=true;trustServerCertificate=true
+db.username=your_username_here
+db.password=your_password_here

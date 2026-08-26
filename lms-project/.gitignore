@@ -1,0 +1,19 @@
+# Build output của Maven
+target/
+
+# File biên dịch Java
+*.class
+
+# Cấu hình IDE (Eclipse/IntelliJ - không dùng nhưng phòng hờ)
+.classpath
+.project
+.settings/
+*.iml
+.idea/
+
+# File chứa password thật - KHÔNG BAO GIỜ commit
+src/main/resources/db.properties
+
+# File rác hệ điều hành
+.DS_Store
+Thumbs.db
