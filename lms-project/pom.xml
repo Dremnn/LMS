@@ -39,6 +39,26 @@
         <artifactId>mssql-jdbc</artifactId>
         <version>12.8.1.jre11</version>
     </dependency>
+
+    <!-- jBCrypt - mã hóa password -->
+    <dependency>
+        <groupId>org.mindrot</groupId>
+        <artifactId>jbcrypt</artifactId>
+        <version>0.4</version>
+    </dependency>
+
+    <!-- JSTL 3.0 - dùng thẻ c:forEach, c:if, c:choose trong JSP (tương thích Tomcat 11 / Jakarta EE 10) -->
+    <dependency>
+        <groupId>org.glassfish.web</groupId>
+        <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+        <version>3.0.1</version>
+    </dependency>
+    <dependency>
+        <groupId>jakarta.servlet.jsp.jstl</groupId>
+        <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+        <version>3.0.0</version>
+    </dependency>
+
   </dependencies>
 
   <build>
