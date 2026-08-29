@@ -273,4 +273,11 @@ public class CourseService {
         }
         return course;
     }
+
+    // =========================================================================
+    // ADMIN: LẤY DANH SÁCH KHÓA HỌC ĐANG CHỜ DUYỆT
+    // =========================================================================
+    public List<Course> getPendingCourses() {
+        return courseDAO.findPendingApproval();
+    }
 }

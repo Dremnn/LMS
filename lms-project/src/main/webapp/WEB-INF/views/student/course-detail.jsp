@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -74,6 +74,11 @@
                 <span style="font-size:13px;color:#a78bfa;font-weight:600;display:block;margin-bottom:10px;">📂 <c:out value="${course.categoryName}"/></span>
             </c:if>
             <h1><c:out value="${course.title}"/></h1>
+            <c:if test="${not empty error}">
+                <div style="background:#fed7d7;color:#822727;border:1px solid #fc8181;padding:11px 16px;border-radius:9px;font-size:14px;margin-bottom:14px;">
+                    ⚠️ ${error}
+                </div>
+            </c:if>
             <p class="desc"><c:out value="${course.description}"/></p>
             <div class="hero-meta">
                 <span>👨‍🏫 <c:out value="${course.instructorName}"/></span>
@@ -91,9 +96,29 @@
                     </c:otherwise>
                 </c:choose>
             </div>
-            <a href="${pageContext.request.contextPath}/enrollments/new?courseId=${course.id}" class="btn-enroll">
-                🚀 Đăng ký học ngay
-            </a>
+            <c:choose>
+                <c:when test="${not empty enrollment}">
+                    <%-- Đã đăng ký: hiện tiến độ + nút vào học --%>
+                    <div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+                        <div style="font-size:13px;opacity:.85;margin-bottom:8px;">
+                            ✅ Bạn đã đăng ký · Tiến độ: <strong>${enrollment.progressPercent}%</strong>
+                        </div>
+                        <div style="background:rgba(255,255,255,.2);border-radius:10px;height:8px;overflow:hidden;">
+                            <div style="height:100%;border-radius:10px;background:#68d391;width:${enrollment.progressPercent}%;"></div>
+                        </div>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/student/my-courses" class="btn-enroll" style="background:linear-gradient(135deg,#48bb78,#38a169);">
+                        ▶ Tiếp tục học
+                    </a>
+                </c:when>
+                <c:otherwise>
+                    <%-- Chưa đăng ký: hiện form đăng ký --%>
+                    <form action="${pageContext.request.contextPath}/enrollments/new" method="post" style="display:inline;">
+                        <input type="hidden" name="courseId" value="${course.id}" />
+                        <button type="submit" class="btn-enroll">🚀 Đăng ký học ngay</button>
+                    </form>
+                </c:otherwise>
+            </c:choose>
         </div>
         <div class="hero-img">
             <c:choose>
@@ -123,7 +148,23 @@
                             <c:when test="${not empty section.lessons}">
                                 <c:forEach var="lesson" items="${section.lessons}">
                                     <div class="lesson-item">
-                                        <span class="lesson-name">▶ <c:out value="${lesson.title}"/></span>
+                                        <span class="lesson-name">
+                                            <c:choose>
+                                                <c:when test="${not empty enrollment}">
+                                                    <%-- Đã đăng ký: tên bài là link dẫn vào xem nội dung --%>
+                                                    <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
+                                                       style="color:#667eea;text-decoration:none;font-weight:600;"
+                                                       onmouseover="this.style.textDecoration='underline'"
+                                                       onmouseout="this.style.textDecoration='none'">
+                                                        ▶ <c:out value="${lesson.title}"/>
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <%-- Chưa đăng ký: text tĩnh + icon khóa --%>
+                                                    <span style="color:#a0aec0;">🔒 <c:out value="${lesson.title}"/></span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
                                         <span class="lesson-duration">
                                             <c:choose>
                                                 <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>

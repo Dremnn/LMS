@@ -50,7 +50,10 @@ public class CourseContentServlet extends HttpServlet {
             int courseId = Integer.parseInt(request.getParameter("id"));
             Course course = courseService.getCourseDetail(courseId);
 
-            if (course.getInstructorId() != currentUser.getId()) {
+            // Instructor chỉ được xem khóa học của mình.
+            // Admin được xem tất cả (để kiểm tra nội dung trước khi duyệt).
+            boolean isAdmin = "admin".equals(currentUser.getRole());
+            if (!isAdmin && course.getInstructorId() != currentUser.getId()) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền quản lý khóa học này!");
                 return;
             }

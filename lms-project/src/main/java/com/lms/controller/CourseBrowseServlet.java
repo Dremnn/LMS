@@ -1,7 +1,10 @@
 package com.lms.controller;
 
 import com.lms.model.Course;
+import com.lms.model.Enrollment;
+import com.lms.model.User;
 import com.lms.service.CourseService;
+import com.lms.service.EnrollmentService;
 import com.lms.dao.CategoryDAO;
 
 import jakarta.servlet.ServletException;
@@ -9,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,11 +23,13 @@ public class CourseBrowseServlet extends HttpServlet {
 
     private CourseService courseService;
     private CategoryDAO categoryDAO;
+    private EnrollmentService enrollmentService;
 
     @Override
     public void init() throws ServletException {
         this.courseService = new CourseService();
         this.categoryDAO = new CategoryDAO();
+        this.enrollmentService = new EnrollmentService();
     }
 
     @Override
@@ -39,11 +45,9 @@ public class CourseBrowseServlet extends HttpServlet {
         }
     }
 
-    // Trang danh sách khóa học - có tìm kiếm + filter + sort
     private void showCourseBrowse(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Đọc tham số từ URL (VD: /courses?keyword=java&categoryId=1&sortBy=popular)
         String keyword = request.getParameter("keyword");
 
         String categoryIdStr = request.getParameter("categoryId");
@@ -52,13 +56,11 @@ public class CourseBrowseServlet extends HttpServlet {
 
         String sortBy = request.getParameter("sortBy");
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "newest"; // Mặc định sắp theo mới nhất
+            sortBy = "newest";
         }
 
         List<Course> courses = courseService.searchCourses(keyword, categoryId, sortBy);
 
-        // Đưa lại các giá trị đã lọc vào request để JSP hiển thị đúng trạng thái đang chọn
-        // (VD: giữ nguyên từ khóa đã gõ trong ô search, giữ dropdown category đang chọn)
         request.setAttribute("courses", courses);
         request.setAttribute("categories", categoryDAO.findAll());
         request.setAttribute("keyword", keyword);
@@ -69,9 +71,15 @@ public class CourseBrowseServlet extends HttpServlet {
                 .forward(request, response);
     }
 
-    // Trang chi tiết 1 khóa học
     private void showCourseDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Đọc flash message (nếu vừa redirect từ EnrollmentServlet với lỗi)
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("flashError") != null) {
+            request.setAttribute("error", session.getAttribute("flashError"));
+            session.removeAttribute("flashError");
+        }
 
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
@@ -83,13 +91,22 @@ public class CourseBrowseServlet extends HttpServlet {
             int courseId = Integer.parseInt(idParam);
             Course course = courseService.getCourseDetail(courseId);
 
-            // Chỉ cho Student xem khóa học đã published (khóa học draft/pending không public)
             if (!"published".equals(course.getStatus())) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Khóa học không tồn tại hoặc chưa được công khai!");
                 return;
             }
 
             request.setAttribute("course", course);
+
+            // Kiểm tra: nếu đang đăng nhập VÀ là student, xem đã enroll khóa học này chưa
+            // Kết quả dùng để JSP quyết định: hiện nút "Đăng ký học" hay cho phép click vào bài học
+            User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+            Enrollment enrollment = null;
+            if (currentUser != null && "student".equalsIgnoreCase(currentUser.getRole())) {
+                enrollment = enrollmentService.getEnrollmentIfExists(currentUser.getId(), courseId);
+            }
+            request.setAttribute("enrollment", enrollment); // null nếu chưa đăng ký (hoặc không phải student)
+
             request.getRequestDispatcher("/WEB-INF/views/student/course-detail.jsp")
                     .forward(request, response);
 

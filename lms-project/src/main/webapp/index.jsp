@@ -1,4 +1,4 @@
-﻿F<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+F<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -78,7 +78,8 @@
             <a href="<%=request.getContextPath()%>/courses" class="btn-hero btn-hero-white">🚀 Khám phá khóa học</a>
             <a href="<%=request.getContextPath()%>/register" class="btn-hero btn-hero-outline">✨ Đăng ký miễn phí</a>
         <% } else if ("student".equals(role)) { %>
-            <a href="<%=request.getContextPath()%>/courses" class="btn-hero btn-hero-white">📚 Khóa học của tôi</a>
+            <a href="<%=request.getContextPath()%>/student/my-courses" class="btn-hero btn-hero-white">📚 Khóa học của tôi</a>
+            <a href="<%=request.getContextPath()%>/courses" class="btn-hero btn-hero-outline">🔍 Khám phá khóa học</a>
         <% } else if ("instructor".equals(role)) { %>
             <a href="<%=request.getContextPath()%>/instructor/courses" class="btn-hero btn-hero-white">📋 Quản lý khóa học</a>
             <a href="<%=request.getContextPath()%>/instructor/courses/new" class="btn-hero btn-hero-outline">➕ Tạo khóa học mới</a>
