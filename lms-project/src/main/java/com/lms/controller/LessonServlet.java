@@ -77,19 +77,31 @@ public class LessonServlet extends HttpServlet {
 
             int courseId = section.getCourseId();
 
-            // 2. Kiểm tra Student đã đăng ký khóa học chứa bài học này chưa
-            Enrollment enrollment = enrollmentService.getEnrollmentOrThrow(currentUser.getId(), courseId);
+            // 2. Kiểm tra quyền truy cập (Admin/Instructor được xem trước, Student phải đăng ký)
+            boolean isPreview = false;
+            if (currentUser != null && ("admin".equals(currentUser.getRole()) || "instructor".equals(currentUser.getRole()))) {
+                isPreview = true;
+            }
+
+            Enrollment enrollment = null;
+            if (!isPreview) {
+                enrollment = enrollmentService.getEnrollmentOrThrow(currentUser.getId(), courseId);
+            }
 
             // 3. Lấy toàn bộ nội dung khóa học (để hiển thị sidebar danh sách chương/bài)
             Course course = courseService.getCourseDetail(courseId);
 
-            // 4. Lấy danh sách tiến độ đã hoàn thành, dùng Set<Integer> chứa lessonId đã tick
-            // để JSP dễ kiểm tra "bài này đã hoàn thành chưa" bằng contains()
-            List<LessonProgress> progressList = enrollmentService.getLessonProgressList(enrollment.getId());
+            // Lấy thêm danh sách Quiz để hiển thị ở sidebar
+            List<com.lms.model.Quiz> quizzes = new com.lms.service.QuizService().getAllQuizzesForCourse(course);
+
+            // 4. Lấy danh sách tiến độ đã hoàn thành
             Set<Integer> completedLessonIds = new HashSet<>();
-            for (LessonProgress p : progressList) {
-                if (p.isCompleted()) {
-                    completedLessonIds.add(p.getLessonId());
+            if (enrollment != null) {
+                List<LessonProgress> progressList = enrollmentService.getLessonProgressList(enrollment.getId());
+                for (LessonProgress p : progressList) {
+                    if (p.isCompleted()) {
+                        completedLessonIds.add(p.getLessonId());
+                    }
                 }
             }
 
@@ -100,6 +112,7 @@ public class LessonServlet extends HttpServlet {
             request.setAttribute("enrollment", enrollment);
             request.setAttribute("completedLessonIds", completedLessonIds);
             request.setAttribute("youtubeEmbedUrl", youtubeEmbedUrl); // null nếu không phải YouTube
+            request.setAttribute("quizzes", quizzes); // Truyền xuống JSP
 
             request.getRequestDispatcher("/WEB-INF/views/student/lesson-view.jsp")
                     .forward(request, response);

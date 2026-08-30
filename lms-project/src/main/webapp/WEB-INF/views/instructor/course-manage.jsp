@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%
@@ -113,7 +113,11 @@
                             <c:when test="${not empty section.lessons}">
                                 <c:forEach var="lesson" items="${section.lessons}">
                                     <div class="lesson-row">
-                                        <span class="lesson-info">▶ <c:out value="${lesson.title}"/></span>
+                                        <span class="lesson-info">▶ 
+                                            <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}" style="color:inherit; text-decoration:underline; font-weight:600;">
+                                                <c:out value="${lesson.title}"/>
+                                            </a>
+                                        </span>
                                         <span class="lesson-dur">
                                             <c:choose>
                                                 <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
@@ -194,6 +198,42 @@
                 </form>
             </div>
         </c:if>
+        <%-- ===== PHẦN QUIZ ===== --%>
+        <div style="background:#fff;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.06);padding:24px 28px;margin-bottom:24px;border-left:4px solid #f6ad55;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <h3 style="font-size:16px;font-weight:700;color:#1a202c;">📝 Quiz khóa học</h3>
+                <a href="${pageContext.request.contextPath}/instructor/quizzes/new?courseId=${course.id}"
+                   class="btn btn-primary btn-sm">➕ Tạo Quiz mới</a>
+            </div>
+            <p style="font-size:13px;color:#718096;margin-bottom:16px;">Tạo bài kiểm tra tổng kết cho toàn bộ khóa học hoặc cho từng chương cụ thể.</p>
+            
+            <c:choose>
+                <c:when test="${not empty quizzes}">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <c:forEach var="quiz" items="${quizzes}">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fffaf0;border:1px solid #feebc8;border-radius:8px;">
+                                <div>
+                                    <div style="font-size:14px;font-weight:700;color:#c05621;"><c:out value="${quiz.title}"/></div>
+                                    <div style="font-size:12px;color:#dd6b20;margin-top:4px;">
+                                        ${quiz.totalQuestions} câu hỏi · Điểm đạt: ${quiz.passScore}/100
+                                        <c:choose>
+                                            <c:when test="${quiz.courseId != null}"> (Quiz tổng kết)</c:when>
+                                            <c:otherwise> (Quiz chương ID: ${quiz.sectionId})</c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                </div>
+                                <a href="${pageContext.request.contextPath}/instructor/quizzes/manage?id=${quiz.id}" class="btn btn-outline btn-sm" style="border-color:#dd6b20;color:#dd6b20;">Quản lý câu hỏi</a>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div style="padding:16px;background:#f7fafc;border-radius:8px;text-align:center;font-size:13px;color:#a0aec0;font-style:italic;">
+                        Chưa có Quiz nào được tạo.
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </div>
     </c:if>
 </div>
 </body>

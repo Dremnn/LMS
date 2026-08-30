@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -87,13 +87,20 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-course-title">📚 <c:out value="${course.title}"/></div>
-            <div class="progress-label">
-                <span>Tiến độ của bạn</span>
-                <span><strong>${enrollment.progressPercent}%</strong></span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width:${enrollment.progressPercent}%;"></div>
-            </div>
+            <c:if test="${enrollment != null}">
+                <div class="progress-label">
+                    <span>Tiến độ của bạn</span>
+                    <span><strong>${enrollment.progressPercent}%</strong></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width:${enrollment.progressPercent}%;"></div>
+                </div>
+            </c:if>
+            <c:if test="${enrollment == null}">
+                <div class="progress-label">
+                    <span>Chế độ xem trước (Admin/Instructor)</span>
+                </div>
+            </c:if>
         </div>
 
         <div class="sidebar-body">
@@ -114,8 +121,39 @@
                             <span><c:out value="${lesson.title}"/></span>
                         </a>
                     </c:forEach>
+
+                    <%-- Quiz cho chương này --%>
+                    <c:forEach var="quiz" items="${quizzes}">
+                        <c:if test="${quiz.sectionId == section.id}">
+                            <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}&lessonId=${currentLesson.id}" class="lesson-link" style="color:#fbd38d;">
+                                <span class="dot" style="border-color:#fbd38d; border-radius:2px;"></span>
+                                <span>📝 <c:out value="${quiz.title}"/></span>
+                            </a>
+                        </c:if>
+                    </c:forEach>
                 </div>
             </c:forEach>
+
+            <%-- Quiz tổng kết khóa học --%>
+            <c:set var="hasCourseQuiz" value="false"/>
+            <c:forEach var="quiz" items="${quizzes}">
+                <c:if test="${quiz.courseId != null}">
+                    <c:set var="hasCourseQuiz" value="true"/>
+                </c:if>
+            </c:forEach>
+            <c:if test="${hasCourseQuiz}">
+                <div class="section-group" style="border-bottom:none;">
+                    <div class="section-title" style="background:#4a2a18; color:#fbd38d;">🏆 Quiz Tổng Kết Khóa Học</div>
+                    <c:forEach var="quiz" items="${quizzes}">
+                        <c:if test="${quiz.courseId != null}">
+                            <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}&lessonId=${currentLesson.id}" class="lesson-link" style="color:#fbd38d;">
+                                <span class="dot" style="border-color:#fbd38d; background:#fbd38d; border-radius:2px;"></span>
+                                <span style="font-weight:700;">⭐ <c:out value="${quiz.title}"/></span>
+                            </a>
+                        </c:if>
+                    </c:forEach>
+                </div>
+            </c:if>
         </div>
     </aside>
 
@@ -169,23 +207,24 @@
 
         <hr class="divider">
 
-        <%-- Form đánh dấu hoàn thành --%>
-        <div class="complete-card">
-            <h3>✅ Tiến độ bài học</h3>
-            <form action="${pageContext.request.contextPath}/student/lessons/complete" method="post">
-                <input type="hidden" name="lessonId" value="${currentLesson.id}" />
-                <input type="hidden" name="courseId" value="${course.id}" />
-                <div class="form-check">
-                    <input type="checkbox" name="completed" id="completedCheck"
-                           <c:if test="${completedLessonIds.contains(currentLesson.id)}">checked</c:if>
-                           onchange="this.form.submit()" />
-                    <label class="form-check-label" for="completedCheck">
-                        Đánh dấu bài học này đã hoàn thành
-                    </label>
-                </div>
-                <button type="submit" class="btn btn-success">💾 Lưu tiến độ</button>
-            </form>
-        </div>
+        <%-- Form đánh dấu hoàn thành (chỉ hiện cho Student đã enroll) --%>
+        <c:if test="${enrollment != null}">
+            <div class="complete-card">
+                <h3>✅ Tiến độ bài học</h3>
+                <form action="${pageContext.request.contextPath}/student/lessons/complete" method="post">
+                    <input type="hidden" name="lessonId" value="${currentLesson.id}" />
+                    <input type="hidden" name="courseId" value="${course.id}" />
+                    <div class="form-check">
+                        <input type="checkbox" name="completed" id="completedCheck"
+                               <c:if test="${completedLessonIds.contains(currentLesson.id)}">checked</c:if> />
+                        <label class="form-check-label" for="completedCheck">
+                            Đánh dấu bài học này đã hoàn thành
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-success">💾 Lưu tiến độ</button>
+                </form>
+            </div>
+        </c:if>
     </main>
 </div>
 </body>

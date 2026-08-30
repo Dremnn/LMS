@@ -392,3 +392,5 @@ BEGIN
     DEALLOCATE cur;
 END
 GO
+
+ALTER TABLE quizzes ADD max_attempts INT NULL;

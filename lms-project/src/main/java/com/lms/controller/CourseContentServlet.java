@@ -58,7 +58,11 @@ public class CourseContentServlet extends HttpServlet {
                 return;
             }
 
+            // Lấy danh sách quiz của khóa học (mới thêm)
+            java.util.List<com.lms.model.Quiz> quizzes = new com.lms.service.QuizService().getAllQuizzesForCourse(course);
+
             request.setAttribute("course", course);
+            request.setAttribute("quizzes", quizzes);
             request.getRequestDispatcher("/WEB-INF/views/instructor/course-manage.jsp")
                     .forward(request, response);
 

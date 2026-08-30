@@ -55,9 +55,7 @@ F<%@ page contentType="text/html;charset=UTF-8" language="java" %>
                 <%=currentUser.getFullName()%>
                 <span class="badge"><%=role%></span>
             </span>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/courses" class="btn btn-outline">Khóa học của tôi</a>
-            <% } else if ("instructor".equals(role)) { %>
+            <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý khóa học</a>
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Trang quản trị</a>
