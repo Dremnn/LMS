@@ -16,8 +16,9 @@ public class Course implements Serializable {
     private String thumbnailUrl;
     private BigDecimal price;
     private BigDecimal passScore;
-    private String status;        // draft, pending, published, rejected
-    private String rejectReason;
+    private String status;        // draft, published, warning, appealed
+    private String rejectReason;  // Lý do cảnh cáo của Admin
+    private String appealMessage; // Nội dung kháng cáo của Instructor
     private BigDecimal avgRating;
     private int totalStudents;
     private int totalLessons;
@@ -71,6 +72,9 @@ public class Course implements Serializable {
 
     public String getRejectReason() { return rejectReason; }
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
+
+    public String getAppealMessage() { return appealMessage; }
+    public void setAppealMessage(String appealMessage) { this.appealMessage = appealMessage; }
 
     public BigDecimal getAvgRating() { return avgRating; }
     public void setAvgRating(BigDecimal avgRating) { this.avgRating = avgRating; }

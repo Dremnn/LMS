@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/enrollments/new", "/student/my-courses"})
+@WebServlet(urlPatterns = {"/enrollments/new", "/enrollments/cancel", "/student/my-courses"})
 public class EnrollmentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -45,13 +45,19 @@ public class EnrollmentServlet extends HttpServlet {
             throws ServletException, IOException {
 
         User currentUser = getCurrentUser(request);
+        String path = request.getServletPath();
 
         try {
             int courseId = Integer.parseInt(request.getParameter("courseId"));
-            enrollmentService.enroll(currentUser.getId(), courseId);
 
-            // Đăng ký thành công -> chuyển tới trang "Khóa học của tôi"
-            response.sendRedirect(request.getContextPath() + "/student/my-courses");
+            if ("/enrollments/cancel".equals(path)) {
+                enrollmentService.unenroll(currentUser.getId(), courseId);
+                response.sendRedirect(request.getContextPath() + "/student/my-courses");
+            } else {
+                enrollmentService.enroll(currentUser.getId(), courseId);
+                // Đăng ký thành công -> chuyển tới trang "Khóa học của tôi"
+                response.sendRedirect(request.getContextPath() + "/student/my-courses");
+            }
 
         } catch (IllegalArgumentException | IllegalStateException e) {
             // Lỗi nghiệp vụ (đã đăng ký rồi, khóa học chưa published...)

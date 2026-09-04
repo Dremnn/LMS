@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -69,6 +69,13 @@
 </div>
 
 <div class="main">
+    <c:if test="${not empty successMessage}">
+        <div style="background:#c6f6d5;color:#22543d;border:1px solid #9ae6b4;padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:18px;">✅ ${successMessage}</div>
+    </c:if>
+    <c:if test="${not empty error}">
+        <div style="background:#fed7d7;color:#822727;border:1px solid #fc8181;padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:18px;">⚠️ ${error}</div>
+    </c:if>
+
     <c:choose>
         <c:when test="${not empty courses}">
             <table>
@@ -91,6 +98,12 @@
                                 <c:if test="${course.status == 'rejected' && not empty course.rejectReason}">
                                     <div class="reject-reason">⚠ Lý do từ chối: <c:out value="${course.rejectReason}"/></div>
                                 </c:if>
+                                <c:if test="${course.status == 'warning' && not empty course.rejectReason}">
+                                    <div class="reject-reason" style="color:#c05621;">⚠️ Admin cảnh cáo: <c:out value="${course.rejectReason}"/></div>
+                                </c:if>
+                                <c:if test="${course.status == 'appealed' && not empty course.appealMessage}">
+                                    <div style="font-size:12px;color:#2a4365;margin-top:4px;">📩 Đã gửi kháng cáo: <c:out value="${course.appealMessage}"/></div>
+                                </c:if>
                             </td>
                             <td>
                                 <c:choose>
@@ -107,8 +120,9 @@
                             <td>
                                 <c:choose>
                                     <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
-                                    <c:when test="${course.status == 'pending'}"><span class="badge badge-pending">⏳ Chờ duyệt</span></c:when>
-                                    <c:when test="${course.status == 'published'}"><span class="badge badge-published">✅ Đã duyệt</span></c:when>
+                                    <c:when test="${course.status == 'published'}"><span class="badge badge-published">✅ Published</span></c:when>
+                                    <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;">⚠️ Warning</span></c:when>
+                                    <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
                                     <c:when test="${course.status == 'rejected'}"><span class="badge badge-rejected">❌ Từ chối</span></c:when>
                                 </c:choose>
                             </td>
@@ -116,27 +130,34 @@
                             <td>${course.createdAt}</td>
                             <td>
                                 <div class="actions">
-                                    <c:choose>
-                                        <c:when test="${course.status == 'draft' || course.status == 'rejected'}">
-                                            <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>
-                                            <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info">📂 Nội dung</a>
-                                            <form action="${pageContext.request.contextPath}/instructor/courses/submit" method="post">
-                                                <input type="hidden" name="id" value="${course.id}">
-                                                <button type="submit" class="btn btn-sm btn-warning">📤 Gửi duyệt</button>
-                                            </form>
-                                            <form action="${pageContext.request.contextPath}/instructor/courses/delete" method="post"
-                                                  onsubmit="return confirm('Bạn chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác!')">
-                                                <input type="hidden" name="id" value="${course.id}">
-                                                <button type="submit" class="btn btn-sm btn-error">🗑 Xóa</button>
-                                            </form>
-                                        </c:when>
-                                        <c:when test="${course.status == 'pending'}">
-                                            <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info">👁 Xem nội dung</a>
-                                        </c:when>
-                                        <c:when test="${course.status == 'published'}">
-                                            <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info">👁 Xem nội dung</a>
-                                        </c:when>
-                                    </c:choose>
+                                    <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>
+                                    <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info">📂 Nội dung</a>
+                                    
+                                    <c:if test="${course.status == 'draft'}">
+                                        <form action="${pageContext.request.contextPath}/instructor/courses/submit" method="post">
+                                            <input type="hidden" name="id" value="${course.id}">
+                                            <button type="submit" class="btn btn-sm btn-warning">🚀 Đăng</button>
+                                        </form>
+                                    </c:if>
+                                    
+                                    <%-- Nút kháng cáo: chỉ hiện khi status = warning --%>
+                                    <c:if test="${course.status == 'warning'}">
+                                        <form action="${pageContext.request.contextPath}/instructor/courses/appeal" method="post"
+                                              style="display:flex; gap:6px; align-items:center;">
+                                            <input type="hidden" name="id" value="${course.id}">
+                                            <input type="text" name="appealMessage" placeholder="Nhập nội dung kháng cáo..."
+                                                   required maxlength="500" style="padding:5px 10px; border:1px solid #e2e8f0; border-radius:6px; font-size:12px; width:200px;">
+                                            <button type="submit" class="btn btn-sm btn-info" style="background:#3182ce;">📩 Kháng cáo</button>
+                                        </form>
+                                    </c:if>
+                                    
+                                    <c:if test="${course.status == 'draft'}">
+                                        <form action="${pageContext.request.contextPath}/instructor/courses/delete" method="post"
+                                              onsubmit="return confirm('Bạn chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác!')">
+                                            <input type="hidden" name="id" value="${course.id}">
+                                            <button type="submit" class="btn btn-sm btn-error">🗑 Xóa</button>
+                                        </form>
+                                    </c:if>
                                 </div>
                             </td>
                         </tr>

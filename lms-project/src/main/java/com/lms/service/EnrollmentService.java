@@ -120,4 +120,18 @@ public class EnrollmentService {
     public Enrollment getEnrollmentIfExists(int studentId, int courseId) {
         return enrollmentDAO.findByStudentAndCourse(studentId, courseId);
     }
+
+    // =========================================================================
+    // 6. Hủy đăng ký khóa học (Unenroll)
+    // =========================================================================
+    public void unenroll(int studentId, int courseId) {
+        if (!enrollmentDAO.isEnrolled(studentId, courseId)) {
+            throw new IllegalStateException("Bạn chưa đăng ký khóa học này!");
+        }
+
+        boolean deleted = enrollmentDAO.delete(studentId, courseId);
+        if (!deleted) {
+            throw new RuntimeException("Có lỗi xảy ra khi hủy khóa học. Vui lòng thử lại!");
+        }
+    }
 }

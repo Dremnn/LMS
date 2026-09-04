@@ -79,9 +79,9 @@
         <span style="font-size:14px;opacity:.85;">Quản lý nội dung khóa học</span>
         <c:choose>
             <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
-            <c:when test="${course.status == 'pending'}"><span class="badge badge-pending">⏳ Chờ duyệt</span></c:when>
-            <c:when test="${course.status == 'published'}"><span class="badge badge-published">✅ Đã duyệt</span></c:when>
-            <c:when test="${course.status == 'rejected'}"><span class="badge badge-rejected">❌ Từ chối</span></c:when>
+            <c:when test="${course.status == 'published'}"><span class="badge badge-published">✅ Published</span></c:when>
+            <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;">⚠️ Warning</span></c:when>
+            <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
         </c:choose>
     </div>
 </div>
@@ -91,13 +91,21 @@
         <div class="alert-danger">⚠️ <%=flashError%></div>
     <% } %>
 
-    <c:choose>
-        <c:when test="${course.status == 'pending' || course.status == 'published'}">
-            <div class="readonly-notice">
-                👁 Khóa học đang ở trạng thái <strong>${course.status}</strong>. Bạn chỉ có thể xem nội dung, không thể chỉnh sửa.
-            </div>
-        </c:when>
-    </c:choose>
+    <c:if test="${(course.status == 'warning' || course.status == 'appealed') && not empty course.rejectReason}">
+        <div class="alert-danger" style="background:#fffaf0; border-color:#f6ad55; color:#c05621; margin-bottom:20px;">
+            <strong>⚠️ Admin đã cảnh cáo khóa học này:</strong> <c:out value="${course.rejectReason}"/>
+            <c:choose>
+                <c:when test="${course.status == 'warning'}">
+                    <div style="font-size:13px; margin-top:6px;">Bạn có thể kháng cáo từ trang danh sách khóa học hoặc chỉnh sửa nội dung theo yêu cầu.</div>
+                </c:when>
+                <c:when test="${course.status == 'appealed'}">
+                    <div style="font-size:13px; margin-top:6px; color:#2a4365;">📩 Kháng cáo của bạn đã được gửi. Đang chờ Admin xem xét...</div>
+                </c:when>
+            </c:choose>
+        </div>
+    </c:if>
+
+    <%-- Removed readonly-notice because instructor can now edit at any time --%>
 
     <%-- Danh sách chương + bài học --%>
     <c:choose>
@@ -132,37 +140,35 @@
                             </c:otherwise>
                         </c:choose>
                     </div>
-                    <%-- Form thêm bài học - chỉ hiện khi draft hoặc rejected --%>
-                    <c:if test="${course.status == 'draft' || course.status == 'rejected'}">
-                        <div class="add-lesson-form">
-                            <h4>➕ Thêm bài học mới vào chương này</h4>
-                            <form action="${pageContext.request.contextPath}/instructor/courses/lessons/add" method="post">
-                                <input type="hidden" name="sectionId" value="${section.id}">
-                                <input type="hidden" name="courseId" value="${course.id}">
-                                <div class="form-row">
-                                    <div class="form-group" style="flex:2;">
-                                        <label>Tên bài học *</label>
-                                        <input type="text" name="title" class="form-control" placeholder="Ví dụ: Giới thiệu về vòng lặp" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Thời lượng (phút)</label>
-                                        <input type="number" name="durationMinutes" class="form-control" placeholder="15" min="1">
-                                    </div>
-                                    <div class="form-group" style="flex:2;">
-                                        <label>URL Video</label>
-                                        <input type="text" name="videoUrl" class="form-control" placeholder="https://youtube.com/...">
-                                    </div>
-                                    <div class="form-group" style="flex:2;">
-                                        <label>URL Tài liệu</label>
-                                        <input type="text" name="documentUrl" class="form-control" placeholder="https://drive.google.com/...">
-                                    </div>
+                    <%-- Form thêm bài học --%>
+                    <div class="add-lesson-form">
+                        <h4>➕ Thêm bài học mới vào chương này</h4>
+                        <form action="${pageContext.request.contextPath}/instructor/courses/lessons/add" method="post">
+                            <input type="hidden" name="sectionId" value="${section.id}">
+                            <input type="hidden" name="courseId" value="${course.id}">
+                            <div class="form-row">
+                                <div class="form-group" style="flex:2;">
+                                    <label>Tên bài học *</label>
+                                    <input type="text" name="title" class="form-control" placeholder="Ví dụ: Giới thiệu về vòng lặp" required>
                                 </div>
-                                <div style="margin-top:12px;">
-                                    <button type="submit" class="btn btn-primary btn-sm">➕ Thêm bài học</button>
+                                <div class="form-group">
+                                    <label>Thời lượng (phút)</label>
+                                    <input type="number" name="durationMinutes" class="form-control" placeholder="15" min="1">
                                 </div>
-                            </form>
-                        </div>
-                    </c:if>
+                                <div class="form-group" style="flex:2;">
+                                    <label>URL Video</label>
+                                    <input type="text" name="videoUrl" class="form-control" placeholder="https://youtube.com/...">
+                                </div>
+                                <div class="form-group" style="flex:2;">
+                                    <label>URL Tài liệu</label>
+                                    <input type="text" name="documentUrl" class="form-control" placeholder="https://drive.google.com/...">
+                                </div>
+                            </div>
+                            <div style="margin-top:12px;">
+                                <button type="submit" class="btn btn-primary btn-sm">➕ Thêm bài học</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </c:forEach>
         </c:when>
@@ -171,33 +177,32 @@
         </c:otherwise>
     </c:choose>
 
-    <%-- Form thêm chương mới - chỉ hiện khi draft hoặc rejected --%>
-    <c:if test="${course.status == 'draft' || course.status == 'rejected'}">
-        <div class="add-section-card">
-            <h3>📌 Thêm chương mới</h3>
-            <form action="${pageContext.request.contextPath}/instructor/courses/sections/add" method="post">
-                <input type="hidden" name="courseId" value="${course.id}">
-                <div class="section-form-row">
-                    <div class="form-group" style="flex:1;">
-                        <label>Tên chương *</label>
-                        <input type="text" name="title" class="form-control" placeholder="Ví dụ: Giới thiệu Java cơ bản" required>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-primary">➕ Thêm chương</button>
-                    </div>
+    <%-- Form thêm chương mới --%>
+    <div class="add-section-card">
+        <h3>📌 Thêm chương mới</h3>
+        <form action="${pageContext.request.contextPath}/instructor/courses/sections/add" method="post">
+            <input type="hidden" name="courseId" value="${course.id}">
+            <div class="section-form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>Tên chương *</label>
+                    <input type="text" name="title" class="form-control" placeholder="Ví dụ: Giới thiệu Java cơ bản" required>
                 </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">➕ Thêm chương</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <c:if test="${not empty course.sectionsCache && course.status == 'draft'}">
+        <div class="submit-section">
+            <p>✅ Khóa học đã có nội dung. Đăng khóa học để học viên có thể vào học ngay?</p>
+            <form action="${pageContext.request.contextPath}/instructor/courses/submit" method="post">
+                <input type="hidden" name="id" value="${course.id}">
+                <button type="submit" class="btn-submit-review">🚀 Đăng khóa học</button>
             </form>
         </div>
-
-        <c:if test="${not empty course.sectionsCache}">
-            <div class="submit-section">
-                <p>✅ Khóa học đã có nội dung. Gửi cho Admin duyệt để xuất bản lên hệ thống?</p>
-                <form action="${pageContext.request.contextPath}/instructor/courses/submit" method="post">
-                    <input type="hidden" name="id" value="${course.id}">
-                    <button type="submit" class="btn-submit-review">📤 Gửi duyệt khóa học</button>
-                </form>
-            </div>
-        </c:if>
+    </c:if>
         <%-- ===== PHẦN QUIZ ===== --%>
         <div style="background:#fff;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.06);padding:24px 28px;margin-bottom:24px;border-left:4px solid #f6ad55;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -234,7 +239,6 @@
                 </c:otherwise>
             </c:choose>
         </div>
-    </c:if>
 </div>
 </body>
 </html>

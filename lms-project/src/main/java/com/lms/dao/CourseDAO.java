@@ -17,7 +17,8 @@ public class CourseDAO {
     // keyword: tìm theo tên khóa học (có thể null/rỗng = không lọc theo tên)
     // categoryId: lọc theo danh mục (null = tất cả danh mục)
     // sortBy: "newest" | "popular" | "rating" (mặc định "newest")
-    // Chỉ lấy các khóa học có status = 'published' (Student chỉ được xem khóa học đã duyệt)
+    // Chỉ lấy các khóa học có status = 'published', 'warning', 'appealed'
+    // (Student vẫn thấy khóa học bị cảnh cáo nhưng sẽ thấy banner thông báo)
     public List<Course> search(String keyword, Integer categoryId, String sortBy) {
         List<Course> list = new ArrayList<>();
 
@@ -29,7 +30,7 @@ public class CourseDAO {
             "FROM courses c " +
             "INNER JOIN users u ON c.instructor_id = u.id " +
             "LEFT JOIN categories cat ON c.category_id = cat.id " +
-            "WHERE c.status = 'published' "
+            "WHERE c.status IN ('published', 'warning', 'appealed') "
         );
 
         List<Object> params = new ArrayList<>();
@@ -106,9 +107,9 @@ public class CourseDAO {
     }
 
     // =========================================================================
-    // 3. LẤY DANH SÁCH KHÓA HỌC CHỜ DUYỆT (dùng cho trang Admin)
+    // 3. LẤY TOÀN BỘ DANH SÁCH KHÓA HỌC (dùng cho trang Admin quản lý/xóa)
     // =========================================================================
-    public List<Course> findPendingApproval() {
+    public List<Course> findAllCourses() {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT c.id, c.instructor_id, c.category_id, c.title, c.description, " +
                      "c.thumbnail_url, c.price, c.pass_score, c.status, c.avg_rating, " +
@@ -117,8 +118,7 @@ public class CourseDAO {
                      "FROM courses c " +
                      "INNER JOIN users u ON c.instructor_id = u.id " +
                      "LEFT JOIN categories cat ON c.category_id = cat.id " +
-                     "WHERE c.status = 'pending' " +
-                     "ORDER BY c.created_at ASC";
+                     "ORDER BY c.created_at DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -297,6 +297,11 @@ public class CourseDAO {
             course.setRejectReason(rs.getString("reject_reason"));
         } catch (SQLException ignored) {}
 
+        // appeal_message
+        try {
+            course.setAppealMessage(rs.getString("appeal_message"));
+        } catch (SQLException ignored) {}
+
         course.setAvgRating(rs.getBigDecimal("avg_rating"));
         course.setTotalStudents(rs.getInt("total_students"));
         course.setTotalLessons(rs.getInt("total_lessons"));
@@ -313,5 +318,26 @@ public class CourseDAO {
         } catch (SQLException ignored) {}
 
         return course;
+    }
+
+    // =========================================================================
+    // 9. CẬP NHẬT NỘI DUNG KHÁNG CÁO (Instructor gửi appeal)
+    // =========================================================================
+    public boolean updateAppeal(int courseId, String appealMessage, String newStatus) {
+        String sql = "UPDATE courses SET appeal_message = ?, status = ? WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, appealMessage);
+            stmt.setString(2, newStatus);
+            stmt.setInt(3, courseId);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

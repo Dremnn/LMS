@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @WebServlet(urlPatterns = {"/courses", "/courses/detail"})
@@ -91,10 +92,12 @@ public class CourseBrowseServlet extends HttpServlet {
             int courseId = Integer.parseInt(idParam);
             Course course = courseService.getCourseDetail(courseId);
 
-            if (!"published".equals(course.getStatus())) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Khóa học không tồn tại hoặc chưa được công khai!");
-                return;
-            }
+        List<String> allowedStatuses = Arrays.asList("published", "appealed", "warning");
+
+        if (!allowedStatuses.contains(course.getStatus())) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Khóa học không tồn tại hoặc không thể truy cập!");
+            return;
+        }
 
             request.setAttribute("course", course);
 

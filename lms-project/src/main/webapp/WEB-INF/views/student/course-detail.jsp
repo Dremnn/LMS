@@ -79,6 +79,11 @@
                     ⚠️ ${error}
                 </div>
             </c:if>
+            <c:if test="${course.status == 'warning' || course.status == 'appealed'}">
+                <div style="background:rgba(237,137,54,.15);border:1px solid rgba(237,137,54,.5);padding:12px 16px;border-radius:9px;font-size:14px;margin-bottom:14px;color:#fbd38d;">
+                    ⚠️ <strong>Khóa học này đang bị cảnh cáo</strong> — Nội dung đang được xem xét bởi quản trị viên.
+                </div>
+            </c:if>
             <p class="desc"><c:out value="${course.description}"/></p>
             <div class="hero-meta">
                 <span>👨‍🏫 <c:out value="${course.instructorName}"/></span>
@@ -107,9 +112,13 @@
                             <div style="height:100%;border-radius:10px;background:#68d391;width:${enrollment.progressPercent}%;"></div>
                         </div>
                     </div>
-                    <a href="${pageContext.request.contextPath}/student/my-courses" class="btn-enroll" style="background:linear-gradient(135deg,#48bb78,#38a169);">
-                        ▶ Tiếp tục học
-                    </a>
+                    <form action="${pageContext.request.contextPath}/enrollments/cancel" method="post" style="display:inline;"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy khóa học này không? Mọi tiến độ học tập sẽ bị xóa.')">
+                        <input type="hidden" name="courseId" value="${course.id}" />
+                        <button type="submit" class="btn-enroll" style="background:linear-gradient(135deg,#f56565,#c53030);">
+                            ❌ Hủy khóa học
+                        </button>
+                    </form>
                 </c:when>
                 <c:otherwise>
                     <%-- Chưa đăng ký: hiện form đăng ký --%>

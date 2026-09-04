@@ -132,6 +132,9 @@
                                     <c:out value="${course.title}"/>
                                 </a>
                             </h3>
+                            <c:if test="${course.status == 'warning' || course.status == 'appealed'}">
+                                <div style="background:#fed7d7;color:#9b2c2c;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px;display:inline-block;">⚠️ Đang bị cảnh cáo</div>
+                            </c:if>
                             <p class="course-instructor">👨‍🏫 <c:out value="${course.instructorName}"/></p>
                             <div class="course-meta">
                                 <span>⭐ ${course.avgRating}</span>

@@ -15,10 +15,11 @@ import java.util.List;
 
 @WebServlet(urlPatterns = {
     "/admin",
-    "/admin/courses/approval",
-    "/admin/courses/pending",
-    "/admin/courses/approve",
-    "/admin/courses/reject"
+    "/admin/courses",
+    "/admin/courses/delete",
+    "/admin/courses/warn",
+    "/admin/courses/approve-appeal",
+    "/admin/courses/reject-appeal"
 })
 public class AdminCourseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -45,11 +46,11 @@ public class AdminCourseServlet extends HttpServlet {
             session.removeAttribute("flashSuccess");
         }
 
-        // Chỉ có 1 route GET: danh sách khóa học đang chờ duyệt
-        List<Course> pendingCourses = courseService.getPendingCourses();
-        request.setAttribute("pendingCourses", pendingCourses);
+        // Lấy tất cả khóa học cho Admin quản lý
+        List<Course> courses = courseService.getAllCourses();
+        request.setAttribute("courses", courses);
 
-        request.getRequestDispatcher("/WEB-INF/views/admin/course-approval.jsp")
+        request.getRequestDispatcher("/WEB-INF/views/admin/course-manage.jsp")
                 .forward(request, response);
     }
 
@@ -64,15 +65,19 @@ public class AdminCourseServlet extends HttpServlet {
         try {
             int courseId = Integer.parseInt(request.getParameter("courseId"));
 
-            if ("/admin/courses/approve".equals(path)) {
-                courseService.approveCourse(courseId);
-                session.setAttribute("flashSuccess", "Đã duyệt khóa học thành công!");
-
-            } else if ("/admin/courses/reject".equals(path)) {
+            if ("/admin/courses/delete".equals(path)) {
+                new com.lms.dao.CourseDAO().delete(courseId); // Xóa cứng khóa học
+                session.setAttribute("flashSuccess", "Đã xóa khóa học thành công!");
+            } else if ("/admin/courses/warn".equals(path)) {
                 String reason = request.getParameter("reason");
-                courseService.rejectCourse(courseId, reason);
-                session.setAttribute("flashSuccess", "Đã từ chối khóa học!");
-
+                courseService.warnCourse(courseId, reason);
+                session.setAttribute("flashSuccess", "Đã cảnh cáo khóa học!");
+            } else if ("/admin/courses/approve-appeal".equals(path)) {
+                courseService.approveAppeal(courseId);
+                session.setAttribute("flashSuccess", "Đã chấp nhận kháng cáo! Khóa học đã được phục hồi.");
+            } else if ("/admin/courses/reject-appeal".equals(path)) {
+                courseService.rejectAppeal(courseId);
+                session.setAttribute("flashSuccess", "Đã từ chối kháng cáo. Khóa học vẫn ở trạng thái cảnh cáo.");
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -85,6 +90,6 @@ public class AdminCourseServlet extends HttpServlet {
             session.setAttribute("flashError", "Đã xảy ra lỗi hệ thống!");
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/courses/pending");
+        response.sendRedirect(request.getContextPath() + "/admin");
     }
 }

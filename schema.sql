@@ -394,3 +394,20 @@ END
 GO
 
 ALTER TABLE quizzes ADD max_attempts INT NULL;
+
+-- Bước 1: Xóa giới hạn cũ
+-- (Nếu SQL báo lỗi không tìm thấy tên 'CHK_course_status', bạn hãy xem tên đúng của constraint trong mục Keys/Constraints của bảng courses để thay thế)
+ALTER TABLE courses DROP CONSTRAINT CK_courses_status;
+GO
+-- Bước 2: Tạo giới hạn mới cho phép 'warning'
+ALTER TABLE courses ADD CONSTRAINT CK_courses_status
+CHECK (status IN ('draft', 'published', 'warning', 'rejected'));
+GO
+
+ALTER TABLE courses ADD appeal_message NVARCHAR(500) NULL;
+GO
+ALTER TABLE courses DROP CONSTRAINT CK_courses_status;
+GO
+ALTER TABLE courses ADD CONSTRAINT CK_courses_status 
+CHECK (status IN ('draft', 'published', 'warning', 'appealed'));
+GO

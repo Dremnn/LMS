@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -84,8 +84,8 @@
 </nav>
 
 <div class="page-header">
-    <h1>⚖️ Duyệt khóa học</h1>
-    <p>Xem xét và phê duyệt các khóa học đang chờ kiểm duyệt từ giảng viên</p>
+    <h1>📂 Quản lý khóa học (Admin)</h1>
+    <p>Xem toàn bộ khóa học trên hệ thống và quản lý (xóa) khi cần thiết</p>
 </div>
 
 <div class="main">
@@ -99,17 +99,15 @@
     </c:if>
 
     <c:choose>
-        <c:when test="${not empty pendingCourses}">
+        <c:when test="${not empty courses}">
 
-            <%-- Tổng số đang chờ --%>
             <p style="font-size:14px;color:#718096;margin-bottom:18px;">
-                Có <strong style="color:#1a202c;">${pendingCourses.size()}</strong> khóa học đang chờ duyệt
+                Hệ thống có <strong style="color:#1a202c;">${courses.size()}</strong> khóa học
             </p>
 
-            <c:forEach var="course" items="${pendingCourses}">
+            <c:forEach var="course" items="${courses}">
                 <div class="course-card">
 
-                    <%-- Header: tiêu đề + meta --%>
                     <div class="card-header">
                         <div class="card-header-left">
                             <div class="course-title"><c:out value="${course.title}"/></div>
@@ -130,54 +128,90 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </span>
-                                <span>📅 ${course.createdAt}</span>
                             </div>
                         </div>
-                        <span class="badge-pending">⏳ Chờ duyệt</span>
+                        <c:choose>
+                            <c:when test="${course.status == 'published'}">
+                                <span style="background:#c6f6d5;color:#22543d;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">✅ Published</span>
+                            </c:when>
+                            <c:when test="${course.status == 'draft'}">
+                                <span style="background:#e2e8f0;color:#4a5568;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">Draft</span>
+                            </c:when>
+                            <c:when test="${course.status == 'warning'}">
+                                <span style="background:#fed7d7;color:#9b2c2c;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">⚠️ Warning</span>
+                            </c:when>
+                            <c:when test="${course.status == 'appealed'}">
+                                <span style="background:#bee3f8;color:#2a4365;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">📩 Đang kháng cáo</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span style="background:#feebc8;color:#744210;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">${course.status}</span>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
 
-                    <%-- Body: mô tả + hành động --%>
                     <div class="card-body">
-                        <c:if test="${not empty course.description}">
-                            <div class="course-desc">
-                                <c:out value="${course.description}"/>
+                        <%-- Hiển thị lý do cảnh cáo nếu đang warning hoặc appealed --%>
+                        <c:if test="${(course.status == 'warning' || course.status == 'appealed') && not empty course.rejectReason}">
+                            <div style="background:#fffaf0;border:1px solid #f6ad55;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#c05621;">
+                                <strong>⚠️ Lý do cảnh cáo:</strong> <c:out value="${course.rejectReason}"/>
+                            </div>
+                        </c:if>
+
+                        <%-- Hiển thị nội dung kháng cáo nếu đang appealed --%>
+                        <c:if test="${course.status == 'appealed' && not empty course.appealMessage}">
+                            <div style="background:#ebf8ff;border:1px solid #63b3ed;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#2a4365;">
+                                <strong>📩 Instructor kháng cáo:</strong> <c:out value="${course.appealMessage}"/>
                             </div>
                         </c:if>
 
                         <div class="actions-row">
-                            <%-- Form DUYỆT --%>
-                            <form action="${pageContext.request.contextPath}/admin/courses/approve"
-                                  method="post" style="display:inline;"
-                                  onsubmit="return confirm('Xác nhận DUYỆT khóa học: \'${course.title}\'?')">
-                                <input type="hidden" name="courseId" value="${course.id}" />
-                                <button type="submit" class="btn-approve">✅ Duyệt</button>
-                            </form>
-
-                            <%-- Form TỪ CHỐI (có ô nhập lý do) --%>
-                            <form action="${pageContext.request.contextPath}/admin/courses/reject"
-                                  method="post" class="reject-form">
-                                <input type="hidden" name="courseId" value="${course.id}" />
-                                <input type="text" name="reason" class="reject-input"
-                                       placeholder="Nhập lý do từ chối..." required
-                                       maxlength="500" />
-                                <button type="submit" class="btn-reject">❌ Từ chối</button>
-                            </form>
-
-                            <%-- Link xem chi tiết (readonly) --%>
+                            <%-- Link xem chi tiết --%>
                             <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}"
-                               class="btn btn-ghost" target="_blank">👁 Xem nội dung</a>
+                               class="btn btn-ghost" target="_blank" style="margin-right:auto;">👁 Xem nội dung</a>
+
+                            <%-- Nút Approve/Reject kháng cáo (chỉ khi status = appealed) --%>
+                            <c:if test="${course.status == 'appealed'}">
+                                <form action="${pageContext.request.contextPath}/admin/courses/approve-appeal"
+                                      method="post" style="display:inline;">
+                                    <input type="hidden" name="courseId" value="${course.id}" />
+                                    <button type="submit" class="btn-approve">✅ Chấp nhận kháng cáo</button>
+                                </form>
+                                <form action="${pageContext.request.contextPath}/admin/courses/reject-appeal"
+                                      method="post" style="display:inline;"
+                                      onsubmit="return confirm('Từ chối kháng cáo? Khóa học sẽ quay lại trạng thái cảnh cáo.')">
+                                    <input type="hidden" name="courseId" value="${course.id}" />
+                                    <button type="submit" class="btn-reject">❌ Từ chối kháng cáo</button>
+                                </form>
+                            </c:if>
+
+                            <c:if test="${course.status == 'published'}">
+                                <%-- Form CẢNH CÁO (có ô nhập lý do) --%>
+                                <form action="${pageContext.request.contextPath}/admin/courses/warn"
+                                      method="post" class="reject-form" style="display:flex; gap:8px; align-items:center;">
+                                    <input type="hidden" name="courseId" value="${course.id}" />
+                                    <input type="text" name="reason" class="reject-input" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:13px;"
+                                           placeholder="Nhập lý do cảnh cáo..." required maxlength="500" />
+                                    <button type="submit" class="btn-reject" style="background:#ed8936; color:#fff;">⚠️ Cảnh cáo</button>
+                                </form>
+                            </c:if>
+
+                            <%-- Nút Xóa Khóa Học --%>
+                            <form action="${pageContext.request.contextPath}/admin/courses/delete"
+                                  method="post" style="display:inline;"
+                                  onsubmit="return confirm('CẢNH BÁO: Xác nhận XÓA vĩnh viễn khóa học \'${course.title}\'? Dữ liệu không thể khôi phục!')">
+                                <input type="hidden" name="courseId" value="${course.id}" />
+                                <button type="submit" class="btn-reject">🗑 Xóa khóa học</button>
+                            </form>
                         </div>
                     </div>
-
                 </div>
             </c:forEach>
 
         </c:when>
         <c:otherwise>
             <div class="empty-state">
-                <div class="icon">🎉</div>
-                <p>Không có khóa học nào đang chờ duyệt.</p>
-                <p style="font-size:13px;margin-top:8px;color:#cbd5e0;">Tất cả khóa học đã được xử lý!</p>
+                <div class="icon">🔍</div>
+                <p>Không có khóa học nào trên hệ thống.</p>
             </div>
         </c:otherwise>
     </c:choose>

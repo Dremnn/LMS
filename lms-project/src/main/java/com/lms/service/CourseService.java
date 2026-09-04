@@ -93,12 +93,7 @@ public class CourseService {
 
         Course course = getCourseAndVerifyOwnership(courseId, currentInstructorId);
 
-        // Chỉ cho phép sửa khi khóa học đang ở trạng thái draft hoặc bị từ chối
-        // (không cho sửa khi đang pending chờ duyệt hoặc đã published - tránh Admin duyệt nhầm nội dung đã đổi)
-        if (!"draft".equals(course.getStatus()) && !"rejected".equals(course.getStatus())) {
-            throw new IllegalStateException(
-                "Không thể chỉnh sửa khóa học đang ở trạng thái '" + course.getStatus() + "'!");
-        }
+        // Đã bỏ giới hạn trạng thái, Instructor có thể sửa thoải mái bất cứ lúc nào
 
         if (title == null || title.trim().isEmpty() || title.trim().length() < 5) {
             throw new IllegalArgumentException("Tên khóa học phải có ít nhất 5 ký tự!");
@@ -119,19 +114,19 @@ public class CourseService {
     }
 
     // =========================================================================
-    // 6. INSTRUCTOR: GỬI KHÓA HỌC CHO ADMIN DUYỆT (draft -> pending)
+    // 6. INSTRUCTOR: TỰ ĐĂNG KHÓA HỌC (draft / warning -> published)
     // =========================================================================
-    public void submitForApproval(int courseId, int currentInstructorId) {
+    public void publishCourse(int courseId, int currentInstructorId) {
         Course course = getCourseAndVerifyOwnership(courseId, currentInstructorId);
 
-        if (!"draft".equals(course.getStatus()) && !"rejected".equals(course.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể gửi duyệt khóa học đang ở trạng thái nháp!");
+        if (!"draft".equals(course.getStatus()) && !"warning".equals(course.getStatus()) && !"rejected".equals(course.getStatus())) {
+            throw new IllegalStateException("Khóa học đã được đăng hoặc không hợp lệ!");
         }
 
-        // Điều kiện bắt buộc: khóa học phải có ít nhất 1 chương và 1 bài học mới được gửi duyệt
+        // Điều kiện bắt buộc: khóa học phải có ít nhất 1 chương và 1 bài học
         List<Section> sections = sectionDAO.findByCourseId(courseId);
         if (sections.isEmpty()) {
-            throw new IllegalStateException("Khóa học cần có ít nhất 1 chương trước khi gửi duyệt!");
+            throw new IllegalStateException("Khóa học cần có ít nhất 1 chương trước khi đăng!");
         }
 
         boolean hasAtLeastOneLesson = false;
@@ -142,12 +137,13 @@ public class CourseService {
             }
         }
         if (!hasAtLeastOneLesson) {
-            throw new IllegalStateException("Khóa học cần có ít nhất 1 bài học trước khi gửi duyệt!");
+            throw new IllegalStateException("Khóa học cần có ít nhất 1 bài học trước khi đăng!");
         }
 
-        boolean updated = courseDAO.updateStatus(courseId, "pending", null);
+        // Tự động chuyển trạng thái sang 'published' và xóa lý do reject/warning cũ
+        boolean updated = courseDAO.updateStatus(courseId, "published", "");
         if (!updated) {
-            throw new RuntimeException("Có lỗi xảy ra khi gửi duyệt khóa học!");
+            throw new RuntimeException("Có lỗi xảy ra khi đăng khóa học!");
         }
     }
 
@@ -168,42 +164,77 @@ public class CourseService {
     }
 
     // =========================================================================
-    // 8. ADMIN: DUYỆT KHÓA HỌC (pending -> published)
+    // 8. ADMIN: CẢNH CÁO KHÓA HỌC (published -> warning, kèm lý do)
     // =========================================================================
-    public void approveCourse(int courseId) {
+    public void warnCourse(int courseId, String warningMessage) {
         Course course = courseDAO.findById(courseId);
         if (course == null) {
             throw new IllegalArgumentException("Khóa học không tồn tại!");
         }
-        if (!"pending".equals(course.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể duyệt khóa học đang chờ phê duyệt!");
+        if (!"published".equals(course.getStatus())) {
+            throw new IllegalStateException("Chỉ có thể cảnh cáo khóa học đang hoạt động (published)!");
+        }
+        if (warningMessage == null || warningMessage.trim().isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng nhập lý do cảnh cáo!");
         }
 
-        boolean updated = courseDAO.updateStatus(courseId, "published", null);
+        // Tái sử dụng reject_reason column trong Database để lưu cảnh báo
+        boolean updated = courseDAO.updateStatus(courseId, "warning", warningMessage.trim());
         if (!updated) {
-            throw new RuntimeException("Có lỗi xảy ra khi duyệt khóa học!");
+            throw new RuntimeException("Có lỗi xảy ra khi cảnh cáo khóa học!");
         }
     }
 
     // =========================================================================
-    // 9. ADMIN: TỪ CHỐI KHÓA HỌC (pending -> rejected, kèm lý do)
+    // 9. INSTRUCTOR: KHÁNG CÁO KHÓA HỌC (warning -> appealed)
     // =========================================================================
-    public void rejectCourse(int courseId, String reason) {
+    public void appealCourse(int courseId, int currentInstructorId, String appealMessage) {
+        Course course = getCourseAndVerifyOwnership(courseId, currentInstructorId);
+
+        if (!"warning".equals(course.getStatus())) {
+            throw new IllegalStateException("Chỉ có thể kháng cáo khóa học đang bị cảnh cáo!");
+        }
+        if (appealMessage == null || appealMessage.trim().isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng nhập nội dung kháng cáo!");
+        }
+
+        boolean updated = courseDAO.updateAppeal(courseId, appealMessage.trim(), "appealed");
+        if (!updated) {
+            throw new RuntimeException("Có lỗi xảy ra khi gửi kháng cáo!");
+        }
+    }
+
+    // =========================================================================
+    // 10. ADMIN: CHẤP NHẬN KHÁNG CÁO (appealed -> published)
+    // =========================================================================
+    public void approveAppeal(int courseId) {
         Course course = courseDAO.findById(courseId);
         if (course == null) {
             throw new IllegalArgumentException("Khóa học không tồn tại!");
         }
-        if (!"pending".equals(course.getStatus())) {
-            throw new IllegalStateException("Chỉ có thể từ chối khóa học đang chờ phê duyệt!");
-        }
-        if (reason == null || reason.trim().isEmpty()) {
-            throw new IllegalArgumentException("Vui lòng nhập lý do từ chối!");
+        if (!"appealed".equals(course.getStatus())) {
+            throw new IllegalStateException("Khóa học này chưa có kháng cáo để duyệt!");
         }
 
-        boolean updated = courseDAO.updateStatus(courseId, "rejected", reason.trim());
-        if (!updated) {
-            throw new RuntimeException("Có lỗi xảy ra khi từ chối khóa học!");
+        // Xóa cảnh cáo + appeal khi duyệt lại
+        courseDAO.updateStatus(courseId, "published", "");
+        courseDAO.updateAppeal(courseId, "", "published");
+    }
+
+    // =========================================================================
+    // 11. ADMIN: TỪ CHỐI KHÁNG CÁO (appealed -> warning, giữ lý do cũ)
+    // =========================================================================
+    public void rejectAppeal(int courseId) {
+        Course course = courseDAO.findById(courseId);
+        if (course == null) {
+            throw new IllegalArgumentException("Khóa học không tồn tại!");
         }
+        if (!"appealed".equals(course.getStatus())) {
+            throw new IllegalStateException("Khóa học này chưa có kháng cáo để từ chối!");
+        }
+
+        // Giữ lại reject_reason cũ, chỉ đổi status về warning
+        courseDAO.updateAppeal(courseId, "", "warning");
     }
 
     // =========================================================================
@@ -275,9 +306,9 @@ public class CourseService {
     }
 
     // =========================================================================
-    // ADMIN: LẤY DANH SÁCH KHÓA HỌC ĐANG CHỜ DUYỆT
+    // ADMIN: LẤY DANH SÁCH TẤT CẢ KHÓA HỌC (để xem/xóa)
     // =========================================================================
-    public List<Course> getPendingCourses() {
-        return courseDAO.findPendingApproval();
+    public List<Course> getAllCourses() {
+        return courseDAO.findAllCourses();
     }
 }

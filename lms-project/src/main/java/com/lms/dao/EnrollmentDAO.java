@@ -158,4 +158,23 @@ public class EnrollmentDAO {
 
         return e;
     }
+
+    // =========================================================================
+    // 6. Hủy đăng ký khóa học (Unenroll)
+    // =========================================================================
+    public boolean delete(int studentId, int courseId) {
+        String sql = "DELETE FROM enrollments WHERE student_id = ? AND course_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, studentId);
+            stmt.setInt(2, courseId);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

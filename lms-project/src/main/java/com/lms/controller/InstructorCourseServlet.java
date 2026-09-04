@@ -22,7 +22,8 @@ import java.util.List;
     "/instructor/courses/new",
     "/instructor/courses/edit",
     "/instructor/courses/submit",
-    "/instructor/courses/delete"
+    "/instructor/courses/delete",
+    "/instructor/courses/appeal"
 })
 public class InstructorCourseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -52,6 +53,16 @@ public class InstructorCourseServlet extends HttpServlet {
 
         switch (path) {
             case "/instructor/courses":
+                // Đọc flash messages
+                HttpSession sess = request.getSession(false);
+                if (sess != null && sess.getAttribute("flashError") != null) {
+                    request.setAttribute("error", sess.getAttribute("flashError"));
+                    sess.removeAttribute("flashError");
+                }
+                if (sess != null && sess.getAttribute("flashSuccess") != null) {
+                    request.setAttribute("successMessage", sess.getAttribute("flashSuccess"));
+                    sess.removeAttribute("flashSuccess");
+                }
                 // Danh sách khóa học của Instructor hiện tại
                 List<Course> courses = courseService.getMyCoursesAsInstructor(currentUser.getId());
                 request.setAttribute("courses", courses);
@@ -114,6 +125,10 @@ public class InstructorCourseServlet extends HttpServlet {
                     handleDelete(request, currentUser);
                     break;
 
+                case "/instructor/courses/appeal":
+                    handleAppeal(request, currentUser);
+                    break;
+
                 default:
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
                     return;
@@ -123,21 +138,37 @@ public class InstructorCourseServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/instructor/courses");
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            // Lỗi nghiệp vụ (validate, sai trạng thái...) -> quay lại form kèm thông báo lỗi
-            request.setAttribute("error", e.getMessage());
-            request.setAttribute("categories", categoryDAO.findAll());
-            request.getRequestDispatcher("/WEB-INF/views/instructor/course-form.jsp")
-                    .forward(request, response);
+            // Nếu lỗi từ appeal hoặc submit/delete -> redirect về danh sách kèm flash error
+            if ("/instructor/courses/appeal".equals(path) 
+                || "/instructor/courses/submit".equals(path)
+                || "/instructor/courses/delete".equals(path)) {
+                HttpSession session = request.getSession();
+                session.setAttribute("flashError", e.getMessage());
+                response.sendRedirect(request.getContextPath() + "/instructor/courses");
+            } else {
+                // Lỗi từ create/edit -> forward về form kèm thông báo lỗi
+                request.setAttribute("error", e.getMessage());
+                request.setAttribute("categories", categoryDAO.findAll());
+                request.getRequestDispatcher("/WEB-INF/views/instructor/course-form.jsp")
+                        .forward(request, response);
+            }
 
         } catch (SecurityException e) {
-            // Lỗi cố tình thao tác vào khóa học không phải của mình
             response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại!");
-            request.getRequestDispatcher("/WEB-INF/views/instructor/course-form.jsp")
-                    .forward(request, response);
+            if ("/instructor/courses/appeal".equals(path)
+                || "/instructor/courses/submit".equals(path)
+                || "/instructor/courses/delete".equals(path)) {
+                HttpSession session = request.getSession();
+                session.setAttribute("flashError", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại!");
+                response.sendRedirect(request.getContextPath() + "/instructor/courses");
+            } else {
+                request.setAttribute("error", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại!");
+                request.getRequestDispatcher("/WEB-INF/views/instructor/course-form.jsp")
+                        .forward(request, response);
+            }
         }
     }
 
@@ -172,11 +203,17 @@ public class InstructorCourseServlet extends HttpServlet {
 
     private void handleSubmit(HttpServletRequest request, User currentUser) {
         int courseId = Integer.parseInt(request.getParameter("id"));
-        courseService.submitForApproval(courseId, currentUser.getId());
+        courseService.publishCourse(courseId, currentUser.getId());
     }
 
     private void handleDelete(HttpServletRequest request, User currentUser) {
         int courseId = Integer.parseInt(request.getParameter("id"));
         courseService.deleteCourse(courseId, currentUser.getId());
+    }
+
+    private void handleAppeal(HttpServletRequest request, User currentUser) {
+        int courseId = Integer.parseInt(request.getParameter("id"));
+        String appealMessage = request.getParameter("appealMessage");
+        courseService.appealCourse(courseId, currentUser.getId(), appealMessage);
     }
 }
