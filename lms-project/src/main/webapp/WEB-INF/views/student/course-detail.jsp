@@ -109,7 +109,7 @@
                             ✅ Bạn đã đăng ký · Tiến độ: <strong>${enrollment.progressPercent}%</strong>
                         </div>
                         <div style="background:rgba(255,255,255,.2);border-radius:10px;height:8px;overflow:hidden;">
-                            <div style="height:100%;border-radius:10px;background:#68d391;width:${enrollment.progressPercent}%;"></div>
+                            <div style="height:100%;border-radius:10px;background:#68d391;width:calc('${enrollment.progressPercent}' * 1%);"></div>s
                         </div>
                     </div>
                     <form action="${pageContext.request.contextPath}/enrollments/cancel" method="post" style="display:inline;"

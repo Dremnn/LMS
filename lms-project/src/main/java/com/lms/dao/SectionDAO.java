@@ -54,7 +54,7 @@ public class SectionDAO {
     // 3. Tự động tính order_index tiếp theo (số chương hiện có + 1)
     // Giúp Instructor không cần tự nhập thứ tự, hệ thống tự xếp cuối danh sách
     public int getNextOrderIndex(int courseId) {
-        String sql = "SELECT ISNULL(MAX(order_index), 0) + 1 AS next_order " +
+        String sql = "SELECT COALESCE(MAX(order_index), 0) + 1 AS next_order " +
                      "FROM sections WHERE course_id = ?";
 
         try (Connection conn = DBConnection.getConnection();

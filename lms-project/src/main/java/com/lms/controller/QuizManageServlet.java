@@ -117,9 +117,10 @@ public class QuizManageServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException | java.time.format.DateTimeParseException e) {
             HttpSession session = request.getSession();
-            session.setAttribute("flashError", e.getMessage());
+            session.setAttribute("flashError",
+                    e instanceof java.time.format.DateTimeParseException ? "Ngày giờ không hợp lệ!" : e.getMessage());
             // Quay lại trang phù hợp tùy ngữ cảnh - đơn giản hóa bằng cách quay về courseId nếu có
             String courseId = request.getParameter("courseId");
             if (courseId != null) {
@@ -146,6 +147,19 @@ public class QuizManageServlet extends HttpServlet {
         Integer maxAttempts = (maxAttemptsStr != null && !maxAttemptsStr.trim().isEmpty())
                 ? Integer.parseInt(maxAttemptsStr) : null;
 
+        String timeLimitStr = request.getParameter("timeLimitMinutes");
+        Integer timeLimitMinutes = (timeLimitStr != null && !timeLimitStr.trim().isEmpty())
+                ? Integer.parseInt(timeLimitStr) : null;
+
+        // Input HTML type="datetime-local" gửi lên dạng "yyyy-MM-ddTHH:mm"
+        String openAtStr = request.getParameter("openAt");
+        java.time.LocalDateTime openAt = (openAtStr != null && !openAtStr.trim().isEmpty())
+                ? java.time.LocalDateTime.parse(openAtStr) : null;
+
+        String closeAtStr = request.getParameter("closeAt");
+        java.time.LocalDateTime closeAt = (closeAtStr != null && !closeAtStr.trim().isEmpty())
+                ? java.time.LocalDateTime.parse(closeAtStr) : null;
+
         Integer sectionId = null;
         Integer courseIdForQuiz = null;
 
@@ -160,7 +174,7 @@ public class QuizManageServlet extends HttpServlet {
         }
 
         Quiz quiz = quizService.createQuiz(currentUser.getId(), sectionId, courseIdForQuiz,
-                title, passScore, maxAttempts);
+                title, passScore, maxAttempts, timeLimitMinutes, openAt, closeAt);
 
         // Tạo xong -> chuyển sang trang quản lý quiz đó để thêm câu hỏi
         response.sendRedirect(request.getContextPath() + "/instructor/quizzes/manage?id=" + quiz.getId());

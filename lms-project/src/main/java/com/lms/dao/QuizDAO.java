@@ -13,7 +13,8 @@ public class QuizDAO {
     // 1. Lấy tất cả quiz gắn vào 1 Section
     public List<Quiz> findBySectionId(int sectionId) {
         List<Quiz> list = new ArrayList<>();
-        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts " +
+        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts, " +
+                     "time_limit_minutes, open_at, close_at " +
                      "FROM quizzes WHERE section_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -35,7 +36,8 @@ public class QuizDAO {
     // 2. Lấy tất cả quiz gắn trực tiếp vào 1 Course (quiz tổng kết cuối khóa)
     public List<Quiz> findByCourseId(int courseId) {
         List<Quiz> list = new ArrayList<>();
-        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts " +
+        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts, " +
+                     "time_limit_minutes, open_at, close_at " +
                      "FROM quizzes WHERE course_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -56,7 +58,8 @@ public class QuizDAO {
 
     // 3. Tìm 1 quiz theo ID
     public Quiz findById(int id) {
-        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts " +
+        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts, " +
+                     "time_limit_minutes, open_at, close_at " +
                      "FROM quizzes WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -97,8 +100,9 @@ public class QuizDAO {
 
     // 5. Tạo quiz mới
     public boolean save(Quiz quiz) {
-        String sql = "INSERT INTO quizzes (section_id, course_id, title, pass_score, max_attempts) " +
-                     "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO quizzes (section_id, course_id, title, pass_score, max_attempts, " +
+                     "time_limit_minutes, open_at, close_at) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -122,6 +126,24 @@ public class QuizDAO {
                 stmt.setInt(5, quiz.getMaxAttempts());
             } else {
                 stmt.setNull(5, Types.INTEGER);
+            }
+
+            if (quiz.getTimeLimitMinutes() != null) {
+                stmt.setInt(6, quiz.getTimeLimitMinutes());
+            } else {
+                stmt.setNull(6, Types.INTEGER);
+            }
+
+            if (quiz.getOpenAt() != null) {
+                stmt.setTimestamp(7, Timestamp.valueOf(quiz.getOpenAt()));
+            } else {
+                stmt.setNull(7, Types.TIMESTAMP);
+            }
+
+            if (quiz.getCloseAt() != null) {
+                stmt.setTimestamp(8, Timestamp.valueOf(quiz.getCloseAt()));
+            } else {
+                stmt.setNull(8, Types.TIMESTAMP);
             }
 
             int affectedRows = stmt.executeUpdate();
@@ -170,6 +192,15 @@ public class QuizDAO {
 
         int maxAttempts = rs.getInt("max_attempts");
         quiz.setMaxAttempts(rs.wasNull() ? null : maxAttempts);
+
+        int timeLimit = rs.getInt("time_limit_minutes");
+        quiz.setTimeLimitMinutes(rs.wasNull() ? null : timeLimit);
+
+        Timestamp openAt = rs.getTimestamp("open_at");
+        quiz.setOpenAt(openAt != null ? openAt.toLocalDateTime() : null);
+
+        Timestamp closeAt = rs.getTimestamp("close_at");
+        quiz.setCloseAt(closeAt != null ? closeAt.toLocalDateTime() : null);
 
         return quiz;
     }

@@ -82,7 +82,7 @@ public class CourseDAO {
     public List<Course> findByInstructor(int instructorId) {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT c.id, c.instructor_id, c.category_id, c.title, c.description, " +
-                     "c.thumbnail_url, c.price, c.pass_score, c.status, c.reject_reason, " +
+                     "c.thumbnail_url, c.price, c.pass_score, c.status, c.reject_reason, c.appeal_message, " +
                      "c.avg_rating, c.total_students, c.total_lessons, c.created_at, " +
                      "cat.name AS category_name " +
                      "FROM courses c " +
@@ -113,7 +113,7 @@ public class CourseDAO {
         List<Course> list = new ArrayList<>();
         String sql = "SELECT c.id, c.instructor_id, c.category_id, c.title, c.description, " +
                      "c.thumbnail_url, c.price, c.pass_score, c.status, c.avg_rating, " +
-                     "c.total_students, c.total_lessons, c.created_at, " +
+                     "c.total_students, c.total_lessons, c.created_at, c.reject_reason, c.appeal_message, " +
                      "u.full_name AS instructor_name, cat.name AS category_name " +
                      "FROM courses c " +
                      "INNER JOIN users u ON c.instructor_id = u.id " +
@@ -138,7 +138,7 @@ public class CourseDAO {
     // =========================================================================
     public Course findById(int id) {
         String sql = "SELECT c.id, c.instructor_id, c.category_id, c.title, c.description, " +
-                     "c.thumbnail_url, c.price, c.pass_score, c.status, c.reject_reason, " +
+                     "c.thumbnail_url, c.price, c.pass_score, c.status, c.reject_reason, c.appeal_message, " +
                      "c.avg_rating, c.total_students, c.total_lessons, c.created_at, " +
                      "u.full_name AS instructor_name, cat.name AS category_name " +
                      "FROM courses c " +
@@ -257,21 +257,97 @@ public class CourseDAO {
     }
 
     // =========================================================================
-    // 8. XÓA KHÓA HỌC (chỉ nên cho phép xóa khi status = 'draft', kiểm tra ở Service)
+    // 8. XÓA KHÓA HỌC (Admin - xóa toàn bộ dữ liệu liên quan trước, sau đó xóa khóa học)
     // =========================================================================
     public boolean delete(int courseId) {
-        String sql = "DELETE FROM courses WHERE id = ?";
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM lesson_progress WHERE enrollment_id IN " +
+                    "(SELECT id FROM enrollments WHERE course_id = ?)")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
 
-            stmt.setInt(1, courseId);
-            return stmt.executeUpdate() > 0;
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM attempt_answers WHERE attempt_id IN " +
+                    "(SELECT id FROM quiz_attempts WHERE quiz_id IN " +
+                    "(SELECT id FROM quizzes WHERE course_id = ?))")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM quiz_attempts WHERE quiz_id IN " +
+                    "(SELECT id FROM quizzes WHERE course_id = ?)")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM enrollments WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM answer_options WHERE question_id IN " +
+                    "(SELECT id FROM questions WHERE quiz_id IN " +
+                    "(SELECT id FROM quizzes WHERE course_id = ?))")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM questions WHERE quiz_id IN " +
+                    "(SELECT id FROM quizzes WHERE course_id = ?)")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM quizzes WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM lessons WHERE section_id IN " +
+                    "(SELECT id FROM sections WHERE course_id = ?)")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM sections WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            int affected;
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM courses WHERE id = ?")) {
+                stmt.setInt(1, courseId);
+                affected = stmt.executeUpdate();
+            }
+
+            conn.commit(); 
+            return affected > 0;
 
         } catch (SQLException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
         }
-        return false;
     }
 
     // =========================================================================

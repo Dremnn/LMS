@@ -80,7 +80,7 @@ public class LessonDAO {
 
     // 4. Tự động tính order_index tiếp theo trong 1 section
     public int getNextOrderIndex(int sectionId) {
-        String sql = "SELECT ISNULL(MAX(order_index), 0) + 1 AS next_order " +
+        String sql = "SELECT COALESCE(MAX(order_index), 0) + 1 AS next_order " +
                      "FROM lessons WHERE section_id = ?";
 
         try (Connection conn = DBConnection.getConnection();

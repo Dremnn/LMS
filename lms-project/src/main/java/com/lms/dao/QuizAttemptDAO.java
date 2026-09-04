@@ -127,7 +127,7 @@ public class QuizAttemptDAO {
         String sql = "SELECT q.id AS question_id, ao.id AS option_id " +
                      "FROM questions q " +
                      "INNER JOIN answer_options ao ON ao.question_id = q.id " +
-                     "WHERE q.quiz_id = ? AND ao.is_correct = 1";
+                     "WHERE q.quiz_id = ? AND ao.is_correct = TRUE";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

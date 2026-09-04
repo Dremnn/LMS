@@ -49,7 +49,7 @@ public class AdminCourseServlet extends HttpServlet {
         // Lấy tất cả khóa học cho Admin quản lý
         List<Course> courses = courseService.getAllCourses();
         request.setAttribute("courses", courses);
-
+        // Lấy tất cả khóa học cho Admin quản lý
         request.getRequestDispatcher("/WEB-INF/views/admin/course-manage.jsp")
                 .forward(request, response);
     }
@@ -66,8 +66,12 @@ public class AdminCourseServlet extends HttpServlet {
             int courseId = Integer.parseInt(request.getParameter("courseId"));
 
             if ("/admin/courses/delete".equals(path)) {
-                new com.lms.dao.CourseDAO().delete(courseId); // Xóa cứng khóa học
-                session.setAttribute("flashSuccess", "Đã xóa khóa học thành công!");
+                boolean deleted = new com.lms.dao.CourseDAO().delete(courseId);
+                if (deleted) {
+                    session.setAttribute("flashSuccess", "Đã xóa khóa học thành công!");
+                } else {
+                    throw new IllegalStateException("Không thể xóa khóa học! Có thể khóa học đang có dữ liệu ràng buộc (học viên đã tham gia).");
+                }
             } else if ("/admin/courses/warn".equals(path)) {
                 String reason = request.getParameter("reason");
                 courseService.warnCourse(courseId, reason);

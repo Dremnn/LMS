@@ -67,6 +67,9 @@
                 </c:choose>
             </span>
             <span>📊 Số câu hỏi: <strong>${questions.size()}</strong></span>
+            <c:if test="${remainingSeconds != null}">
+                <span>⏱️ Thời gian còn lại: <strong id="countdown" style="color:#fc8181;">--:--</strong></span>
+            </c:if>
         </div>
     </div>
 </div>
@@ -76,8 +79,8 @@
         <div class="alert-danger">⚠️ <c:out value="${error}"/></div>
     </c:if>
 
-    <form action="${pageContext.request.contextPath}/student/quizzes/submit" method="post"
-          onsubmit="return confirm('Bạn chắc chắn muốn nộp bài? Sau khi nộp sẽ không thể thay đổi.')">
+    <form id="quizForm" action="${pageContext.request.contextPath}/student/quizzes/submit" method="post"
+          onsubmit="return window.autoSubmitting || confirm('Bạn chắc chắn muốn nộp bài? Sau khi nộp sẽ không thể thay đổi.')">
         <input type="hidden" name="quizId" value="${quiz.id}" />
         <c:if test="${not empty param.lessonId}">
             <input type="hidden" name="lessonId" value="${param.lessonId}" />
@@ -121,5 +124,42 @@
         </div>
     </form>
 </div>
+
+<c:if test="${remainingSeconds != null}">
+<script>
+    // remainingSeconds được server tính sẵn (dựa trên mốc bắt đầu lưu trong session),
+    // nên F5 lại trang không làm reset đồng hồ đếm ngược.
+    (function () {
+        var remaining = parseInt("${remainingSeconds}", 10) || 0;
+        var countdownEl = document.getElementById('countdown');
+        window.autoSubmitting = false;
+
+        function render() {
+            var m = Math.floor(remaining / 60);
+            var s = remaining % 60;
+            countdownEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+            if (remaining <= 60) {
+                countdownEl.style.color = '#e53e3e';
+            }
+        }
+
+        render();
+
+        var timer = setInterval(function () {
+            remaining--;
+            if (remaining <= 0) {
+                remaining = 0;
+                render();
+                clearInterval(timer);
+                window.autoSubmitting = true;
+                alert('Đã hết thời gian làm bài! Hệ thống sẽ tự động nộp bài của bạn.');
+                document.getElementById('quizForm').submit();
+                return;
+            }
+            render();
+        }, 1000);
+    })();
+</script>
+</c:if>
 </body>
 </html>

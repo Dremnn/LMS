@@ -2,7 +2,7 @@ package com.lms.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-
+import java.time.LocalDateTime;
 public class Quiz implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -13,6 +13,10 @@ public class Quiz implements Serializable {
     private BigDecimal passScore;
     private Integer maxAttempts; // null = không giới hạn số lần làm
 
+    private Integer timeLimitMinutes;
+    private LocalDateTime openAt;
+    private LocalDateTime closeAt;
+
     // Bổ sung từ JOIN - không map trực tiếp cột DB
     private String sectionTitle;
     private String courseTitle;
@@ -21,12 +25,16 @@ public class Quiz implements Serializable {
     public Quiz() {}
 
     public Quiz(Integer sectionId, Integer courseId, String title,
-                BigDecimal passScore, Integer maxAttempts) {
+                BigDecimal passScore, Integer maxAttempts,Integer timeLimitMinutes,
+                LocalDateTime openAt, LocalDateTime closeAt) {
         this.sectionId = sectionId;
         this.courseId = courseId;
         this.title = title;
         this.passScore = passScore;
         this.maxAttempts = maxAttempts;
+        this.timeLimitMinutes = timeLimitMinutes;
+        this.openAt = openAt;
+        this.closeAt = closeAt;
     }
 
     public int getId() { return id; }
@@ -46,6 +54,30 @@ public class Quiz implements Serializable {
 
     public Integer getMaxAttempts() { return maxAttempts; }
     public void setMaxAttempts(Integer maxAttempts) { this.maxAttempts = maxAttempts; }
+
+    public Integer getTimeLimitMinutes() { return timeLimitMinutes; }
+    public void setTimeLimitMinutes(Integer timeLimitMinutes) { this.timeLimitMinutes = timeLimitMinutes; }
+
+    public LocalDateTime getOpenAt() { return openAt; }
+    public void setOpenAt(LocalDateTime openAt) { this.openAt = openAt; }
+
+    public LocalDateTime getCloseAt() { return closeAt; }
+    public void setCloseAt(LocalDateTime closeAt) { this.closeAt = closeAt; }
+
+    public boolean isOpenNow() {
+        LocalDateTime now = LocalDateTime.now();
+        if (openAt != null && now.isBefore(openAt)) return false;
+        if (closeAt != null && now.isAfter(closeAt)) return false;
+        return true;
+    }
+    private static final java.time.format.DateTimeFormatter DISPLAY_FMT =
+        java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+
+    public String getOpenAtFormatted() { return openAt != null ? openAt.format(DISPLAY_FMT) : null; }
+    public String getCloseAtFormatted() { return closeAt != null ? closeAt.format(DISPLAY_FMT) : null; }
+
+    public boolean isNotYetOpen() { return openAt != null && LocalDateTime.now().isBefore(openAt); }
+    public boolean isClosedNow() { return closeAt != null && LocalDateTime.now().isAfter(closeAt); }
 
     public String getSectionTitle() { return sectionTitle; }
     public void setSectionTitle(String sectionTitle) { this.sectionTitle = sectionTitle; }

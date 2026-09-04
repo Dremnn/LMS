@@ -53,6 +53,13 @@
         <artifactId>jakarta.servlet.jsp.jstl</artifactId>
         <version>3.0.1</version>
     </dependency>
+
+    <dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <version>42.7.6</version>
+    </dependency>
+    
     <dependency>
         <groupId>jakarta.servlet.jsp.jstl</groupId>
         <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>

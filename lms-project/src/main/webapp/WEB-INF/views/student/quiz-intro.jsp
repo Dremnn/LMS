@@ -79,7 +79,41 @@
                         </c:choose>
                     </div>
                 </div>
+                <div class="info-box">
+                    <div class="info-label">⏱️ Thời gian làm bài</div>
+                    <div class="info-value">
+                        <c:choose>
+                            <c:when test="${quiz.timeLimitMinutes != null}">${quiz.timeLimitMinutes} phút</c:when>
+                            <c:otherwise>Không giới hạn</c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+                <c:if test="${quiz.openAt != null || quiz.closeAt != null}">
+                    <div class="info-box">
+                        <div class="info-label">🗓️ Thời gian mở/đóng</div>
+                        <div class="info-value" style="font-size:15px;">
+                            <c:if test="${quiz.openAt != null}">Mở: ${quiz.openAtFormatted}<br/></c:if>
+                            <c:if test="${quiz.closeAt != null}">Đóng: ${quiz.closeAtFormatted}</c:if>
+                        </div>
+                    </div>
+                </c:if>
             </div>
+
+            <c:if test="${!quiz.openNow}">
+                <div class="status-box" style="background:#fff5f5;border-color:#fc8181;">
+                    <div class="status-icon">🚫</div>
+                    <div class="status-text">
+                        <c:choose>
+                            <c:when test="${quiz.notYetOpen}">
+                                <strong>Quiz chưa mở.</strong><br>Quiz sẽ mở lúc ${quiz.openAtFormatted}.
+                            </c:when>
+                            <c:otherwise>
+                                <strong>Quiz đã đóng.</strong><br>Quiz đã đóng lúc ${quiz.closeAtFormatted}, không thể làm bài nữa.
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </c:if>
 
             <div class="status-box">
                 <c:choose>
@@ -105,6 +139,9 @@
 
             <div class="actions">
                 <c:choose>
+                    <c:when test="${!quiz.openNow}">
+                        <a href="#" class="btn-start disabled">🚫 Quiz không khả dụng lúc này</a>
+                    </c:when>
                     <c:when test="${quiz.maxAttempts != null && attemptsUsed >= quiz.maxAttempts}">
                         <a href="#" class="btn-start disabled">❌ Đã hết lượt làm bài</a>
                     </c:when>

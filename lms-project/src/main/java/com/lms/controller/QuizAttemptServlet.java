@@ -111,12 +111,29 @@ public class QuizAttemptServlet extends HttpServlet {
         int quizId = Integer.parseInt(request.getParameter("id"));
 
         Quiz quiz = quizService.getQuizById(quizId);
-        // getQuestionsForAttempt() đã tự kiểm tra: đã enroll chưa, còn lượt làm bài không,
-        // và ĐÃ ẨN SẴN đáp án đúng trước khi trả về (xử lý trong QuizService)
+        // getQuestionsForAttempt() đã tự kiểm tra: đã enroll chưa, quiz có đang mở không,
+        // còn lượt làm bài không, và ĐÃ ẨN SẴN đáp án đúng trước khi trả về (xử lý trong QuizService)
         List<Question> questions = quizService.getQuestionsForAttempt(currentUser.getId(), quizId);
+
+        // Ghi nhận thời điểm bắt đầu làm bài vào session (chỉ set 1 lần, F5 lại không bị reset đồng hồ)
+        // dùng để: (1) tính remainingSeconds cho JS đếm ngược, (2) server-side kiểm tra hết giờ khi submit
+        Long remainingSeconds = null;
+        if (quiz.getTimeLimitMinutes() != null) {
+            HttpSession session = request.getSession();
+            String startKey = "quizAttemptStart_" + quizId;
+            Long startMillis = (Long) session.getAttribute(startKey);
+            if (startMillis == null) {
+                startMillis = System.currentTimeMillis();
+                session.setAttribute(startKey, startMillis);
+            }
+            long elapsedSeconds = (System.currentTimeMillis() - startMillis) / 1000;
+            long totalSeconds = quiz.getTimeLimitMinutes() * 60L;
+            remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+        }
 
         request.setAttribute("quiz", quiz);
         request.setAttribute("questions", questions);
+        request.setAttribute("remainingSeconds", remainingSeconds);
         request.getRequestDispatcher("/WEB-INF/views/student/quiz-attempt.jsp")
                 .forward(request, response);
     }
@@ -174,7 +191,24 @@ public class QuizAttemptServlet extends HttpServlet {
                 selectedAnswers.put(q.getId(), selectedList);
             }
 
-            QuizAttempt attempt = quizService.submitAttempt(currentUser.getId(), quizId, selectedAnswers);
+            // Lấy lại thời điểm bắt đầu làm bài đã lưu trong session (nếu quiz có giới hạn thời gian)
+            HttpSession session = request.getSession(false);
+            String startKey = "quizAttemptStart_" + quizId;
+            java.time.LocalDateTime attemptStartedAt = null;
+            if (session != null) {
+                Long startMillis = (Long) session.getAttribute(startKey);
+                if (startMillis != null) {
+                    attemptStartedAt = java.time.LocalDateTime.ofInstant(
+                            java.time.Instant.ofEpochMilli(startMillis), java.time.ZoneId.systemDefault());
+                }
+            }
+
+            QuizAttempt attempt = quizService.submitAttempt(currentUser.getId(), quizId, selectedAnswers, attemptStartedAt);
+
+            // Nộp bài thành công -> dọn mốc thời gian bắt đầu khỏi session
+            if (session != null) {
+                session.removeAttribute(startKey);
+            }
 
             String redirectUrl = request.getContextPath() + "/student/quizzes/result?attemptId=" + attempt.getId();
             String lessonId = request.getParameter("lessonId");

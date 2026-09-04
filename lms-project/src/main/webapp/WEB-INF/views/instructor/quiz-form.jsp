@@ -87,6 +87,24 @@
             </div>
 
             <div class="form-group">
+                <label for="timeLimitMinutes">Thời gian làm bài (phút)</label>
+                <input type="number" id="timeLimitMinutes" name="timeLimitMinutes" min="1" placeholder="Để trống = không giới hạn thời gian" />
+                <div class="hint">💡 Học viên sẽ thấy đồng hồ đếm ngược và bài tự động nộp khi hết giờ.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="openAt">Mở quiz lúc</label>
+                <input type="datetime-local" id="openAt" name="openAt" style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;color:#2d3748;outline:none;" />
+                <div class="hint">💡 Để trống nếu muốn mở ngay khi tạo quiz.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="closeAt">Đóng quiz lúc</label>
+                <input type="datetime-local" id="closeAt" name="closeAt" style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;color:#2d3748;outline:none;" />
+                <div class="hint">💡 Để trống nếu không muốn tự động đóng quiz.</div>
+            </div>
+
+            <div class="form-group">
                 <label>Gắn Quiz vào *</label>
                 <div class="radio-group">
                     <label class="radio-option">

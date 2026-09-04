@@ -60,7 +60,8 @@ public class QuizService {
     // 1. INSTRUCTOR: TẠO QUIZ MỚI (gắn vào Section HOẶC Course, theo lựa chọn)
     // =========================================================================
     public Quiz createQuiz(int currentInstructorId, Integer sectionId, Integer courseId,
-                            String title, BigDecimal passScore, Integer maxAttempts) {
+                            String title, BigDecimal passScore, Integer maxAttempts,
+                            Integer timeLimitMinutes, java.time.LocalDateTime openAt, java.time.LocalDateTime closeAt) {
 
         if ((sectionId == null) == (courseId == null)) {
             // Cả 2 cùng null HOẶC cả 2 cùng có giá trị đều là sai - phải chọn ĐÚNG 1 trong 2
@@ -96,7 +97,16 @@ public class QuizService {
             throw new IllegalArgumentException("Số lần làm bài tối đa phải lớn hơn 0 (để trống nếu không giới hạn)!");
         }
 
-        Quiz quiz = new Quiz(sectionId, courseId, title.trim(), passScore, maxAttempts);
+        if (timeLimitMinutes != null && timeLimitMinutes <= 0) {
+            throw new IllegalArgumentException("Thời gian làm bài phải lớn hơn 0 phút (để trống nếu không giới hạn)!");
+        }
+
+        if (openAt != null && closeAt != null && !closeAt.isAfter(openAt)) {
+            throw new IllegalArgumentException("Thời điểm đóng quiz phải sau thời điểm mở!");
+        }
+
+        Quiz quiz = new Quiz(sectionId, courseId, title.trim(), passScore, maxAttempts,
+                timeLimitMinutes, openAt, closeAt);
         boolean saved = quizDAO.save(quiz);
         if (!saved) {
             throw new RuntimeException("Có lỗi xảy ra khi tạo quiz!");
@@ -203,6 +213,9 @@ public class QuizService {
         // Bắt buộc phải đã đăng ký khóa học chứa quiz này mới được làm bài
         enrollmentService.getEnrollmentOrThrow(studentId, courseId);
 
+        // Kiểm tra cửa sổ thời gian mở/đóng của quiz
+        checkQuizWindow(quiz);
+
         // Kiểm tra giới hạn số lần làm bài (nếu Instructor có set max_attempts)
         if (quiz.getMaxAttempts() != null) {
             int attemptsUsed = quizAttemptDAO.countAttempts(studentId, quizId);
@@ -236,10 +249,34 @@ public class QuizService {
     }
 
     // =========================================================================
+    // Hàm phụ trợ: Kiểm tra quiz có đang trong khoảng thời gian mở/đóng cho phép không
+    // =========================================================================
+    private static final java.time.format.DateTimeFormatter DATETIME_FMT =
+            java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+
+    private void checkQuizWindow(Quiz quiz) {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        if (quiz.getOpenAt() != null && now.isBefore(quiz.getOpenAt())) {
+            throw new IllegalStateException(
+                "Quiz chưa mở! Quiz sẽ mở lúc " + quiz.getOpenAt().format(DATETIME_FMT) + ".");
+        }
+        if (quiz.getCloseAt() != null && now.isAfter(quiz.getCloseAt())) {
+            throw new IllegalStateException(
+                "Quiz đã đóng lúc " + quiz.getCloseAt().format(DATETIME_FMT) + ", không thể làm bài nữa!");
+        }
+    }
+
+    // Số phút cho phép trễ so với time_limit_minutes trước khi coi là quá hạn nghiêm trọng
+    // (bù độ trễ mạng / độ lệch giữa đồng hồ client-server so với JS đếm ngược)
+    private static final long TIME_LIMIT_GRACE_MINUTES = 2;
+
+    // =========================================================================
     // 5. STUDENT: NỘP BÀI — CHẤM ĐIỂM TỰ ĐỘNG
     // selectedAnswers: Map<questionId, List<selectedOptionId>>
+    // attemptStartedAt: thời điểm Student bắt đầu làm bài (lấy từ session) - null nếu không xác định được
     // =========================================================================
-    public QuizAttempt submitAttempt(int studentId, int quizId, Map<Integer, List<Integer>> selectedAnswers) {
+    public QuizAttempt submitAttempt(int studentId, int quizId, Map<Integer, List<Integer>> selectedAnswers,
+                                      java.time.LocalDateTime attemptStartedAt) {
 
         Quiz quiz = quizDAO.findById(quizId);
         if (quiz == null) {
@@ -249,12 +286,25 @@ public class QuizService {
         int courseId = resolveCourseId(quiz);
         enrollmentService.getEnrollmentOrThrow(studentId, courseId);
 
+        // Kiểm tra lại cửa sổ mở/đóng (phòng trường hợp Student mở tab từ trước, quiz đóng lúc đang làm)
+        checkQuizWindow(quiz);
+
         // Kiểm tra lại giới hạn số lần làm bài (phòng trường hợp Student mở 2 tab cùng lúc)
         if (quiz.getMaxAttempts() != null) {
             int attemptsUsed = quizAttemptDAO.countAttempts(studentId, quizId);
             if (attemptsUsed >= quiz.getMaxAttempts()) {
                 throw new IllegalStateException(
                     "Bạn đã hết lượt làm bài (tối đa " + quiz.getMaxAttempts() + " lần)!");
+            }
+        }
+
+        // Kiểm tra thời gian làm bài (time_limit_minutes) - có cộng thêm ít phút "grace"
+        // để bù độ trễ mạng/độ lệch giờ, tránh làm mất bài do sai số nhỏ
+        if (quiz.getTimeLimitMinutes() != null && attemptStartedAt != null) {
+            long elapsedMinutes = java.time.Duration.between(attemptStartedAt, java.time.LocalDateTime.now()).toMinutes();
+            if (elapsedMinutes > quiz.getTimeLimitMinutes() + TIME_LIMIT_GRACE_MINUTES) {
+                throw new IllegalStateException(
+                    "Đã hết thời gian làm bài (giới hạn " + quiz.getTimeLimitMinutes() + " phút)! Bài làm không được ghi nhận.");
             }
         }
 

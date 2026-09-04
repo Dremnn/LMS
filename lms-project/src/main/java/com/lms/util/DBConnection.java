@@ -17,7 +17,7 @@ public class DBConnection {
     // dùng để đọc file db.properties
     static {
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("org.postgresql.Driver");
             Properties props = new Properties();
             InputStream input = DBConnection.class.getClassLoader()
                     .getResourceAsStream("db.properties");
@@ -40,7 +40,11 @@ public class DBConnection {
 
     // Trả về 1 Connection mới mỗi lần gọi
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, username, password);
+        return DriverManager.getConnection(
+                url,
+                username,
+                password
+        );
     }
 
     // Hàm main dùng để test nhanh kết nối trực tiếp
