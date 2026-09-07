@@ -144,14 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 shape.style.transform = `translate3d(${x * speed * 2}px, ${y * speed * 2}px, 0)`;
             });
             
-            // Di chuyển các widget nổi (sử dụng translate3d và thêm xoay 3D)
-            document.querySelectorAll('.widget-pos').forEach(pos => {
-                // Lấy speed từ child .parallax
-                const parallaxChild = pos.querySelector('.parallax');
-                const speed = parallaxChild ? (parallaxChild.getAttribute('data-speed') || 1) : 1;
-                // Vừa dịch chuyển, vừa xoay nhẹ để tạo cảm giác không gian 3 chiều
-                pos.style.transform = `translate3d(${x * speed * -5}px, ${y * speed * -5}px, 0) rotateX(${y * speed * -2}deg) rotateY(${x * speed * 2}deg)`;
-            });
         });
     });
 

@@ -59,17 +59,18 @@
     <artifactId>postgresql</artifactId>
     <version>42.7.6</version>
     </dependency>
+
+    <!-- HikariCP - Connection Pool, bắt buộc khi dùng DB cloud để tránh mở kết nối mới liên tục -->
+    <dependency>
+        <groupId>com.zaxxer</groupId>
+        <artifactId>HikariCP</artifactId>
+        <version>5.1.0</version>
+    </dependency>
     
     <dependency>
         <groupId>jakarta.servlet.jsp.jstl</groupId>
         <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
         <version>3.0.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.7.6</version>
     </dependency>
 
   </dependencies>

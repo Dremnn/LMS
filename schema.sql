@@ -135,6 +135,9 @@ CREATE TABLE quizzes (
     title           VARCHAR(200) NOT NULL,
     pass_score      NUMERIC(5,2) NOT NULL DEFAULT 50,
     max_attempts    INTEGER,
+    time_limit_minutes INTEGER,
+    open_at         TIMESTAMP,
+    close_at        TIMESTAMP,
 
     CONSTRAINT fk_quizzes_section
         FOREIGN KEY (section_id) REFERENCES sections(id),
@@ -255,6 +258,20 @@ CREATE INDEX idx_courses_instructor ON courses(instructor_id);
 CREATE INDEX idx_enrollments_student ON enrollments(student_id);
 CREATE INDEX idx_enrollments_course ON enrollments(course_id);
 CREATE INDEX idx_lesson_progress_enrollment ON lesson_progress(enrollment_id);
+CREATE INDEX idx_sections_course ON sections(course_id);
+CREATE INDEX idx_lessons_section ON lessons(section_id);
+CREATE INDEX idx_quizzes_section ON quizzes(section_id);
+CREATE INDEX idx_quizzes_course ON quizzes(course_id);
+CREATE INDEX idx_questions_quiz ON questions(quiz_id);
+CREATE INDEX idx_answer_options_question ON answer_options(question_id);
+CREATE INDEX idx_quiz_attempts_student ON quiz_attempts(student_id);
+CREATE INDEX idx_quiz_attempts_quiz ON quiz_attempts(quiz_id);
+CREATE INDEX idx_attempt_answers_attempt ON attempt_answers(attempt_id);
+CREATE INDEX idx_attempt_answers_question ON attempt_answers(question_id);
+CREATE INDEX idx_attempt_answers_option ON attempt_answers(selected_option_id);
+CREATE INDEX idx_certificates_student ON certificates(student_id);
+CREATE INDEX idx_certificates_course ON certificates(course_id);
+CREATE INDEX idx_reviews_student ON reviews(student_id);
 
 -- ============================================================
 -- 7. FUNCTIONS
@@ -417,3 +434,12 @@ DROP TRIGGER IF EXISTS trg_lesson_update_total_lessons ON lessons;
 CREATE TRIGGER trg_lesson_update_total_lessons
 AFTER INSERT OR DELETE OR UPDATE OF section_id ON lessons
 FOR EACH ROW EXECUTE FUNCTION trg_lesson_update_total_lessons_fn();
+
+INSERT INTO users (full_name, email, password_hash, role, status)
+VALUES (
+    'Admin',
+    'admin@lms.com',
+    '$2a$12$s7BCaCoYxbUZlpNj9H.Gx.wA.5kwBLezvFNmglpgcxrMd54FApCey',
+    'admin',
+    'active'
+);
