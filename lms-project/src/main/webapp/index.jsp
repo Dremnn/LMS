@@ -146,7 +146,11 @@
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+        
         <% if (currentUser != null) { %>
+            <!-- ĐÂY LÀ ĐOẠN CODE MỚI ĐƯỢC THÊM VÀO -->
+            <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            
             <div class="user-badge">
                 <div class="user-avatar"><%=currentUser.getFullName().substring(0,1).toUpperCase()%></div>
                 <span><%=currentUser.getFullName()%></span>
@@ -157,6 +161,7 @@
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
             <% } else { %>
+                <!-- Bạn cũng có thể đổi chữ "Của tôi" ở dưới đây thành "Bảng điều khiển" nếu muốn thay thế hoàn toàn -->
                 <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>

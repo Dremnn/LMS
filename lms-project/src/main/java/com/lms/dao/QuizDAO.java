@@ -177,6 +177,30 @@ public class QuizDAO {
         return false;
     }
 
+    public List<Quiz> findByCloseAtMonth(int year, int month) {
+        List<Quiz> list = new ArrayList<>();
+        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts, " +
+                    "time_limit_minutes, open_at, close_at " +
+                    "FROM quizzes " +
+                    "WHERE EXTRACT(YEAR FROM close_at) = ? AND EXTRACT(MONTH FROM close_at) = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, year);
+            stmt.setInt(2, month);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToQuiz(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     private Quiz mapResultSetToQuiz(ResultSet rs) throws SQLException {
         Quiz quiz = new Quiz();
         quiz.setId(rs.getInt("id"));
