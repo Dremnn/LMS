@@ -6,88 +6,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khám phá khóa học - LMS</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;}
-        body{background:#f0f4f8;color:#2d3748;}
-        .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:14px 40px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
-        .navbar .logo{font-size:20px;font-weight:800;color:#667eea;text-decoration:none;}
-        .nav-links{display:flex;align-items:center;gap:12px;}
-        .nav-link{color:#4a5568;text-decoration:none;font-size:14px;font-weight:500;padding:6px 2px;border-bottom:2px solid transparent;}
-        .nav-link.active,.nav-link:hover{color:#667eea;border-bottom-color:#667eea;}
-        .btn{padding:8px 18px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:all .2s;display:inline-block;}
-        .btn-outline{border:1.5px solid #667eea;color:#667eea;background:transparent;}
-        .btn-outline:hover{background:#667eea;color:#fff;}
-        .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
-        .btn-danger{background:#fc8181;color:#742a2a;}
-        .btn-danger:hover{background:#f56565;color:#fff;}
-        .page-header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:48px 40px;}
-        .page-header h1{font-size:32px;font-weight:800;margin-bottom:8px;}
-        .page-header p{opacity:.88;font-size:15px;}
-        .search-section{background:#fff;padding:24px 40px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
-        .search-form{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-        .search-input{flex:1;min-width:220px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s;}
-        .search-input:focus{border-color:#667eea;}
-        .search-select{padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;color:#2d3748;outline:none;cursor:pointer;background:#fff;}
-        .btn-search{padding:10px 22px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
-        .main{max-width:1200px;margin:36px auto;padding:0 24px;}
-        .result-info{color:#718096;font-size:14px;margin-bottom:20px;}
-        .course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
-        .course-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.07);transition:transform .2s,box-shadow .2s;}
-        .course-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.12);}
-        .course-card img{width:100%;height:185px;object-fit:cover;}
-        .course-body{padding:20px;}
-        .course-title{font-size:16px;font-weight:700;color:#1a202c;margin-bottom:8px;line-height:1.4;}
-        .course-title a{color:inherit;text-decoration:none;}
-        .course-title a:hover{color:#667eea;}
-        .course-instructor{font-size:13px;color:#718096;margin-bottom:10px;}
-        .course-meta{display:flex;gap:14px;font-size:12px;color:#a0aec0;margin-bottom:14px;flex-wrap:wrap;}
-        .course-meta span{display:flex;align-items:center;gap:4px;}
-        .course-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f4f8;padding-top:14px;}
-        .price{font-size:18px;font-weight:800;}
-        .price-free{color:#38a169;}
-        .price-paid{color:#667eea;}
-        .btn-detail{padding:7px 16px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity .2s;}
-        .btn-detail:hover{opacity:.88;}
-        .empty-state{text-align:center;padding:80px 20px;color:#a0aec0;}
-        .empty-state .icon{font-size:64px;margin-bottom:16px;}
-        .empty-state p{font-size:16px;}
-        .badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;background:#ebf8ff;color:#2b6cb0;text-transform:uppercase;margin-left:6px;}
-    </style>
+    <title>Khám phá khóa học - EduViet LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
 </head>
-<body>
+<body class="mesh-bg">
 <%
     User currentUser = (User) session.getAttribute("currentUser");
     String role = currentUser != null ? currentUser.getRole() : "";
 %>
-<nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+
+<!-- NAVBAR -->
+<nav class="lms-navbar">
+    <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+    </a>
     <div class="nav-links">
-        <a href="${pageContext.request.contextPath}/courses" class="nav-link active">Khóa học</a>
+        <a href="<%=request.getContextPath()%>/courses" class="nav-link active">Khóa học</a>
         <% if (currentUser != null) { %>
-            <span style="font-size:14px;color:#4a5568;font-weight:600;"><%=currentUser.getFullName()%><span class="badge"><%=role%></span></span>
-            <% if ("instructor".equals(role)) { %>
-                <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <div class="user-badge">
+                <div class="user-avatar"><%=currentUser.getFullName().substring(0,1).toUpperCase()%></div>
+                <span><%=currentUser.getFullName()%></span>
+                <span class="role-tag"><%=role%></span>
+            </div>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+            <% } else if ("instructor".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
             <% } %>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
+            <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
-            <a href="${pageContext.request.contextPath}/login" class="btn btn-outline">Đăng nhập</a>
-            <a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Đăng ký</a>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
     </div>
 </nav>
 
+<!-- PAGE HEADER -->
 <div class="page-header">
-    <h1>📚 Khám phá khóa học</h1>
-    <p>Tìm kiếm và học những kỹ năng bạn muốn phát triển</p>
+    <div class="page-header-inner">
+        <div>
+            <h1><i class="fa-solid fa-compass"></i> Khám phá khóa học</h1>
+            <p>Tìm kiếm và học những kỹ năng bạn muốn phát triển</p>
+        </div>
+    </div>
 </div>
 
+<!-- SEARCH -->
 <div class="search-section">
     <form action="${pageContext.request.contextPath}/courses" method="get" class="search-form">
         <input type="text" name="keyword" class="search-input"
-               placeholder="🔍 Tìm kiếm khóa học..." value="<c:out value='${keyword}' default=''/>">
+               placeholder="Tìm kiếm khóa học..." value="<c:out value='${keyword}' default=''/>">
         <select name="categoryId" class="search-select">
-            <option value="">📂 Tất cả danh mục</option>
+            <option value="">Tất cả danh mục</option>
             <c:forEach var="cat" items="${categories}">
                 <option value="${cat.id}" <c:if test="${cat.id == selectedCategoryId}">selected</c:if>>
                     <c:out value="${cat.name}"/>
@@ -95,15 +68,16 @@
             </c:forEach>
         </select>
         <select name="sortBy" class="search-select">
-            <option value="newest" <c:if test="${sortBy == 'newest' || empty sortBy}">selected</c:if>>🕐 Mới nhất</option>
-            <option value="popular" <c:if test="${sortBy == 'popular'}">selected</c:if>>🔥 Phổ biến nhất</option>
-            <option value="rating" <c:if test="${sortBy == 'rating'}">selected</c:if>>⭐ Đánh giá cao nhất</option>
+            <option value="newest" <c:if test="${sortBy == 'newest' || empty sortBy}">selected</c:if>>Mới nhất</option>
+            <option value="popular" <c:if test="${sortBy == 'popular'}">selected</c:if>>Phổ biến nhất</option>
+            <option value="rating" <c:if test="${sortBy == 'rating'}">selected</c:if>>Đánh giá cao nhất</option>
         </select>
-        <button type="submit" class="btn-search">Tìm kiếm</button>
+        <button type="submit" class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
     </form>
 </div>
 
-<div class="main">
+<!-- MAIN -->
+<div class="lms-main">
     <p class="result-info">
         <c:choose>
             <c:when test="${not empty courses}">Tìm thấy <strong>${courses.size()}</strong> khóa học</c:when>
@@ -113,39 +87,41 @@
 
     <c:choose>
         <c:when test="${not empty courses}">
-            <div class="course-grid">
-                <c:forEach var="course" items="${courses}">
-                    <div class="course-card">
-                        <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;">
+                <c:forEach var="course" items="${courses}" varStatus="vs">
+                    <div class="course-card reveal reveal-d${(vs.index % 3) + 1}">
+                        <div class="course-img-wrap">
                             <c:choose>
                                 <c:when test="${not empty course.thumbnailUrl}">
-                                    <img src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>">
+                                    <img class="course-card-img" src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>">
                                 </c:when>
                                 <c:otherwise>
-                                    <img src="https://via.placeholder.com/400x200/667eea/ffffff?text=No+Image" alt="No Image">
+                                    <div class="course-img-placeholder"></div>
                                 </c:otherwise>
                             </c:choose>
-                        </a>
-                        <div class="course-body">
-                            <h3 class="course-title">
+                            <c:if test="${not empty course.categoryName}">
+                                <div class="course-category-chip"><c:out value="${course.categoryName}"/></div>
+                            </c:if>
+                        </div>
+                        <div class="course-card-body">
+                            <h3 class="course-card-title">
                                 <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}">
                                     <c:out value="${course.title}"/>
                                 </a>
                             </h3>
                             <c:if test="${course.status == 'warning' || course.status == 'appealed'}">
-                                <div style="background:#fed7d7;color:#9b2c2c;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px;display:inline-block;">⚠️ Đang bị cảnh cáo</div>
+                                <div style="background:#fed7d7;color:#9b2c2c;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-bottom:6px;display:inline-block;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Đang bị cảnh cáo
+                                </div>
                             </c:if>
-                            <p class="course-instructor">👨‍🏫 <c:out value="${course.instructorName}"/></p>
-                            <div class="course-meta">
-                                <span>⭐ ${course.avgRating}</span>
-                                <span>👤 ${course.totalStudents} học viên</span>
-                                <span>📖 ${course.totalLessons} bài học</span>
-                                <c:if test="${not empty course.categoryName}">
-                                    <span>📂 <c:out value="${course.categoryName}"/></span>
-                                </c:if>
+                            <p class="course-card-instructor"><i class="fa-solid fa-chalkboard-user"></i> <c:out value="${course.instructorName}"/></p>
+                            <div class="course-card-meta">
+                                <span><i class="fa-solid fa-star"></i> ${course.avgRating}</span>
+                                <span><i class="fa-solid fa-users"></i> ${course.totalStudents} học viên</span>
+                                <span><i class="fa-solid fa-book-open"></i> ${course.totalLessons} bài</span>
                             </div>
-                            <div class="course-footer">
-                                <span class="price">
+                            <div class="course-card-footer">
+                                <span>
                                     <c:choose>
                                         <c:when test="${course.price == 0 || course.price == null}">
                                             <span class="price-free">Miễn phí</span>
@@ -155,7 +131,8 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </span>
-                                <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn-detail">Xem chi tiết</a>
+                                <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}"
+                                   class="btn btn-primary btn-sm">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
@@ -164,11 +141,46 @@
         </c:when>
         <c:otherwise>
             <div class="empty-state">
-                <div class="icon">🔍</div>
-                <p>Không tìm thấy khóa học phù hợp.<br>Hãy thử từ khóa hoặc danh mục khác!</p>
+                <span class="empty-state-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <h3>Không tìm thấy khóa học</h3>
+                <p>Hãy thử từ khóa hoặc danh mục khác nhé!</p>
+                <a href="${pageContext.request.contextPath}/courses" class="btn btn-primary">Xem tất cả khóa học</a>
             </div>
         </c:otherwise>
     </c:choose>
 </div>
+
+<!-- FOOTER -->
+<footer class="lms-footer modern-footer">
+    <div class="container">
+        <div class="footer-grid" style="align-items: flex-start;">
+            <div class="footer-col brand-col">
+                <a href="<%=request.getContextPath()%>/" class="lms-logo footer-logo" style="margin-bottom: 16px;">
+                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">EduViet LMS</span>
+                </a>
+                <p class="footer-desc">Nền tảng học trực tuyến hàng đầu Việt Nam.</p>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-title">Liên kết</h4>
+                <ul class="footer-links">
+                    <li><a href="<%=request.getContextPath()%>/courses">Khóa học</a></li>
+                    <li><a href="<%=request.getContextPath()%>/register">Đăng ký</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4 class="footer-title">Hỗ trợ</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Hướng dẫn</a></li>
+                    <li><a href="#">Liên hệ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EduViet LMS</p>
+        </div>
+    </div>
+</footer>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
 </body>
 </html>
