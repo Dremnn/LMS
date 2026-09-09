@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -47,11 +47,12 @@
         .empty-state p{font-size:16px;margin-bottom:20px;}
         .user-info{font-size:14px;color:#4a5568;font-weight:600;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser"); %>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/courses" class="btn btn-outline">Khám phá khóa học</a>
         <% if (currentUser != null) { %>
@@ -62,7 +63,7 @@
 </nav>
 
 <div class="page-header">
-    <h1>📚 Khóa học của tôi</h1>
+    <h1><i class="fa-solid fa-book-open"></i> Khóa học của tôi</h1>
     <p>Theo dõi tiến độ học tập và tiếp tục các khóa học đang dở</p>
 </div>
 
@@ -91,15 +92,15 @@
                                 </h3>
                                 <c:choose>
                                     <c:when test="${enrollment.status == 'completed'}">
-                                        <span class="badge-status badge-completed">✅ Đã hoàn thành</span>
+                                        <span class="badge-status badge-completed"><i class="fa-solid fa-circle-check"></i> Đã hoàn thành</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <span class="badge-status badge-inprogress">📖 Đang học</span>
+                                        <span class="badge-status badge-inprogress"><i class="fa-solid fa-book-open"></i> Đang học</span>
                                     </c:otherwise>
                                 </c:choose>
                             </div>
                             <div class="course-meta">
-                                <span>📖 ${enrollment.totalLessons} bài học</span>
+                                <span><i class="fa-solid fa-book-open"></i> ${enrollment.totalLessons} bài học</span>
                             </div>
                             <div class="progress-wrap">
                                 <div class="progress-label">
@@ -117,7 +118,7 @@
                                 📅 Đăng ký: ${enrollment.enrolledAt}
                             </span>
                             <a href="${pageContext.request.contextPath}/courses/detail?id=${enrollment.courseId}"
-                               class="btn btn-primary">▶ Vào học</a>
+                               class="btn btn-primary"><i class="fa-solid fa-play"></i> Vào học</a>
                         </div>
                     </div>
                 </div>
@@ -125,10 +126,10 @@
         </c:when>
         <c:otherwise>
             <div class="empty-state">
-                <div class="icon">📭</div>
+                <div class="icon"><i class="fa-solid fa-inbox"></i></div>
                 <p>Bạn chưa đăng ký khóa học nào.</p>
                 <a href="${pageContext.request.contextPath}/courses" class="btn btn-primary">
-                    🚀 Khám phá khóa học ngay
+                    <i class="fa-solid fa-rocket"></i> Khám phá khóa học ngay
                 </a>
             </div>
         </c:otherwise>

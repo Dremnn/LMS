@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -64,12 +64,13 @@
         .btn-nav{padding:9px 18px;background:#3d4f6e;color:#cbd5e0;border:1px solid #4a5568;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;}
         .btn-nav:hover{background:#4a5568;color:#fff;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser"); %>
 
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-right">
         <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn btn-ghost">← Chi tiết khóa học</a>
         <% if (currentUser != null) { %>
@@ -86,7 +87,7 @@
     <%-- ===================== SIDEBAR ===================== --%>
     <aside class="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-course-title">📚 <c:out value="${course.title}"/></div>
+            <div class="sidebar-course-title"><i class="fa-solid fa-book-open"></i> <c:out value="${course.title}"/></div>
             <c:if test="${enrollment != null}">
                 <div class="progress-label">
                     <span>Tiến độ của bạn</span>
@@ -143,12 +144,12 @@
             </c:forEach>
             <c:if test="${hasCourseQuiz}">
                 <div class="section-group" style="border-bottom:none;">
-                    <div class="section-title" style="background:#4a2a18; color:#fbd38d;">🏆 Quiz Tổng Kết Khóa Học</div>
+                    <div class="section-title" style="background:#4a2a18; color:#fbd38d;"><i class="fa-solid fa-trophy"></i> Quiz Tổng Kết Khóa Học</div>
                     <c:forEach var="quiz" items="${quizzes}">
                         <c:if test="${quiz.courseId != null}">
                             <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}&lessonId=${currentLesson.id}" class="lesson-link" style="color:#fbd38d;">
                                 <span class="dot" style="border-color:#fbd38d; background:#fbd38d; border-radius:2px;"></span>
-                                <span style="font-weight:700;">⭐ <c:out value="${quiz.title}"/></span>
+                                <span style="font-weight:700;"><i class="fa-solid fa-star"></i> <c:out value="${quiz.title}"/></span>
                             </a>
                         </c:if>
                     </c:forEach>
@@ -163,7 +164,7 @@
 
         <%-- Thông báo lỗi flash (nếu có) --%>
         <c:if test="${not empty error}">
-            <div class="alert-danger">⚠️ ${error}</div>
+            <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> ${error}</div>
         </c:if>
 
         <%-- Video bài học --%>
@@ -210,7 +211,7 @@
         <%-- Form đánh dấu hoàn thành (chỉ hiện cho Student đã enroll) --%>
         <c:if test="${enrollment != null}">
             <div class="complete-card">
-                <h3>✅ Tiến độ bài học</h3>
+                <h3><i class="fa-solid fa-circle-check"></i> Tiến độ bài học</h3>
                 <form action="${pageContext.request.contextPath}/student/lessons/complete" method="post">
                     <input type="hidden" name="lessonId" value="${currentLesson.id}" />
                     <input type="hidden" name="courseId" value="${course.id}" />

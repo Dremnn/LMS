@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -44,12 +44,13 @@
         .btn-submit{padding:11px 28px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
         .btn-submit:hover{opacity:.9;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">← Danh sách khóa học</a>
         <% if (currentUser != null) { %>
@@ -64,7 +65,7 @@
 
     <div class="card">
         <c:if test="${not empty error}">
-            <div class="alert-danger">⚠️ <c:out value="${error}"/></div>
+            <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <c:out value="${error}"/></div>
         </c:if>
 
         <form action="${pageContext.request.contextPath}/instructor/quizzes/new" method="post">
@@ -110,14 +111,14 @@
                     <label class="radio-option">
                         <input type="radio" name="attachType" value="course" checked onchange="toggleSectionInput(this.value)" />
                         <div>
-                            <div class="radio-option-label">📚 Toàn bộ khóa học</div>
+                            <div class="radio-option-label"><i class="fa-solid fa-book-open"></i> Toàn bộ khóa học</div>
                             <div class="radio-option-sub">Quiz tổng kết — xuất hiện sau khi học xong tất cả các chương</div>
                         </div>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="attachType" value="section" onchange="toggleSectionInput(this.value)" />
                         <div>
-                            <div class="radio-option-label">📂 Một chương cụ thể</div>
+                            <div class="radio-option-label"><i class="fa-solid fa-folder-open"></i> Một chương cụ thể</div>
                             <div class="radio-option-sub">Quiz cuối chương — gắn với 1 section nhất định</div>
                         </div>
                     </label>

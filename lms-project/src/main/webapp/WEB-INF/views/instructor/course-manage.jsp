@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%
@@ -62,11 +62,12 @@
         .btn-submit-review:hover{opacity:.9;transform:translateY(-1px);}
         .readonly-notice{background:#fffff0;border:1px solid #f6e05e;color:#744210;padding:12px 16px;border-radius:9px;font-size:13px;margin-bottom:20px;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser"); %>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">← Danh sách khóa học</a>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
@@ -74,13 +75,13 @@
 </nav>
 
 <div class="page-header">
-    <h1>📂 <c:out value="${course.title}"/></h1>
+    <h1><i class="fa-solid fa-folder-open"></i> <c:out value="${course.title}"/></h1>
     <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
         <span style="font-size:14px;opacity:.85;">Quản lý nội dung khóa học</span>
         <c:choose>
             <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
-            <c:when test="${course.status == 'published'}"><span class="badge badge-published">✅ Published</span></c:when>
-            <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;">⚠️ Warning</span></c:when>
+            <c:when test="${course.status == 'published'}"><span class="badge badge-published"><i class="fa-solid fa-circle-check"></i> Published</span></c:when>
+            <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></c:when>
             <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
         </c:choose>
     </div>
@@ -88,12 +89,12 @@
 
 <div class="main">
     <% if (flashError != null && !flashError.isEmpty()) { %>
-        <div class="alert-danger">⚠️ <%=flashError%></div>
+        <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <%=flashError%></div>
     <% } %>
 
     <c:if test="${(course.status == 'warning' || course.status == 'appealed') && not empty course.rejectReason}">
         <div class="alert-danger" style="background:#fffaf0; border-color:#f6ad55; color:#c05621; margin-bottom:20px;">
-            <strong>⚠️ Admin đã cảnh cáo khóa học này:</strong> <c:out value="${course.rejectReason}"/>
+            <strong><i class="fa-solid fa-triangle-exclamation"></i> Admin đã cảnh cáo khóa học này:</strong> <c:out value="${course.rejectReason}"/>
             <c:choose>
                 <c:when test="${course.status == 'warning'}">
                     <div style="font-size:13px; margin-top:6px;">Bạn có thể kháng cáo từ trang danh sách khóa học hoặc chỉnh sửa nội dung theo yêu cầu.</div>
@@ -113,7 +114,7 @@
             <c:forEach var="section" items="${course.sectionsCache}" varStatus="st">
                 <div class="section-block">
                     <div class="section-head">
-                        <h3>📚 Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
+                        <h3><i class="fa-solid fa-book-open"></i> Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
                         <span style="font-size:12px;color:#a0aec0;">${section.lessons.size()} bài học</span>
                     </div>
                     <div class="lesson-list">
@@ -121,7 +122,7 @@
                             <c:when test="${not empty section.lessons}">
                                 <c:forEach var="lesson" items="${section.lessons}">
                                     <div class="lesson-row">
-                                        <span class="lesson-info">▶ 
+                                        <span class="lesson-info"><i class="fa-solid fa-play"></i> 
                                             <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}" style="color:inherit; text-decoration:underline; font-weight:600;">
                                                 <c:out value="${lesson.title}"/>
                                             </a>
@@ -173,7 +174,7 @@
             </c:forEach>
         </c:when>
         <c:otherwise>
-            <div class="alert-info">📭 Khóa học này chưa có chương nào. Hãy thêm chương đầu tiên bên dưới!</div>
+            <div class="alert-info"><i class="fa-solid fa-inbox"></i> Khóa học này chưa có chương nào. Hãy thêm chương đầu tiên bên dưới!</div>
         </c:otherwise>
     </c:choose>
 
@@ -196,10 +197,10 @@
 
     <c:if test="${not empty course.sectionsCache && course.status == 'draft'}">
         <div class="submit-section">
-            <p>✅ Khóa học đã có nội dung. Đăng khóa học để học viên có thể vào học ngay?</p>
+            <p><i class="fa-solid fa-circle-check"></i> Khóa học đã có nội dung. Đăng khóa học để học viên có thể vào học ngay?</p>
             <form action="${pageContext.request.contextPath}/instructor/courses/submit" method="post">
                 <input type="hidden" name="id" value="${course.id}">
-                <button type="submit" class="btn-submit-review">🚀 Đăng khóa học</button>
+                <button type="submit" class="btn-submit-review"><i class="fa-solid fa-rocket"></i> Đăng khóa học</button>
             </form>
         </div>
     </c:if>

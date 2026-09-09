@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -74,7 +74,7 @@
 <% User currentUser = (User) session.getAttribute("currentUser"); %>
 
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS Admin</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> LMS Admin</a>
     <div class="nav-links">
         <% if (currentUser != null) { %>
             <span class="user-info"><%= currentUser.getFullName() %><span class="badge-admin">admin</span></span>
@@ -84,7 +84,7 @@
 </nav>
 
 <div class="page-header">
-    <h1>📂 Quản lý khóa học (Admin)</h1>
+    <h1><i class="fa-solid fa-folder-open"></i> Quản lý khóa học (Admin)</h1>
     <p>Xem toàn bộ khóa học trên hệ thống và quản lý (xóa) khi cần thiết</p>
 </div>
 
@@ -92,10 +92,10 @@
 
     <%-- Flash messages --%>
     <c:if test="${not empty successMessage}">
-        <div class="alert alert-success">✅ ${successMessage}</div>
+        <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> ${successMessage}</div>
     </c:if>
     <c:if test="${not empty error}">
-        <div class="alert alert-danger">⚠️ ${error}</div>
+        <div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> ${error}</div>
     </c:if>
 
     <c:choose>
@@ -112,11 +112,11 @@
                         <div class="card-header-left">
                             <div class="course-title"><c:out value="${course.title}"/></div>
                             <div class="course-meta">
-                                <span>👨‍🏫 <c:out value="${course.instructorName}"/></span>
+                                <span><i class="fa-solid fa-chalkboard-user"></i> <c:out value="${course.instructorName}"/></span>
                                 <c:if test="${not empty course.categoryName}">
-                                    <span>📂 <c:out value="${course.categoryName}"/></span>
+                                    <span><i class="fa-solid fa-folder-open"></i> <c:out value="${course.categoryName}"/></span>
                                 </c:if>
-                                <span>📖 ${course.totalLessons} bài học</span>
+                                <span><i class="fa-solid fa-book-open"></i> ${course.totalLessons} bài học</span>
                                 <span>
                                     💰
                                     <c:choose>
@@ -132,13 +132,13 @@
                         </div>
                         <c:choose>
                             <c:when test="${course.status == 'published'}">
-                                <span style="background:#c6f6d5;color:#22543d;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">✅ Published</span>
+                                <span style="background:#c6f6d5;color:#22543d;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;"><i class="fa-solid fa-circle-check"></i> Published</span>
                             </c:when>
                             <c:when test="${course.status == 'draft'}">
                                 <span style="background:#e2e8f0;color:#4a5568;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">Draft</span>
                             </c:when>
                             <c:when test="${course.status == 'warning'}">
-                                <span style="background:#fed7d7;color:#9b2c2c;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">⚠️ Warning</span>
+                                <span style="background:#fed7d7;color:#9b2c2c;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span>
                             </c:when>
                             <c:when test="${course.status == 'appealed'}">
                                 <span style="background:#bee3f8;color:#2a4365;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">📩 Đang kháng cáo</span>
@@ -153,7 +153,7 @@
                         <%-- Hiển thị lý do cảnh cáo nếu đang warning hoặc appealed --%>
                         <c:if test="${(course.status == 'warning' || course.status == 'appealed') && not empty course.rejectReason}">
                             <div style="background:#fffaf0;border:1px solid #f6ad55;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#c05621;">
-                                <strong>⚠️ Lý do cảnh cáo:</strong> <c:out value="${course.rejectReason}"/>
+                                <strong><i class="fa-solid fa-triangle-exclamation"></i> Lý do cảnh cáo:</strong> <c:out value="${course.rejectReason}"/>
                             </div>
                         </c:if>
 
@@ -174,13 +174,13 @@
                                 <form action="${pageContext.request.contextPath}/admin/courses/approve-appeal"
                                       method="post" style="display:inline;">
                                     <input type="hidden" name="courseId" value="${course.id}" />
-                                    <button type="submit" class="btn-approve">✅ Chấp nhận kháng cáo</button>
+                                    <button type="submit" class="btn-approve"><i class="fa-solid fa-circle-check"></i> Chấp nhận kháng cáo</button>
                                 </form>
                                 <form action="${pageContext.request.contextPath}/admin/courses/reject-appeal"
                                       method="post" style="display:inline;"
                                       onsubmit="return confirm('Từ chối kháng cáo? Khóa học sẽ quay lại trạng thái cảnh cáo.')">
                                     <input type="hidden" name="courseId" value="${course.id}" />
-                                    <button type="submit" class="btn-reject">❌ Từ chối kháng cáo</button>
+                                    <button type="submit" class="btn-reject"><i class="fa-solid fa-xmark"></i> Từ chối kháng cáo</button>
                                 </form>
                             </c:if>
 
@@ -191,7 +191,7 @@
                                     <input type="hidden" name="courseId" value="${course.id}" />
                                     <input type="text" name="reason" class="reject-input" style="padding:6px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:13px;"
                                            placeholder="Nhập lý do cảnh cáo..." required maxlength="500" />
-                                    <button type="submit" class="btn-reject" style="background:#ed8936; color:#fff;">⚠️ Cảnh cáo</button>
+                                    <button type="submit" class="btn-reject" style="background:#ed8936; color:#fff;"><i class="fa-solid fa-triangle-exclamation"></i> Cảnh cáo</button>
                                 </form>
                             </c:if>
 
@@ -210,7 +210,7 @@
         </c:when>
         <c:otherwise>
             <div class="empty-state">
-                <div class="icon">🔍</div>
+                <div class="icon"><i class="fa-solid fa-magnifying-glass"></i></div>
                 <p>Không có khóa học nào trên hệ thống.</p>
             </div>
         </c:otherwise>

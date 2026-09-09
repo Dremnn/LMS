@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -6,57 +6,58 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đăng nhập — EduViet LMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=3">
   <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=3">
 </head>
 <body style="margin:0;padding:0;">
 <div class="auth-wrapper">
 
-  <!-- ── Left: Brand Panel ─────────────────────────────── -->
+  <!-- Left: Brand Panel -->
   <div class="auth-brand">
     <div class="auth-brand-inner">
-      <span class="auth-brand-logo">🎓</span>
+      <span class="auth-brand-logo"><i class="fa-solid fa-graduation-cap"></i></span>
       <h1 class="auth-brand-title">Chào mừng trở lại!</h1>
       <p class="auth-brand-desc">
         Đăng nhập để tiếp tục hành trình học tập cùng hàng nghìn sinh viên Việt Nam đang phát triển mỗi ngày.
       </p>
       <div class="auth-features">
         <div class="auth-feature">
-          <div class="auth-feature-icon">📚</div>
+          <div class="auth-feature-icon"><i class="fa-solid fa-book-open"></i></div>
           <span>Truy cập 500+ bài học chất lượng cao</span>
         </div>
         <div class="auth-feature">
-          <div class="auth-feature-icon">📊</div>
+          <div class="auth-feature-icon"><i class="fa-solid fa-chart-line"></i></div>
           <span>Theo dõi tiến độ học tập realtime</span>
         </div>
         <div class="auth-feature">
-          <div class="auth-feature-icon">🏆</div>
+          <div class="auth-feature-icon"><i class="fa-solid fa-certificate"></i></div>
           <span>Nhận chứng chỉ khi hoàn thành khoá</span>
         </div>
         <div class="auth-feature">
-          <div class="auth-feature-icon">🎯</div>
+          <div class="auth-feature-icon"><i class="fa-solid fa-bullseye"></i></div>
           <span>Lộ trình học được cá nhân hoá</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── Right: Form ────────────────────────────────────── -->
+  <!-- Right: Form -->
   <div class="auth-form-side">
     <div class="auth-form-box">
       <a href="${pageContext.request.contextPath}/"
          style="color:var(--text-muted);font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:24px;">
-        ← Về trang chủ
+        <i class="fa-solid fa-arrow-left"></i> Về trang chủ
       </a>
 
       <h2 class="auth-form-title">Đăng nhập</h2>
       <p class="auth-form-sub">Nhập thông tin tài khoản của bạn</p>
 
       <c:if test="${not empty error}">
-        <div class="alert alert-danger">⚠️ <span>${error}</span></div>
+        <div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <span>${error}</span></div>
       </c:if>
       <c:if test="${not empty successMessage}">
-        <div class="alert alert-success">✅ <span>${successMessage}</span></div>
+        <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> <span>${successMessage}</span></div>
       </c:if>
 
       <form action="${pageContext.request.contextPath}/login" method="post">
@@ -72,7 +73,7 @@
                  placeholder="Nhập mật khẩu của bạn" required>
         </div>
         <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">
-          Đăng nhập →
+          Đăng nhập <i class="fa-solid fa-arrow-right"></i>
         </button>
       </form>
 

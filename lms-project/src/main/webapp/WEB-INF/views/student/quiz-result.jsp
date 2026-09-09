@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -40,12 +40,13 @@
         .btn-retry{padding:11px 24px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;text-decoration:none;transition:opacity .2s;}
         .btn-retry:hover{opacity:.9;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/student/my-courses" class="btn btn-outline">← Khóa học của tôi</a>
         <% if (currentUser != null) { %>
@@ -82,15 +83,15 @@
         <%-- Thông tin chi tiết --%>
         <div class="result-meta">
             <div class="meta-row">
-                <span class="label">🎯 Điểm yêu cầu</span>
+                <span class="label"><i class="fa-solid fa-bullseye"></i> Điểm yêu cầu</span>
                 <span class="value">${quiz.passScore}/100</span>
             </div>
             <div class="meta-row">
-                <span class="label">📊 Điểm của bạn</span>
+                <span class="label"><i class="fa-solid fa-chart-line"></i> Điểm của bạn</span>
                 <span class="value" style="color:${attempt.passed ? '#276749' : '#9b2c2c'};font-size:16px;">${attempt.score}/100</span>
             </div>
             <div class="meta-row">
-                <span class="label">🕐 Thời gian nộp</span>
+                <span class="label"><i class="fa-regular fa-clock"></i> Thời gian nộp</span>
                 <span class="value">${attempt.submittedAt}</span>
             </div>
         </div>
@@ -98,7 +99,7 @@
         <%-- Nút hành động --%>
         <div class="result-actions">
             <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}${not empty param.lessonId ? '&lessonId=' : ''}${param.lessonId}" class="btn-back">← Về trang thông tin Quiz</a>
-            <a href="${pageContext.request.contextPath}/student/my-courses" class="btn-retry">📚 Khóa học của tôi</a>
+            <a href="${pageContext.request.contextPath}/student/my-courses" class="btn-retry"><i class="fa-solid fa-book-open"></i> Khóa học của tôi</a>
         </div>
     </div>
 </div>

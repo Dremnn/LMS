@@ -88,7 +88,7 @@
         <div class="auth-form-wrapper reveal-up reveal-delay-1">
             <div class="auth-header">
                 <a href="${pageContext.request.contextPath}/" class="lms-logo" style="justify-content: center; margin-bottom: 24px;">
-                    <span class="logo-icon">🎓</span><span class="logo-text">EduViet LMS</span>
+                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">EduViet LMS</span>
                 </a>
                 <h1>Tạo tài khoản mới</h1>
                 <p>Chỉ mất vài phút để thiết lập hồ sơ học tập của bạn.</p>
@@ -133,12 +133,12 @@
                         <label class="role-opt">
                             <input type="radio" name="role" value="student"
                                    <c:if test="${empty role || role == 'student'}">checked</c:if>>
-                            <span>🎓 Học viên</span>
+                            <span><i class="fa-solid fa-graduation-cap"></i> Học viên</span>
                         </label>
                         <label class="role-opt">
                             <input type="radio" name="role" value="instructor"
                                    <c:if test="${role == 'instructor'}">checked</c:if>>
-                            <span>👨‍🏫 Giảng viên</span>
+                            <span><i class="fa-solid fa-chalkboard-user"></i> Giảng viên</span>
                         </label>
                     </div>
                 </div>
