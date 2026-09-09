@@ -9,10 +9,7 @@ target/
 .project
 .settings/
 *.iml
-.idea/
-
-# File chứa password thật - KHÔNG BAO GIỜ commit
-src/main/resources/db.properties
+.idea/~
 
 # File rác hệ điều hành
 .DS_Store
