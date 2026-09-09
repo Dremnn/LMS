@@ -17,6 +17,16 @@ CREATE TABLE users (
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+create table events (
+  id SERIAL primary key,
+  user_id INT not null references users (id),
+  course_id INT null references courses (id),
+  title VARCHAR(255) not null,
+  event_date TIMESTAMP not null,
+  description TEXT,
+  created_at TIMESTAMP default NOW()
+);
+
 -- ============================================================
 -- 2. NHÓM KHÓA HỌC
 -- ============================================================
