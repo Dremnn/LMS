@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -39,12 +39,13 @@
         .btn-submit{padding:13px 36px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;}
         .btn-submit:hover{opacity:.9;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/student/my-courses" class="btn btn-outline">← Khóa học của tôi</a>
         <% if (currentUser != null) { %>
@@ -58,7 +59,7 @@
     <div class="hero-inner">
         <div class="quiz-title">📝 <c:out value="${quiz.title}"/></div>
         <div class="quiz-meta">
-            <span>🎯 Điểm đạt yêu cầu: <strong>${quiz.passScore}/100</strong></span>
+            <span><i class="fa-solid fa-bullseye"></i> Điểm đạt yêu cầu: <strong>${quiz.passScore}/100</strong></span>
             <span>
                 🔄 Số lần làm:
                 <c:choose>
@@ -66,7 +67,7 @@
                     <c:otherwise><strong>Không giới hạn</strong></c:otherwise>
                 </c:choose>
             </span>
-            <span>📊 Số câu hỏi: <strong>${questions.size()}</strong></span>
+            <span><i class="fa-solid fa-chart-line"></i> Số câu hỏi: <strong>${questions.size()}</strong></span>
             <c:if test="${remainingSeconds != null}">
                 <span>⏱️ Thời gian còn lại: <strong id="countdown" style="color:#fc8181;">--:--</strong></span>
             </c:if>
@@ -76,7 +77,7 @@
 
 <div class="main">
     <c:if test="${not empty error}">
-        <div class="alert-danger">⚠️ <c:out value="${error}"/></div>
+        <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <c:out value="${error}"/></div>
     </c:if>
 
     <form id="quizForm" action="${pageContext.request.contextPath}/student/quizzes/submit" method="post"
@@ -120,7 +121,7 @@
             <div class="submit-bar-info">
                 📋 Tổng <strong>${questions.size()}</strong> câu hỏi · Điểm đạt: <strong>${quiz.passScore}/100</strong>
             </div>
-            <button type="submit" class="btn-submit">🚀 Nộp bài</button>
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-rocket"></i> Nộp bài</button>
         </div>
     </form>
 </div>

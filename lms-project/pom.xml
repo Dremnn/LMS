@@ -12,8 +12,8 @@
 
 <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+    <maven.compiler.source>25</maven.compiler.source>
+    <maven.compiler.target>25</maven.compiler.target>
 </properties>
 
   <dependencies>
@@ -37,7 +37,7 @@
     <dependency>
         <groupId>com.microsoft.sqlserver</groupId>
         <artifactId>mssql-jdbc</artifactId>
-        <version>12.8.1.jre11</version>
+        <version>12.8.2.jre11</version>
     </dependency>
 
     <!-- jBCrypt - mã hóa password -->
@@ -57,7 +57,7 @@
     <dependency>
     <groupId>org.postgresql</groupId>
     <artifactId>postgresql</artifactId>
-    <version>42.7.6</version>
+    <version>42.7.12</version>
     </dependency>
 
     <!-- HikariCP - Connection Pool, bắt buộc khi dùng DB cloud để tránh mở kết nối mới liên tục -->
@@ -71,6 +71,12 @@
         <groupId>jakarta.servlet.jsp.jstl</groupId>
         <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
         <version>3.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.12</version>
     </dependency>
 
   </dependencies>
@@ -89,11 +95,11 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.11.0</version>
+          <version>3.14.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.1</version>
+          <version>3.5.3</version>
         </plugin>
         <plugin>
           <artifactId>maven-war-plugin</artifactId>

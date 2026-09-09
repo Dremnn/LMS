@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -38,12 +38,13 @@
         .btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,161,105,.3);}
         .btn-start.disabled{background:#cbd5e0;color:#718096;pointer-events:none;box-shadow:none;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn btn-outline">← Chi tiết khóa học</a>
         <% if (currentUser != null) { %>
@@ -63,7 +64,7 @@
         <div class="intro-body">
             <div class="info-grid">
                 <div class="info-box">
-                    <div class="info-label">🎯 Điểm đạt yêu cầu</div>
+                    <div class="info-label"><i class="fa-solid fa-bullseye"></i> Điểm đạt yêu cầu</div>
                     <div class="info-value highlight">${quiz.passScore} / 100</div>
                 </div>
                 <div class="info-box">
@@ -125,12 +126,12 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="status-icon">📊</div>
+                        <div class="status-icon"><i class="fa-solid fa-chart-line"></i></div>
                         <div class="status-text">
                             <strong>Đã làm bài (${attemptsUsed} lần).</strong><br>
                             Điểm cao nhất của bạn hiện tại là: <strong style="font-size:16px;">${highestScore != null ? highestScore : 0}</strong> / 100.
                             <c:if test="${highestScore >= quiz.passScore}">
-                                <span style="color:#276749;font-weight:bold;"> (Đã Đạt ✅)</span>
+                                <span style="color:#276749;font-weight:bold;"> (Đã Đạt <i class="fa-solid fa-circle-check"></i>)</span>
                             </c:if>
                         </div>
                     </c:otherwise>
@@ -143,11 +144,11 @@
                         <a href="#" class="btn-start disabled">🚫 Quiz không khả dụng lúc này</a>
                     </c:when>
                     <c:when test="${quiz.maxAttempts != null && attemptsUsed >= quiz.maxAttempts}">
-                        <a href="#" class="btn-start disabled">❌ Đã hết lượt làm bài</a>
+                        <a href="#" class="btn-start disabled"><i class="fa-solid fa-xmark"></i> Đã hết lượt làm bài</a>
                     </c:when>
                     <c:otherwise>
                         <a href="${pageContext.request.contextPath}/student/quizzes/attempt?id=${quiz.id}${not empty param.lessonId ? '&lessonId=' : ''}${param.lessonId}" class="btn-start">
-                            ${attemptsUsed == 0 ? '🚀 Bắt đầu làm bài' : '🔄 Làm lại Quiz'}
+                            ${attemptsUsed == 0 ? '<i class="fa-solid fa-rocket"></i> Bắt đầu làm bài' : '🔄 Làm lại Quiz'}
                         </a>
                     </c:otherwise>
                 </c:choose>

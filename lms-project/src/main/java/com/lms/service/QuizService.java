@@ -5,6 +5,7 @@ import com.lms.model.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class QuizService {
@@ -377,5 +378,78 @@ public class QuizService {
             throw new IllegalArgumentException("Quiz không tồn tại!");
         }
         return quiz;
+    }
+
+
+    public List<Quiz> getUpcomingQuizzesForStudent(int studentId, String dueFilter, String sortBy, Integer courseIdFilter) {
+
+        List<Enrollment> enrolledCourse = new com.lms.dao.EnrollmentDAO().findByStudent(studentId);
+        List<Integer> enrolledCourseIds = enrolledCourse.stream().map(Enrollment::getCourseId).toList();
+        
+        List<Quiz> result = new ArrayList<>();
+        SectionDAO sectionDAO = new SectionDAO();
+
+        for (Integer courseId : enrolledCourseIds) {
+            if (courseIdFilter != null && !courseIdFilter.equals(courseId)) {
+                continue; // Lọc theo môn học nếu có chọn cụ thể
+            }
+
+            // Quiz gắn trực tiếp vào Course
+            result.addAll(quizDAO.findByCourseId(courseId));
+
+            // Quiz gắn vào từng Section của Course đó
+            for (Section sec : sectionDAO.findByCourseId(courseId)) {
+                result.addAll(quizDAO.findBySectionId(sec.getId()));
+            }
+        }
+
+        // Chỉ giữ quiz có deadline
+        result.removeIf(q -> q.getCloseAt() == null);
+
+        // Lọc theo khoảng thời gian còn hạn
+        LocalDateTime now = LocalDateTime.now();
+        if ("overdue".equals(dueFilter)) {
+            result.removeIf(q -> !q.getCloseAt().isBefore(now));
+        } else if (dueFilter != null && !dueFilter.equals("all")) {
+            int days = Integer.parseInt(dueFilter); // "7", "30", "90", "180"
+            LocalDateTime threshold = now.plusDays(days);
+            result.removeIf(q -> q.getCloseAt().isBefore(now) || q.getCloseAt().isAfter(threshold));
+        }
+
+        // Sắp xếp
+        if ("courses".equals(sortBy)) {
+            result.sort((a, b) -> Integer.compare(
+                    a.getCourseId() != null ? a.getCourseId() : 0,
+                    b.getCourseId() != null ? b.getCourseId() : 0));
+        } else {
+            result.sort((a, b) -> a.getCloseAt().compareTo(b.getCloseAt())); // mặc định theo ngày
+        }
+
+        return result;
+    }
+
+    public List<Quiz> getQuizzesByCloseAtMonth(int year, int month) {
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("Tháng không hợp lệ!");
+        }
+        return quizDAO.findByCloseAtMonth(year, month);
+    }
+
+    public String getDeadlineUrgency(Quiz quiz) {
+        if (quiz.getCloseAt() == null) {
+            return "none";
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime closeAt = quiz.getCloseAt();
+
+        if (now.isAfter(closeAt)) {
+            return "expired";
+        }
+
+        long minutesLeft = java.time.temporal.ChronoUnit.MINUTES.between(now, closeAt);
+        long hoursLeft = minutesLeft / 60;
+
+        return hoursLeft <= 72 ? "urgent" : "upcoming";
     }
 }

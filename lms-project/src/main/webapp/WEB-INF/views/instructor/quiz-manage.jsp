@@ -62,12 +62,13 @@
         .btn-submit{padding:11px 28px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;}
         .btn-submit:hover{opacity:.9;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">← Khóa học</a>
         <% if (currentUser != null) { %>
@@ -81,19 +82,19 @@
     <div class="page-header">
         <div class="page-title">📝 <c:out value="${quiz.title}"/></div>
         <div class="page-meta">
-            <span>🎯 Điểm đạt: <strong>${quiz.passScore}/100</strong></span>
+            <span><i class="fa-solid fa-bullseye"></i> Điểm đạt: <strong>${quiz.passScore}/100</strong></span>
             <span>🔄 Số lần làm:
                 <c:choose>
                     <c:when test="${quiz.maxAttempts != null}"><strong>${quiz.maxAttempts}</strong></c:when>
                     <c:otherwise><strong>Không giới hạn</strong></c:otherwise>
                 </c:choose>
             </span>
-            <span>📊 Số câu hỏi: <strong>${quiz.totalQuestions}</strong></span>
+            <span><i class="fa-solid fa-chart-line"></i> Số câu hỏi: <strong>${quiz.totalQuestions}</strong></span>
         </div>
     </div>
 
     <c:if test="${not empty error}">
-        <div class="alert-danger">⚠️ <c:out value="${error}"/></div>
+        <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <c:out value="${error}"/></div>
     </c:if>
 
     <%-- ===== DANH SÁCH CÂU HỎI ===== --%>
@@ -143,7 +144,7 @@
         </c:when>
         <c:otherwise>
             <div class="empty-questions">
-                <div style="font-size:40px;margin-bottom:10px;">📭</div>
+                <div style="font-size:40px;margin-bottom:10px;"><i class="fa-solid fa-inbox"></i></div>
                 <p>Quiz chưa có câu hỏi nào. Thêm câu hỏi đầu tiên bên dưới!</p>
             </div>
         </c:otherwise>

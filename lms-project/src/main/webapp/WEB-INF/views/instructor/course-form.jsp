@@ -42,10 +42,11 @@
         .back-link:hover{color:#fff;}
         .divider{border:none;border-top:1px solid #f0f4f8;margin:24px 0;}
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo">🎓 LMS System</a>
+    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
     <div class="nav-links">
         <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">← Danh sách khóa học</a>
         <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
@@ -71,7 +72,7 @@
 <div class="main">
     <div class="card">
         <c:if test="${not empty error}">
-            <div class="alert-danger">⚠️ ${error}</div>
+            <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> ${error}</div>
         </c:if>
 
         <c:choose>
@@ -121,7 +122,7 @@
 
             <button type="submit" class="btn-submit">
                 <c:choose>
-                    <c:when test="${empty course}">🚀 Tạo khóa học</c:when>
+                    <c:when test="${empty course}"><i class="fa-solid fa-rocket"></i> Tạo khóa học</c:when>
                     <c:otherwise>💾 Cập nhật khóa học</c:otherwise>
                 </c:choose>
             </button>
