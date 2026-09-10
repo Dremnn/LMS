@@ -33,7 +33,8 @@
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f6fa; }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f5f6fa; }
+        .dashboard-container { max-width: 1200px; margin: 24px auto 40px; padding: 0 24px; }
         .panel { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         .panel h2 { margin-top: 0; }
 
@@ -73,9 +74,6 @@
         .badge.none     { background: #6b7280; }
         .badge.event    { background: #7c3aed; }
 
-        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
-        .btn-primary { background: #2563eb; color: #fff; }
-
         .modal-overlay {
             display: none; position: fixed; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 1000;
@@ -99,19 +97,22 @@
             <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
         </a>
         <div class="nav-links">
-            <a href="<%=request.getContextPath()%>/courses" class="nav-link active">Khóa học</a>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
+                <% if ("student".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link active">Bảng điều khiển</a>
+                <% } %>
                 <div class="user-badge">
-                    <div class="user-avatar"><%=currentUser.getFullName().substring(0,1).toUpperCase()%></div>
+                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
                     <span><%=currentUser.getFullName()%></span>
                     <span class="role-tag"><%=role%></span>
                 </div>
-                <% if ("student".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
-                <% } else if ("instructor".equals(role)) { %>
+                <% if ("instructor".equals(role)) { %>
                     <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
                 <% } else if ("admin".equals(role)) { %>
                     <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+                <% } else { %>
+                    <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
                 <% } %>
                 <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
             <% } else { %>
@@ -121,6 +122,7 @@
         </div>
     </nav>
 
+    <div class="dashboard-container">
     <% if (request.getAttribute("error") != null) { %>
         <div class="panel" style="background:#fef2f2; color:#991b1b;"><%= request.getAttribute("error") %></div>
     <% } %>
@@ -215,6 +217,7 @@
             <% } %>
         </div>
     </div>
+    </div> <!-- /dashboard-container -->
 
     <!-- ================= MODAL: TẠO SỰ KIỆN MỚI ================= -->
     <div class="modal-overlay" id="eventModal">

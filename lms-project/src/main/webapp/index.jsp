@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -113,18 +113,19 @@
 <!-- Navbar -->
 <nav class="lms-navbar">
     <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <span class="logo-icon">🎓</span>
+        <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
         <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         
         <% if (currentUser != null) { %>
-            <!-- ĐÂY LÀ ĐOẠN CODE MỚI ĐƯỢC THÊM VÀO -->
-            <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            <% } %>
             
             <div class="user-badge">
-                <div class="user-avatar"><%=currentUser.getFullName().substring(0,1).toUpperCase()%></div>
+                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
                 <span><%=currentUser.getFullName()%></span>
                 <span class="role-tag"><%=role%></span>
             </div>
@@ -133,7 +134,6 @@
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
             <% } else { %>
-                <!-- Bạn cũng có thể đổi chữ "Của tôi" ở dưới đây thành "Bảng điều khiển" nếu muốn thay thế hoàn toàn -->
                 <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>

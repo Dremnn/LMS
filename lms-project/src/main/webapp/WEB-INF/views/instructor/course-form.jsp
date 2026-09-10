@@ -1,4 +1,5 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -12,17 +13,10 @@
         </c:choose>
         - LMS Instructor
     </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;}
-        body{background:#f0f4f8;color:#2d3748;}
-        .navbar{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:14px 40px;display:flex;justify-content:space-between;align-items:center;}
-        .navbar .logo{font-size:20px;font-weight:800;color:#667eea;text-decoration:none;}
-        .nav-links{display:flex;align-items:center;gap:12px;}
-        .btn{padding:8px 18px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:all .2s;display:inline-block;}
-        .btn-outline{border:1.5px solid #667eea;color:#667eea;background:transparent;}
-        .btn-outline:hover{background:#667eea;color:#fff;}
-        .btn-danger{background:#fc8181;color:#742a2a;}
-        .btn-danger:hover{background:#f56565;color:#fff;}
         .page-header{padding:36px 40px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
         .page-header h1{font-size:26px;font-weight:800;}
         .page-header p{opacity:.85;font-size:14px;margin-top:6px;}
@@ -42,14 +36,43 @@
         .back-link:hover{color:#fff;}
         .divider{border:none;border-top:1px solid #f0f4f8;margin:24px 0;}
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
+<body class="mesh-bg">
+<% 
+    User currentUser = (User) session.getAttribute("currentUser"); 
+    String role = currentUser != null ? currentUser.getRole() : "";
+%>
+
+<!-- NAVBAR -->
+<nav class="lms-navbar">
+    <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+    </a>
     <div class="nav-links">
-        <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">← Danh sách khóa học</a>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
+        <a href="<%=request.getContextPath()%>/instructor/courses" class="nav-link">← Danh sách khóa học</a>
+        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+        <% if (currentUser != null) { %>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            <% } %>
+            <div class="user-badge">
+                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <span><%=currentUser.getFullName()%></span>
+                <span class="role-tag"><%=role%></span>
+            </div>
+            <% if ("instructor".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <% } else if ("admin".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+            <% } else { %>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+            <% } %>
+            <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+        <% } else { %>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
+        <% } %>
     </div>
 </nav>
 

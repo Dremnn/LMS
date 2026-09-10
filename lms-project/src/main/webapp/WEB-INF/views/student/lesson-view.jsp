@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -7,25 +7,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${currentLesson.title} - LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;}
         body{background:#1a202c;color:#e2e8f0;min-height:100vh;}
 
-        /* ---- NAVBAR ---- */
-        .navbar{background:#2d3748;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.3);position:sticky;top:0;z-index:200;}
-        .navbar .logo{font-size:18px;font-weight:800;color:#a78bfa;text-decoration:none;}
-        .nav-right{display:flex;align-items:center;gap:12px;}
-        .btn{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:all .2s;display:inline-block;}
-        .btn-ghost{background:transparent;color:#a0aec0;border:1px solid #4a5568;}
-        .btn-ghost:hover{background:#4a5568;color:#fff;}
-        .btn-danger{background:#9b2c2c;color:#fff;}
-        .btn-danger:hover{background:#c53030;}
         .btn-success{background:#276749;color:#fff;padding:9px 20px;font-size:14px;font-weight:700;}
         .btn-success:hover{background:#22543d;}
-        .badge-role{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;background:#553c9a;color:#e9d8fd;text-transform:uppercase;margin-left:6px;}
 
         /* ---- LAYOUT 2 CỘT ---- */
-        .layout{display:flex;min-height:calc(100vh - 52px);}
+        .layout{display:flex;min-height:calc(100vh - 64px);}
 
         /* ---- SIDEBAR ---- */
         .sidebar{width:300px;flex-shrink:0;background:#2d3748;overflow-y:auto;border-right:1px solid #4a5568;display:flex;flex-direction:column;}
@@ -64,20 +57,42 @@
         .btn-nav{padding:9px 18px;background:#3d4f6e;color:#cbd5e0;border:1px solid #4a5568;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;}
         .btn-nav:hover{background:#4a5568;color:#fff;}
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-<% User currentUser = (User) session.getAttribute("currentUser"); %>
+<% 
+    User currentUser = (User) session.getAttribute("currentUser"); 
+    String role = currentUser != null ? currentUser.getRole() : "";
+%>
 
-<nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
-    <div class="nav-right">
-        <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn btn-ghost">← Chi tiết khóa học</a>
+<!-- NAVBAR -->
+<nav class="lms-navbar">
+    <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+    </a>
+    <div class="nav-links">
+        <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link">← Chi tiết khóa học</a>
+        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
-            <span style="font-size:13px;color:#a0aec0;font-weight:600;">
-                <%= currentUser.getFullName() %><span class="badge-role">student</span>
-            </span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            <% } %>
+            <div class="user-badge">
+                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <span><%=currentUser.getFullName()%></span>
+                <span class="role-tag"><%=role%></span>
+            </div>
+            <% if ("instructor".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <% } else if ("admin".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+            <% } else { %>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+            <% } %>
+            <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+        <% } else { %>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
     </div>
 </nav>
