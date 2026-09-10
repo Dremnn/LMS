@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khám phá khóa học - EduViet LMS</title>
+    <title>Khám phá khóa học - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
@@ -21,7 +21,7 @@
 <nav class="lms-navbar">
     <a href="<%=request.getContextPath()%>/" class="lms-logo">
         <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+        <span class="logo-text">UTEdu <span class="logo-tag">LMS</span></span>
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link active">Khóa học</a>
@@ -161,7 +161,7 @@
         <div class="footer-grid" style="align-items: flex-start;">
             <div class="footer-col brand-col">
                 <a href="<%=request.getContextPath()%>/" class="lms-logo footer-logo" style="margin-bottom: 16px;">
-                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">EduViet LMS</span>
+                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">UTEdu LMS</span>
                 </a>
                 <p class="footer-desc">Nền tảng học trực tuyến hàng đầu Việt Nam.</p>
             </div>
@@ -181,7 +181,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 EduViet LMS</p>
+            <p>&copy; 2026 UTEdu LMS</p>
         </div>
     </div>
 </footer>

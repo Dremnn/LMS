@@ -39,7 +39,7 @@
 <nav class="lms-navbar">
     <a href="<%=request.getContextPath()%>/" class="lms-logo">
         <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+        <span class="logo-text">UTEdu <span class="logo-tag">LMS</span></span>
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link">← Chi tiết khóa học</a>

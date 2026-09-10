@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduViet LMS - Nền tảng học trực tuyến</title>
+    <title>UTEdu LMS - Nền tảng học trực tuyến</title>
 
     <!-- Preconnect để trình duyệt kết nối sớm tới các CDN, giảm độ trễ tải -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -114,7 +114,7 @@
 <nav class="lms-navbar">
     <a href="<%=request.getContextPath()%>/" class="lms-logo">
         <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+        <span class="logo-text">UTEdu <span class="logo-tag">LMS</span></span>
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
@@ -197,7 +197,7 @@
 <!-- Features -->
 <section class="features-section">
     <div class="container">
-        <h2 class="section-title">Vì sao chọn EduViet LMS?</h2>
+        <h2 class="section-title">Vì sao chọn UTEdu LMS?</h2>
         <p class="section-subtitle">Chúng tôi mang đến trải nghiệm học thuật chuyên nghiệp kết hợp sự sáng tạo, chuẩn giáo dục Việt Nam.</p>
 
         <div class="features-grid">
@@ -249,7 +249,7 @@
         <div class="footer-grid" style="align-items: flex-start;">
             <div class="footer-col brand-col">
                 <a href="<%=request.getContextPath()%>/" class="lms-logo footer-logo" style="margin-bottom: 16px;">
-                    <span class="logo-icon">🎓</span><span class="logo-text">EduViet LMS</span>
+                    <span class="logo-icon">🎓</span><span class="logo-text">UTEdu LMS</span>
                 </a>
                 <p class="footer-desc">Nền tảng học trực tuyến. Nâng tầm tri thức, kiến tạo tương lai thế hệ trẻ.</p>
                 <div class="social-links">
@@ -275,12 +275,12 @@
                 <ul class="footer-contact">
                     <li><i class="fa-solid fa-location-dot"></i> Tầng 15, Tòa nhà công nghệ, Thành phố Hồ Chí Minh</li>
                     <li><i class="fa-solid fa-phone"></i> 1900 1036</li>
-                    <li><i class="fa-solid fa-envelope"></i> hotro@eduviet.vn</li>
+                    <li><i class="fa-solid fa-envelope"></i> hotro@utedu.vn</li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 EduViet LMS. Đã đăng ký bản quyền.</p>
+            <p>&copy; 2026 UTEdu LMS. Đã đăng ký bản quyền.</p>
             <div class="footer-bottom-links">
                 <a href="#">Bảo mật</a>
                 <a href="#">Điều khoản</a>

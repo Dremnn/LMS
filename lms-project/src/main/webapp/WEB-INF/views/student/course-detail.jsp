@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${course.title} - EduViet LMS</title>
+    <title>${course.title} - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
@@ -56,7 +56,7 @@
 <nav class="lms-navbar">
     <a href="<%=request.getContextPath()%>/" class="lms-logo">
         <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+        <span class="logo-text">UTEdu <span class="logo-tag">LMS</span></span>
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
@@ -161,7 +161,7 @@
                     <img src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>">
                 </c:when>
                 <c:otherwise>
-                    <img src="https://via.placeholder.com/420x260/6366F1/ffffff?text=EduViet+Course" alt="Course Thumbnail">
+                    <img src="https://via.placeholder.com/420x260/6366F1/ffffff?text=UTEdu+Course" alt="Course Thumbnail">
                 </c:otherwise>
             </c:choose>
         </div>
