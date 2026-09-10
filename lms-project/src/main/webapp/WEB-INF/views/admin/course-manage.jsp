@@ -7,11 +7,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Duyệt khóa học - Admin LMS</title>
+
+    <!-- Font Awesome (trang này dùng icon fa-solid trong nội dung, cần import để hiển thị đúng) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Dùng chung CSS thiết kế với index.jsp để navbar đồng bộ -->
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=15">
+
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;}
         body{background:#f0f4f8;color:#2d3748;}
 
-        /* NAVBAR */
+        /* NAVBAR (cũ - không còn dùng, giữ lại không ảnh hưởng gì) */
         .navbar{background:#1a202c;padding:13px 36px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.3);}
         .navbar .logo{font-size:19px;font-weight:800;color:#a78bfa;text-decoration:none;}
         .nav-links{display:flex;align-items:center;gap:12px;}
@@ -71,21 +78,42 @@
     </style>
 </head>
 <body>
-<% User currentUser = (User) session.getAttribute("currentUser"); %>
+<%
+    User currentUser = (User) session.getAttribute("currentUser");
+    String role = currentUser != null ? currentUser.getRole() : "";
+%>
 
-<nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> LMS Admin</a>
+<!-- NAVBAR -->
+<nav class="lms-navbar">
+    <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+    </a>
     <div class="nav-links">
+        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
-            <span class="user-info"><%= currentUser.getFullName() %><span class="badge-admin">admin</span></span>
+            <div class="user-badge">
+                <div class="user-avatar"><%=currentUser.getFullName().substring(0,1).toUpperCase()%></div>
+                <span><%=currentUser.getFullName()%></span>
+                <span class="role-tag"><%=role%></span>
+            </div>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+            <% } else if ("instructor".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <% } else if ("admin".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+            <% } %>
+            <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+        <% } else { %>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-logout">Đăng xuất</a>
     </div>
 </nav>
 
 <div class="page-header">
     <h1><i class="fa-solid fa-folder-open"></i> Quản lý khóa học (Admin)</h1>
-    <p>Xem toàn bộ khóa học trên hệ thống và quản lý (xóa) khi cần thiết</p>
 </div>
 
 <div class="main">

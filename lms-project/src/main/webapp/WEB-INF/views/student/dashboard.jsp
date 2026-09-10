@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.time.LocalDate, java.util.*, com.lms.model.Quiz, com.lms.model.Event, com.lms.model.Course" %>
+<%@ page import="java.time.LocalDate, java.util.*, com.lms.model.Quiz, com.lms.model.Event, com.lms.model.Course, com.lms.model.User" %>
 <%
     int year = (Integer) request.getAttribute("year");
     int month = (Integer) request.getAttribute("month");
@@ -11,6 +11,8 @@
     String dueFilter = (String) request.getAttribute("dueFilter");
     String sortBy = (String) request.getAttribute("sortBy");
     List<Course> myCourses = (List<Course>) request.getAttribute("myCourses");
+    User currentUser = (User) session.getAttribute("currentUser");
+    String role = currentUser != null ? currentUser.getRole() : "";
 
     LocalDate firstDay = LocalDate.of(year, month, 1);
     int daysInMonth = firstDay.lengthOfMonth();
@@ -25,7 +27,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Điều Khiển - LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background: #f5f6fa; }
         .panel { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
@@ -85,7 +91,35 @@
         .btn-secondary { background: #e5e7eb; color: #333; }
     </style>
 </head>
-<body>
+<body class="mesh-bg">
+    <!-- NAVBAR -->
+    <nav class="lms-navbar">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+            <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+            <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+        </a>
+        <div class="nav-links">
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link active">Khóa học</a>
+            <% if (currentUser != null) { %>
+                <div class="user-badge">
+                    <div class="user-avatar"><%=currentUser.getFullName().substring(0,1).toUpperCase()%></div>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                </div>
+                <% if ("student".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+                <% } else if ("instructor".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+                <% } else if ("admin".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+                <% } %>
+                <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+            <% } else { %>
+                <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+                <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
+            <% } %>
+        </div>
+    </nav>
 
     <% if (request.getAttribute("error") != null) { %>
         <div class="panel" style="background:#fef2f2; color:#991b1b;"><%= request.getAttribute("error") %></div>
@@ -208,6 +242,7 @@
 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Huỷ</button>
+                    <button type="button" class="btn btn-danger" style="background:#ef4444;color:#fff;">Xoá</button>
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -225,6 +260,7 @@
             document.getElementById('eventModal').classList.remove('show');
         }
     </script>
+    <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
 
 </body>
 </html>
