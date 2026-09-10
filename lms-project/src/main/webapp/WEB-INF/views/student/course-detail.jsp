@@ -14,7 +14,11 @@
         .hero-section{background:rgba(255,255,255,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,0.8);padding:50px 40px 60px;}
         .hero-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:start;}
         .hero-info h1{font-size:34px;font-weight:800;line-height:1.25;margin-bottom:16px;color:#0F172A;}
-        .hero-info .desc{font-size:15px;color:#475569;line-height:1.7;margin-bottom:24px;max-height:90px;overflow:hidden;}
+        .hero-info .desc{font-size:15px;color:#475569;line-height:1.7;margin-bottom:24px;max-height:120px;overflow-y:auto;padding-right:8px;}
+        .hero-info .desc::-webkit-scrollbar{width:5px;}
+        .hero-info .desc::-webkit-scrollbar-track{background:#F1F5F9;border-radius:4px;}
+        .hero-info .desc::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px;}
+        .hero-info .desc::-webkit-scrollbar-thumb:hover{background:#94A3B8;}
         .hero-meta{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin-bottom:28px;}
         .hero-meta span{display:inline-flex;align-items:center;gap:6px;background:#F1F5F9;color:#475569;padding:6px 14px;border-radius:30px;font-weight:600;}
         .hero-meta span.instructor-tag{background:#EEF2FF;color:#4F46E5;}
