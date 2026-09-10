@@ -63,6 +63,11 @@ public class CourseService {
     // =========================================================================
     public Course createCourse(int instructorId, String title, String description,
                                 Integer categoryId, BigDecimal price) {
+        return createCourse(instructorId, title, description, categoryId, price, null);
+    }
+
+    public Course createCourse(int instructorId, String title, String description,
+                                Integer categoryId, BigDecimal price, String thumbnailUrl) {
 
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Tên khóa học không được để trống!");
@@ -76,7 +81,8 @@ public class CourseService {
 
         Course course = new Course(instructorId, categoryId, title.trim(),
                 description != null ? description.trim() : null,
-                price != null ? price : BigDecimal.ZERO);
+                price != null ? price : BigDecimal.ZERO,
+                thumbnailUrl != null && !thumbnailUrl.trim().isEmpty() ? thumbnailUrl.trim() : null);
 
         boolean saved = courseDAO.save(course);
         if (!saved) {
@@ -90,6 +96,11 @@ public class CourseService {
     // =========================================================================
     public void updateCourse(int courseId, int currentInstructorId, String title,
                               String description, Integer categoryId, BigDecimal price) {
+        updateCourse(courseId, currentInstructorId, title, description, categoryId, price, null);
+    }
+
+    public void updateCourse(int courseId, int currentInstructorId, String title,
+                              String description, Integer categoryId, BigDecimal price, String thumbnailUrl) {
 
         Course course = getCourseAndVerifyOwnership(courseId, currentInstructorId);
 
@@ -106,6 +117,7 @@ public class CourseService {
         course.setDescription(description != null ? description.trim() : null);
         course.setCategoryId(categoryId);
         course.setPrice(price != null ? price : BigDecimal.ZERO);
+        course.setThumbnailUrl(thumbnailUrl != null && !thumbnailUrl.trim().isEmpty() ? thumbnailUrl.trim() : null);
 
         boolean updated = courseDAO.update(course);
         if (!updated) {

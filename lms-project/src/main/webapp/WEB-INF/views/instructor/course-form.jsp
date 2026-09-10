@@ -141,6 +141,26 @@
                 <p class="form-hint">Nhập 0 nếu muốn khóa học miễn phí.</p>
             </div>
 
+            <div class="form-group">
+                <label for="thumbnailUrl"><i class="fa-solid fa-image" style="color:#4F46E5;"></i> Ảnh thu nhỏ khóa học (Thumbnail URL)</label>
+                <input type="text" id="thumbnailUrl" name="thumbnailUrl" class="form-control"
+                       placeholder="https://images.unsplash.com/... hoặc đường dẫn ảnh..."
+                       value="<c:out value='${course.thumbnailUrl}' default=''/>"
+                       oninput="previewThumbnail(this.value)">
+                <p class="form-hint">Dán link hình ảnh minh họa cho khóa học (khuyến nghị tỷ lệ 16:9). Xem trước hiển thị bên dưới:</p>
+                
+                <div id="thumbnailPreviewContainer" style="margin-top:12px; max-width:380px; border-radius:12px; overflow:hidden; border:1.5px dashed #CBD5E1; background:#F8FAFC; padding:10px; text-align:center;">
+                    <img id="thumbnailPreviewImg" src="${not empty course.thumbnailUrl ? course.thumbnailUrl : ''}" 
+                         alt="Thumbnail Preview" 
+                         style="max-width:100%; height:180px; width:100%; object-fit:cover; border-radius:8px; display:${not empty course.thumbnailUrl ? 'block' : 'none'};"
+                         onerror="handleImageError()">
+                    <div id="thumbnailPlaceholder" style="padding:28px 12px; color:#94A3B8; font-size:13px; display:${not empty course.thumbnailUrl ? 'none' : 'block'};">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px; margin-bottom:8px; display:block; color:#CBD5E1;"></i>
+                        <span>Chưa có ảnh thu nhỏ. Nhập URL ở trên để xem trước.</span>
+                    </div>
+                </div>
+            </div>
+
             <hr class="divider">
 
             <button type="submit" class="btn-submit">
@@ -152,5 +172,30 @@
         </form>
     </div>
 </div>
+
+<script>
+function previewThumbnail(url) {
+    var img = document.getElementById('thumbnailPreviewImg');
+    var placeholder = document.getElementById('thumbnailPlaceholder');
+    url = url ? url.trim() : '';
+    if (url) {
+        img.src = url;
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        img.style.display = 'none';
+        img.src = '';
+        placeholder.style.display = 'block';
+        placeholder.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" style="font-size:32px; margin-bottom:8px; display:block; color:#CBD5E1;"></i><span>Chưa có ảnh thu nhỏ. Nhập URL ở trên để xem trước.</span>';
+    }
+}
+function handleImageError() {
+    var img = document.getElementById('thumbnailPreviewImg');
+    var placeholder = document.getElementById('thumbnailPlaceholder');
+    img.style.display = 'none';
+    placeholder.style.display = 'block';
+    placeholder.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:28px; color:#EF4444; margin-bottom:8px; display:block;"></i><span style="color:#EF4444; font-weight:600;">Link ảnh không tải được hoặc không đúng định dạng</span>';
+}
+</script>
 </body>
 </html>

@@ -177,13 +177,14 @@ public class InstructorCourseServlet extends HttpServlet {
         String description = request.getParameter("description");
         String categoryIdStr = request.getParameter("categoryId");
         String priceStr = request.getParameter("price");
+        String thumbnailUrl = request.getParameter("thumbnailUrl");
 
         Integer categoryId = (categoryIdStr != null && !categoryIdStr.isEmpty())
                 ? Integer.parseInt(categoryIdStr) : null;
         BigDecimal price = (priceStr != null && !priceStr.isEmpty())
                 ? new BigDecimal(priceStr) : BigDecimal.ZERO;
 
-        courseService.createCourse(currentUser.getId(), title, description, categoryId, price);
+        courseService.createCourse(currentUser.getId(), title, description, categoryId, price, thumbnailUrl);
     }
 
     private void handleUpdate(HttpServletRequest request, User currentUser) {
@@ -192,13 +193,14 @@ public class InstructorCourseServlet extends HttpServlet {
         String description = request.getParameter("description");
         String categoryIdStr = request.getParameter("categoryId");
         String priceStr = request.getParameter("price");
+        String thumbnailUrl = request.getParameter("thumbnailUrl");
 
         Integer categoryId = (categoryIdStr != null && !categoryIdStr.isEmpty())
                 ? Integer.parseInt(categoryIdStr) : null;
         BigDecimal price = (priceStr != null && !priceStr.isEmpty())
                 ? new BigDecimal(priceStr) : BigDecimal.ZERO;
 
-        courseService.updateCourse(courseId, currentUser.getId(), title, description, categoryId, price);
+        courseService.updateCourse(courseId, currentUser.getId(), title, description, categoryId, price, thumbnailUrl);
     }
 
     private void handleSubmit(HttpServletRequest request, User currentUser) {

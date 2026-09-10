@@ -98,10 +98,11 @@
                         <div class="course-img-wrap">
                             <c:choose>
                                 <c:when test="${not empty course.thumbnailUrl}">
-                                    <img class="course-card-img" src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>">
+                                    <img class="course-card-img" src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>"
+                                         onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/images/default-course.svg';">
                                 </c:when>
                                 <c:otherwise>
-                                    <div class="course-img-placeholder"></div>
+                                    <img class="course-card-img" src="${pageContext.request.contextPath}/assets/images/default-course.svg" alt="Default Thumbnail">
                                 </c:otherwise>
                             </c:choose>
                             <c:if test="${not empty course.categoryName}">

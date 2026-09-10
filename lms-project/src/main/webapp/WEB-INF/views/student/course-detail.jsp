@@ -158,10 +158,11 @@
         <div class="hero-img">
             <c:choose>
                 <c:when test="${not empty course.thumbnailUrl}">
-                    <img src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>">
+                    <img src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>"
+                         onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/images/default-course.svg';">
                 </c:when>
                 <c:otherwise>
-                    <img src="https://via.placeholder.com/420x260/6366F1/ffffff?text=UTEdu+Course" alt="Course Thumbnail">
+                    <img src="${pageContext.request.contextPath}/assets/images/default-course.svg" alt="Course Thumbnail">
                 </c:otherwise>
             </c:choose>
         </div>

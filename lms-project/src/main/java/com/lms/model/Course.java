@@ -33,11 +33,16 @@ public class Course implements Serializable {
 
     // Constructor dùng khi Instructor tạo khóa học mới
     public Course(int instructorId, Integer categoryId, String title, String description, BigDecimal price) {
+        this(instructorId, categoryId, title, description, price, null);
+    }
+
+    public Course(int instructorId, Integer categoryId, String title, String description, BigDecimal price, String thumbnailUrl) {
         this.instructorId = instructorId;
         this.categoryId = categoryId;
         this.title = title;
         this.description = description;
         this.price = price;
+        this.thumbnailUrl = thumbnailUrl;
         this.status = "draft";
     }
 

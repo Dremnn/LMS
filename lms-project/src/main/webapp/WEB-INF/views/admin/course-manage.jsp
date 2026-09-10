@@ -124,9 +124,13 @@
                 <div class="course-card">
 
                     <div class="card-header">
-                        <div class="card-header-left">
-                            <div class="course-title"><c:out value="${course.title}"/></div>
-                            <div class="course-meta">
+                        <div class="card-header-left" style="display:flex;gap:14px;align-items:center;">
+                            <c:if test="${not empty course.thumbnailUrl}">
+                                <img src="${course.thumbnailUrl}" alt="Thumb" style="width:64px;height:44px;object-fit:cover;border-radius:8px;border:1px solid #E2E8F0;flex-shrink:0;" onerror="this.style.display='none'">
+                            </c:if>
+                            <div>
+                                <div class="course-title"><c:out value="${course.title}"/></div>
+                                <div class="course-meta">
                                 <span><i class="fa-solid fa-chalkboard-user"></i> <c:out value="${course.instructorName}"/></span>
                                 <c:if test="${not empty course.categoryName}">
                                     <span><i class="fa-solid fa-folder-open"></i> <c:out value="${course.categoryName}"/></span>

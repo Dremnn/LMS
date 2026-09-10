@@ -113,16 +113,32 @@
                     <c:forEach var="course" items="${courses}">
                         <tr>
                             <td>
-                                <div class="course-name"><c:out value="${course.title}"/></div>
-                                <c:if test="${course.status == 'rejected' && not empty course.rejectReason}">
-                                    <div class="reject-reason">⚠ Lý do từ chối: <c:out value="${course.rejectReason}"/></div>
-                                </c:if>
-                                <c:if test="${course.status == 'warning' && not empty course.rejectReason}">
-                                    <div class="reject-reason" style="color:#c05621;"><i class="fa-solid fa-triangle-exclamation"></i> Admin cảnh cáo: <c:out value="${course.rejectReason}"/></div>
-                                </c:if>
-                                <c:if test="${course.status == 'appealed' && not empty course.appealMessage}">
-                                    <div style="font-size:12px;color:#2a4365;margin-top:4px;">📩 Đã gửi kháng cáo: <c:out value="${course.appealMessage}"/></div>
-                                </c:if>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <c:choose>
+                                        <c:when test="${not empty course.thumbnailUrl}">
+                                            <img src="${course.thumbnailUrl}" alt="Thumb"
+                                                 style="width:52px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #E2E8F0;flex-shrink:0;"
+                                                 onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\'width:52px;height:36px;background:#F1F5F9;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:14px;flex-shrink:0;\'><i class=\'fa-solid fa-image\'></i></div>';">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div style="width:52px;height:36px;background:#F1F5F9;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:14px;flex-shrink:0;">
+                                                <i class="fa-solid fa-image"></i>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <div>
+                                        <div class="course-name"><c:out value="${course.title}"/></div>
+                                        <c:if test="${course.status == 'rejected' && not empty course.rejectReason}">
+                                            <div class="reject-reason">⚠ Lý do từ chối: <c:out value="${course.rejectReason}"/></div>
+                                        </c:if>
+                                        <c:if test="${course.status == 'warning' && not empty course.rejectReason}">
+                                            <div class="reject-reason" style="color:#c05621;"><i class="fa-solid fa-triangle-exclamation"></i> Admin cảnh cáo: <c:out value="${course.rejectReason}"/></div>
+                                        </c:if>
+                                        <c:if test="${course.status == 'appealed' && not empty course.appealMessage}">
+                                            <div style="font-size:12px;color:#2a4365;margin-top:4px;">📩 Đã gửi kháng cáo: <c:out value="${course.appealMessage}"/></div>
+                                        </c:if>
+                                    </div>
+                                </div>
                             </td>
                             <td>
                                 <c:choose>
