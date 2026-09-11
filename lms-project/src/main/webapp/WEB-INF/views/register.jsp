@@ -88,7 +88,8 @@
         <div class="auth-form-wrapper reveal-up reveal-delay-1">
             <div class="auth-header">
                 <a href="${pageContext.request.contextPath}/" class="lms-logo" style="justify-content: center; margin-bottom: 24px;">
-                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">UTEdu LMS</span>
+                    <img src="${pageContext.request.contextPath}/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+                    <span class="logo-tag">LMS</span>
                 </a>
                 <h1>Tạo tài khoản mới</h1>
                 <p>Chỉ mất vài phút để thiết lập hồ sơ học tập của bạn.</p>

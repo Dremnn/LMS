@@ -51,8 +51,8 @@
 <!-- NAVBAR -->
 <nav class="lms-navbar">
     <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span class="logo-text">UTEdu <span class="logo-tag">LMS</span></span>
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+        <span class="logo-tag">LMS</span>
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
