@@ -1,11 +1,11 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký - EduViet LMS</title>
+    <title>Đăng ký - UTEdu LMS</title>
     
     <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -88,7 +88,8 @@
         <div class="auth-form-wrapper reveal-up reveal-delay-1">
             <div class="auth-header">
                 <a href="${pageContext.request.contextPath}/" class="lms-logo" style="justify-content: center; margin-bottom: 24px;">
-                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">EduViet LMS</span>
+                    <img src="${pageContext.request.contextPath}/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+                    <span class="logo-tag">LMS</span>
                 </a>
                 <h1>Tạo tài khoản mới</h1>
                 <p>Chỉ mất vài phút để thiết lập hồ sơ học tập của bạn.</p>

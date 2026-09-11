@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -7,77 +7,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${currentLesson.title} - LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;}
-        body{background:#1a202c;color:#e2e8f0;min-height:100vh;}
+        body{background:#F8FAFF;color:#0F172A;min-height:100vh;}
 
-        /* ---- NAVBAR ---- */
-        .navbar{background:#2d3748;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.3);position:sticky;top:0;z-index:200;}
-        .navbar .logo{font-size:18px;font-weight:800;color:#a78bfa;text-decoration:none;}
-        .nav-right{display:flex;align-items:center;gap:12px;}
-        .btn{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:all .2s;display:inline-block;}
-        .btn-ghost{background:transparent;color:#a0aec0;border:1px solid #4a5568;}
-        .btn-ghost:hover{background:#4a5568;color:#fff;}
-        .btn-danger{background:#9b2c2c;color:#fff;}
-        .btn-danger:hover{background:#c53030;}
-        .btn-success{background:#276749;color:#fff;padding:9px 20px;font-size:14px;font-weight:700;}
-        .btn-success:hover{background:#22543d;}
-        .badge-role{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;background:#553c9a;color:#e9d8fd;text-transform:uppercase;margin-left:6px;}
+        .btn-success{background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:12px 28px;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(16,185,129,.25);transition:all .2s;}
+        .btn-success:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(16,185,129,.35);}
 
         /* ---- LAYOUT 2 CỘT ---- */
-        .layout{display:flex;min-height:calc(100vh - 52px);}
+        .layout{display:flex;min-height:calc(100vh - 68px);}
 
         /* ---- SIDEBAR ---- */
-        .sidebar{width:300px;flex-shrink:0;background:#2d3748;overflow-y:auto;border-right:1px solid #4a5568;display:flex;flex-direction:column;}
-        .sidebar-header{padding:18px 18px 14px;border-bottom:1px solid #4a5568;background:#1a202c;}
-        .sidebar-course-title{font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:10px;line-height:1.4;}
-        .progress-label{display:flex;justify-content:space-between;font-size:11px;color:#a0aec0;margin-bottom:5px;}
-        .progress-bar-bg{background:#4a5568;border-radius:10px;height:7px;overflow:hidden;}
-        .progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#667eea,#764ba2);}
+        .sidebar{width:340px;flex-shrink:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-right:1px solid #E2E8F0;display:flex;flex-direction:column;box-shadow:2px 0 16px rgba(0,0,0,.02);}
+        .sidebar-header{padding:20px 24px;border-bottom:1px solid #E2E8F0;background:#FFFFFF;}
+        .sidebar-course-title{font-size:15px;font-weight:700;color:#0F172A;margin-bottom:12px;line-height:1.4;}
+        .progress-label{display:flex;justify-content:space-between;font-size:13px;color:#64748B;margin-bottom:8px;font-weight:500;}
+        .progress-bar-bg{background:#E2E8F0;border-radius:10px;height:8px;overflow:hidden;}
+        .progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#4F46E5,#06B6D4);}
         .sidebar-body{flex:1;overflow-y:auto;}
-        .section-group{border-bottom:1px solid #4a5568;}
-        .section-title{padding:12px 16px;font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;background:#1e2a38;}
-        .lesson-link{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:13px;color:#cbd5e0;text-decoration:none;transition:background .15s;cursor:pointer;}
-        .lesson-link:hover{background:#3d4f6e;color:#fff;}
-        .lesson-link.active{background:#4c3f9e;color:#fff;font-weight:700;}
-        .lesson-link .tick{color:#68d391;font-size:14px;flex-shrink:0;}
-        .lesson-link .dot{width:8px;height:8px;border-radius:50%;border:2px solid #4a5568;flex-shrink:0;}
-        .lesson-link.active .dot{background:#a78bfa;border-color:#a78bfa;}
+        .section-group{border-bottom:1px solid #E2E8F0;}
+        .section-title{padding:12px 20px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;background:#F8FAFC;border-bottom:1px solid #F1F5F9;}
+        .lesson-link{display:flex;align-items:center;gap:12px;padding:12px 20px;font-size:14px;color:#334155;text-decoration:none;transition:all .15s;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid #F8FAFC;}
+        .lesson-link:hover{background:#EEF2FF;color:#4F46E5;}
+        .lesson-link.active{background:#EEF2FF;color:#4F46E5;font-weight:700;border-left-color:#4F46E5;}
+        .lesson-link .tick{color:#10B981;font-size:14px;font-weight:800;flex-shrink:0;}
+        .lesson-link .dot{width:9px;height:9px;border-radius:50%;border:2px solid #94A3B8;flex-shrink:0;}
+        .lesson-link.active .dot{background:#4F46E5;border-color:#4F46E5;}
+        .quiz-link{background:#FFFBEB;color:#D97706;font-weight:600;}
+        .quiz-link:hover{background:#FEF3C7;color:#B45309;}
 
         /* ---- CONTENT ---- */
-        .content{flex:1;overflow-y:auto;padding:32px 40px;max-width:900px;}
-        .lesson-title{font-size:24px;font-weight:800;color:#f7fafc;margin-bottom:20px;line-height:1.3;}
-        .alert-danger{background:#742a2a;border:1px solid #9b2c2c;color:#fed7d7;padding:12px 16px;border-radius:9px;font-size:14px;margin-bottom:20px;}
-        .video-wrap{background:#000;border-radius:12px;overflow:hidden;margin-bottom:24px;}
+        .content{flex:1;overflow-y:auto;padding:36px 48px;max-width:1020px;margin:0 auto;}
+        .lesson-title{font-size:28px;font-weight:800;color:#0F172A;margin-bottom:24px;line-height:1.3;}
+        .alert-danger{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;padding:14px 20px;border-radius:12px;font-size:14px;margin-bottom:24px;}
+        .video-wrap{background:#000;border-radius:16px;overflow:hidden;margin-bottom:28px;box-shadow:0 12px 36px rgba(0,0,0,.08);}
         .video-wrap video{display:block;width:100%;}
-        .no-video{background:#2d3748;border-radius:12px;padding:48px;text-align:center;color:#718096;margin-bottom:24px;}
+        .no-video{background:#FFFFFF;border:2px dashed #CBD5E1;border-radius:16px;padding:56px 24px;text-align:center;color:#64748B;margin-bottom:28px;}
         .no-video .icon{font-size:48px;margin-bottom:12px;}
-        .doc-link{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#2d3748;border:1px solid #4a5568;border-radius:8px;color:#90cdf4;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:24px;transition:background .15s;}
-        .doc-link:hover{background:#3d4f6e;color:#bee3f8;}
-        .complete-card{background:#2d3748;border-radius:12px;padding:22px 26px;border:1px solid #4a5568;margin-top:8px;}
-        .complete-card h3{font-size:15px;font-weight:700;color:#e2e8f0;margin-bottom:14px;}
-        .form-check{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-        .form-check input[type=checkbox]{width:18px;height:18px;accent-color:#667eea;cursor:pointer;flex-shrink:0;}
-        .form-check-label{font-size:14px;color:#cbd5e0;cursor:pointer;line-height:1.4;}
-        .divider{border:none;border-top:1px solid #4a5568;margin:24px 0;}
-        .nav-lessons{display:flex;justify-content:space-between;margin-top:24px;}
-        .btn-nav{padding:9px 18px;background:#3d4f6e;color:#cbd5e0;border:1px solid #4a5568;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .15s;}
-        .btn-nav:hover{background:#4a5568;color:#fff;}
+        .doc-link{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;background:#FFFFFF;border:1.5px solid #E2E8F0;border-radius:12px;color:#4F46E5;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:28px;box-shadow:0 2px 8px rgba(0,0,0,.03);transition:all .2s;}
+        .doc-link:hover{border-color:#818CF8;box-shadow:0 6px 20px rgba(79,70,229,.12);transform:translateY(-2px);}
+        .complete-card{background:#FFFFFF;border-radius:16px;padding:24px 28px;border:1px solid #E2E8F0;box-shadow:0 4px 20px rgba(0,0,0,.04);margin-top:12px;}
+        .complete-card h3{font-size:16px;font-weight:700;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .form-check{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+        .form-check input[type=checkbox]{width:20px;height:20px;accent-color:#4F46E5;cursor:pointer;flex-shrink:0;}
+        .form-check-label{font-size:15px;color:#334155;cursor:pointer;font-weight:500;}
+        .divider{border:none;border-top:1px solid #E2E8F0;margin:28px 0;}
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<% User currentUser = (User) session.getAttribute("currentUser"); %>
+<body class="mesh-bg">
+<% 
+    User currentUser = (User) session.getAttribute("currentUser"); 
+    String role = currentUser != null ? currentUser.getRole() : "";
+%>
 
-<nav class="navbar">
-    <a href="${pageContext.request.contextPath}/" class="logo"><i class="fa-solid fa-graduation-cap"></i> EduViet LMS</a>
-    <div class="nav-right">
-        <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn btn-ghost">← Chi tiết khóa học</a>
+<!-- NAVBAR -->
+<nav class="lms-navbar">
+    <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+        <span class="logo-tag">LMS</span>
+    </a>
+    <div class="nav-links">
+        <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link">← Chi tiết khóa học</a>
+        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
-            <span style="font-size:13px;color:#a0aec0;font-weight:600;">
-                <%= currentUser.getFullName() %><span class="badge-role">student</span>
-            </span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            <% } %>
+            <div class="user-badge">
+                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <span><%=currentUser.getFullName()%></span>
+                <span class="role-tag"><%=role%></span>
+            </div>
+            <% if ("instructor".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <% } else if ("admin".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+            <% } else { %>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+            <% } %>
+            <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+        <% } else { %>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
     </div>
 </nav>
@@ -126,9 +139,9 @@
                     <%-- Quiz cho chương này --%>
                     <c:forEach var="quiz" items="${quizzes}">
                         <c:if test="${quiz.sectionId == section.id}">
-                            <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}&lessonId=${currentLesson.id}" class="lesson-link" style="color:#fbd38d;">
-                                <span class="dot" style="border-color:#fbd38d; border-radius:2px;"></span>
-                                <span>📝 <c:out value="${quiz.title}"/></span>
+                            <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}&lessonId=${currentLesson.id}" class="lesson-link quiz-link">
+                                <span class="dot" style="border-color:#d97706; background:#fef3c7; border-radius:3px;"></span>
+                                <span><i class="fa-solid fa-file-lines" style="color:#d97706; margin-right:4px;"></i> <c:out value="${quiz.title}"/></span>
                             </a>
                         </c:if>
                     </c:forEach>
@@ -144,12 +157,12 @@
             </c:forEach>
             <c:if test="${hasCourseQuiz}">
                 <div class="section-group" style="border-bottom:none;">
-                    <div class="section-title" style="background:#4a2a18; color:#fbd38d;"><i class="fa-solid fa-trophy"></i> Quiz Tổng Kết Khóa Học</div>
+                    <div class="section-title" style="background:#FEF3C7; color:#92400E; border-bottom:1px solid #FDE68A;"><i class="fa-solid fa-trophy" style="color:#D97706;"></i> Quiz Tổng Kết Khóa Học</div>
                     <c:forEach var="quiz" items="${quizzes}">
                         <c:if test="${quiz.courseId != null}">
-                            <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}&lessonId=${currentLesson.id}" class="lesson-link" style="color:#fbd38d;">
-                                <span class="dot" style="border-color:#fbd38d; background:#fbd38d; border-radius:2px;"></span>
-                                <span style="font-weight:700;"><i class="fa-solid fa-star"></i> <c:out value="${quiz.title}"/></span>
+                            <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}&lessonId=${currentLesson.id}" class="lesson-link quiz-link" style="background:#FFFBEB;">
+                                <span class="dot" style="border-color:#F59E0B; background:#F59E0B; border-radius:3px;"></span>
+                                <span style="font-weight:700; color:#B45309;"><i class="fa-solid fa-star" style="color:#F59E0B; margin-right:4px;"></i> <c:out value="${quiz.title}"/></span>
                             </a>
                         </c:if>
                     </c:forEach>

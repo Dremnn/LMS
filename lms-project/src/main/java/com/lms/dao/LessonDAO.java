@@ -167,15 +167,35 @@ public class LessonDAO {
 
     // 7. Xóa bài học (Trigger sẽ tự cập nhật lại total_lessons)
     public boolean delete(int lessonId) {
-        String sql = "DELETE FROM lessons WHERE id = ?";
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            // Xóa lesson_progress liên quan trước để tránh lỗi foreign key
+            String delProgressSql = "DELETE FROM lesson_progress WHERE lesson_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(delProgressSql)) {
+                stmt.setInt(1, lessonId);
+                stmt.executeUpdate();
+            }
 
-            stmt.setInt(1, lessonId);
-            return stmt.executeUpdate() > 0;
+            String sql = "DELETE FROM lessons WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, lessonId);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
         }
         return false;
     }

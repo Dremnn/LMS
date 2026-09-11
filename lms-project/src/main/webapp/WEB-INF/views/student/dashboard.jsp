@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.time.LocalDate, java.util.*, com.lms.model.Quiz, com.lms.model.Event, com.lms.model.Course" %>
+<%@ page import="java.time.LocalDate, java.util.*, com.lms.model.Quiz, com.lms.model.Event, com.lms.model.Course, com.lms.model.User" %>
 <%
     int year = (Integer) request.getAttribute("year");
     int month = (Integer) request.getAttribute("month");
@@ -11,6 +11,8 @@
     String dueFilter = (String) request.getAttribute("dueFilter");
     String sortBy = (String) request.getAttribute("sortBy");
     List<Course> myCourses = (List<Course>) request.getAttribute("myCourses");
+    User currentUser = (User) session.getAttribute("currentUser");
+    String role = currentUser != null ? currentUser.getRole() : "";
 
     LocalDate firstDay = LocalDate.of(year, month, 1);
     int daysInMonth = firstDay.lengthOfMonth();
@@ -29,9 +31,14 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Điều Khiển - LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f6fa; }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f5f6fa; }
+        .dashboard-container { max-width: 1200px; margin: 24px auto 40px; padding: 0 24px; }
         .panel { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
         .panel h2 { margin-top: 0; }
 
@@ -65,8 +72,23 @@
         .badge.none     { background: #6b7280; }
         .badge.event    { background: #7c3aed; }
 
+<<<<<<< HEAD
         .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
         .btn-primary { background: #2563eb; color: #fff; }
+=======
+        .modal-overlay {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: #fff; border-radius: 10px; padding: 24px; width: 400px; }
+        .modal-box h3 { margin-top: 0; }
+        .modal-box label { display: block; margin: 10px 0 4px; font-size: 13px; color: #555; }
+        .modal-box input, .modal-box select, .modal-box textarea {
+            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+        }
+        .modal-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; }
+>>>>>>> f97b1d1d52e1ebd4905ecdd946f022412ef02217
         .btn-secondary { background: #e5e7eb; color: #333; }
         .btn-danger-outline { background: #fff; border: 1px solid #ccc; color: #333; }
 
@@ -129,8 +151,40 @@
     <!-- TinyMCE CDN (Phiên bản Open Source không cần API key) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
-<body>
+<body class="mesh-bg">
+    <!-- NAVBAR -->
+    <nav class="lms-navbar">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+            <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+            <span class="logo-tag">LMS</span>
+        </a>
+        <div class="nav-links">
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+            <% if (currentUser != null) { %>
+                <% if ("student".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link active">Bảng điều khiển</a>
+                <% } %>
+                <div class="user-badge">
+                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                </div>
+                <% if ("instructor".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+                <% } else if ("admin".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+                <% } else { %>
+                    <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+                <% } %>
+                <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+            <% } else { %>
+                <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+                <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
+            <% } %>
+        </div>
+    </nav>
 
+    <div class="dashboard-container">
     <% if (request.getAttribute("error") != null) { %>
         <div class="panel" style="background:#fef2f2; color:#991b1b;"><%= request.getAttribute("error") %></div>
     <% } %>
@@ -233,6 +287,7 @@
             <% } %>
         </div>
     </div>
+    </div> <!-- /dashboard-container -->
 
     <!-- ================= MODAL: TẠO / SỬA SỰ KIỆN ================= -->
     <div class="modal-overlay" id="eventFormModal">
@@ -312,7 +367,12 @@
                 </div>
 
                 <div class="modal-actions">
+<<<<<<< HEAD
                     <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Huỷ</button>
+=======
+                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Huỷ</button>
+                    <button type="button" class="btn btn-danger" style="background:#ef4444;color:#fff;">Xoá</button>
+>>>>>>> f97b1d1d52e1ebd4905ecdd946f022412ef02217
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -501,6 +561,7 @@
             document.getElementById('deleteModal').classList.remove('show');
         }
     </script>
+    <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
 
 </body>
 </html>

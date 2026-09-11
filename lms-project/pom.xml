@@ -54,12 +54,6 @@
         <version>3.0.1</version>
     </dependency>
 
-    <dependency>
-    <groupId>org.postgresql</groupId>
-    <artifactId>postgresql</artifactId>
-    <version>42.7.12</version>
-    </dependency>
-
     <!-- HikariCP - Connection Pool, bắt buộc khi dùng DB cloud để tránh mở kết nối mới liên tục -->
     <dependency>
         <groupId>com.zaxxer</groupId>

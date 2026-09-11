@@ -167,7 +167,7 @@ public class CourseDAO {
     // =========================================================================
     public boolean save(Course course) {
         String sql = "INSERT INTO courses (instructor_id, category_id, title, description, " +
-                     "price, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                     "price, status, created_at, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -187,6 +187,7 @@ public class CourseDAO {
 
             LocalDateTime now = LocalDateTime.now();
             stmt.setTimestamp(7, Timestamp.valueOf(now));
+            stmt.setString(8, course.getThumbnailUrl());
 
             int affectedRows = stmt.executeUpdate();
 
@@ -207,10 +208,10 @@ public class CourseDAO {
     }
 
     // =========================================================================
-    // 6. CẬP NHẬT THÔNG TIN KHÓA HỌC (Instructor sửa title/description/price/category)
+    // 6. CẬP NHẬT THÔNG TIN KHÓA HỌC (Instructor sửa title/description/price/category/thumbnail)
     // =========================================================================
     public boolean update(Course course) {
-        String sql = "UPDATE courses SET category_id = ?, title = ?, description = ?, price = ? " +
+        String sql = "UPDATE courses SET category_id = ?, title = ?, description = ?, price = ?, thumbnail_url = ? " +
                      "WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -225,7 +226,8 @@ public class CourseDAO {
             stmt.setString(2, course.getTitle());
             stmt.setString(3, course.getDescription());
             stmt.setBigDecimal(4, course.getPrice());
-            stmt.setInt(5, course.getId());
+            stmt.setString(5, course.getThumbnailUrl());
+            stmt.setInt(6, course.getId());
 
             return stmt.executeUpdate() > 0;
 

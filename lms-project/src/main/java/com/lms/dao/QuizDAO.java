@@ -163,17 +163,61 @@ public class QuizDAO {
         return false;
     }
 
-    // 6. Xóa quiz (CASCADE sẽ tự xóa questions/answer_options nhờ ON DELETE CASCADE đã khai báo trong DB)
+    // 6. Xóa quiz an toàn trong transaction (xóa cả attempts, attempt_answers, options, questions)
     public boolean delete(int quizId) {
-        String sql = "DELETE FROM quizzes WHERE id = ?";
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            // 1. Xóa câu trả lời chi tiết của các lượt làm bài
+            String delAttemptAnswersSql = "DELETE FROM attempt_answers WHERE attempt_id IN " +
+                                          "(SELECT id FROM quiz_attempts WHERE quiz_id = ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(delAttemptAnswersSql)) {
+                stmt.setInt(1, quizId);
+                stmt.executeUpdate();
+            }
 
-            stmt.setInt(1, quizId);
-            return stmt.executeUpdate() > 0;
+            // 2. Xóa các lượt làm bài
+            String delAttemptsSql = "DELETE FROM quiz_attempts WHERE quiz_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(delAttemptsSql)) {
+                stmt.setInt(1, quizId);
+                stmt.executeUpdate();
+            }
+
+            // 3. Xóa các đáp án lựa chọn của các câu hỏi trong quiz
+            String delOptionsSql = "DELETE FROM answer_options WHERE question_id IN " +
+                                  "(SELECT id FROM questions WHERE quiz_id = ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(delOptionsSql)) {
+                stmt.setInt(1, quizId);
+                stmt.executeUpdate();
+            }
+
+            // 4. Xóa câu hỏi trong quiz
+            String delQuestionsSql = "DELETE FROM questions WHERE quiz_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(delQuestionsSql)) {
+                stmt.setInt(1, quizId);
+                stmt.executeUpdate();
+            }
+
+            // 5. Xóa quiz
+            String delQuizSql = "DELETE FROM quizzes WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(delQuizSql)) {
+                stmt.setInt(1, quizId);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
         }
         return false;
     }

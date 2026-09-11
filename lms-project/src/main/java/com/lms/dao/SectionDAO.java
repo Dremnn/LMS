@@ -101,15 +101,12 @@ public class SectionDAO {
     }
 
     // 5. Sửa tên chương
-    public boolean update(Section section) {
+    public boolean updateTitle(int sectionId, String title) {
         String sql = "UPDATE sections SET title = ? WHERE id = ?";
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, section.getTitle());
-            stmt.setInt(2, section.getId());
-
+            stmt.setString(1, title);
+            stmt.setInt(2, sectionId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -117,17 +114,177 @@ public class SectionDAO {
         return false;
     }
 
-    // 6. Xóa chương (sẽ tự động xóa luôn các Lesson bên trong nhờ ON DELETE CASCADE đã khai báo trong DB)
-    public boolean delete(int sectionId) {
-        String sql = "DELETE FROM sections WHERE id = ?";
+    public boolean update(Section section) {
+        return updateTitle(section.getId(), section.getTitle());
+    }
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    // 6. Xóa chương và tự động dồn số thứ tự các chương sau lên 1
+    public boolean deleteAndShiftOrder(int sectionId, int courseId) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
 
-            stmt.setInt(1, sectionId);
-            return stmt.executeUpdate() > 0;
+            int deletedOrder = -1;
+            String getOrderSql = "SELECT order_index FROM sections WHERE id = ? AND course_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(getOrderSql)) {
+                stmt.setInt(1, sectionId);
+                stmt.setInt(2, courseId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        deletedOrder = rs.getInt("order_index");
+                    }
+                }
+            }
+
+            if (deletedOrder == -1) {
+                conn.rollback();
+                return false;
+            }
+
+            // Dọn dẹp lesson_progress của các bài học bên trong
+            String delProgressSql = "DELETE FROM lesson_progress WHERE lesson_id IN " +
+                                    "(SELECT id FROM lessons WHERE section_id = ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(delProgressSql)) {
+                stmt.setInt(1, sectionId);
+                stmt.executeUpdate();
+            }
+
+            // Gỡ liên kết quiz nếu gắn với section này
+            String unbindQuizSql = "UPDATE quizzes SET section_id = NULL WHERE section_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(unbindQuizSql)) {
+                stmt.setInt(1, sectionId);
+                stmt.executeUpdate();
+            }
+
+            // Xóa section (lessons tự xóa theo CASCADE)
+            String delSectionSql = "DELETE FROM sections WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(delSectionSql)) {
+                stmt.setInt(1, sectionId);
+                stmt.executeUpdate();
+            }
+
+            // Dồn thứ tự: giảm order_index đi 1 cho các section có order_index > deletedOrder
+            String shiftSql = "UPDATE sections SET order_index = order_index - 1 " +
+                              "WHERE course_id = ? AND order_index > ?";
+            try (PreparedStatement stmt = conn.prepareStatement(shiftSql)) {
+                stmt.setInt(1, courseId);
+                stmt.setInt(2, deletedOrder);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        }
+        return false;
+    }
+
+    // 7. Đổi số thứ tự chương và tự động điều chỉnh các chương khác theo
+    public boolean reorderSection(int sectionId, int courseId, int targetOrder) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            int currentOrder = -1;
+            String getOrderSql = "SELECT order_index FROM sections WHERE id = ? AND course_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(getOrderSql)) {
+                stmt.setInt(1, sectionId);
+                stmt.setInt(2, courseId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        currentOrder = rs.getInt("order_index");
+                    }
+                }
+            }
+
+            if (currentOrder == -1 || currentOrder == targetOrder) {
+                conn.rollback();
+                return currentOrder == targetOrder;
+            }
+
+            // Kiểm tra tổng số chương của khóa học
+            int totalSections = 0;
+            String countSql = "SELECT COUNT(*) FROM sections WHERE course_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(countSql)) {
+                stmt.setInt(1, courseId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        totalSections = rs.getInt(1);
+                    }
+                }
+            }
+
+            if (targetOrder < 1 || targetOrder > totalSections) {
+                conn.rollback();
+                return false;
+            }
+
+            // Tạm thời đưa section đang chọn về -1
+            String tempSql = "UPDATE sections SET order_index = -1 WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(tempSql)) {
+                stmt.setInt(1, sectionId);
+                stmt.executeUpdate();
+            }
+
+            // Nếu targetOrder < currentOrder: dịch các section [targetOrder, currentOrder - 1] tăng lên 1
+            if (targetOrder < currentOrder) {
+                String shiftUpSql = "UPDATE sections SET order_index = order_index + 1 " +
+                                    "WHERE course_id = ? AND order_index >= ? AND order_index < ?";
+                try (PreparedStatement stmt = conn.prepareStatement(shiftUpSql)) {
+                    stmt.setInt(1, courseId);
+                    stmt.setInt(2, targetOrder);
+                    stmt.setInt(3, currentOrder);
+                    stmt.executeUpdate();
+                }
+            } else {
+                // targetOrder > currentOrder: dịch các section [currentOrder + 1, targetOrder] giảm đi 1
+                String shiftDownSql = "UPDATE sections SET order_index = order_index - 1 " +
+                                      "WHERE course_id = ? AND order_index > ? AND order_index <= ?";
+                try (PreparedStatement stmt = conn.prepareStatement(shiftDownSql)) {
+                    stmt.setInt(1, courseId);
+                    stmt.setInt(2, currentOrder);
+                    stmt.setInt(3, targetOrder);
+                    stmt.executeUpdate();
+                }
+            }
+
+            // Đặt section đang chọn về targetOrder
+            String finalSql = "UPDATE sections SET order_index = ? WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(finalSql)) {
+                stmt.setInt(1, targetOrder);
+                stmt.setInt(2, sectionId);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        }
+        return false;
+    }
+
+    public boolean delete(int sectionId) {
+        Section s = findById(sectionId);
+        if (s != null) {
+            return deleteAndShiftOrder(sectionId, s.getCourseId());
         }
         return false;
     }

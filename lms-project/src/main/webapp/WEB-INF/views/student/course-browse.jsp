@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khám phá khóa học - EduViet LMS</title>
+    <title>Khám phá khóa học - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
@@ -20,21 +20,26 @@
 <!-- NAVBAR -->
 <nav class="lms-navbar">
     <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span class="logo-text">EduViet <span class="logo-tag">LMS</span></span>
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+        <span class="logo-tag">LMS</span>
     </a>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link active">Khóa học</a>
         <% if (currentUser != null) { %>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            <% } %>
             <div class="user-badge">
-                <div class="user-avatar"><%=currentUser.getFullName().substring(0,1).toUpperCase()%></div>
+                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
                 <span><%=currentUser.getFullName()%></span>
                 <span class="role-tag"><%=role%></span>
             </div>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
-            <% } else if ("instructor".equals(role)) { %>
+            <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <% } else if ("admin".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+            <% } else { %>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
@@ -93,10 +98,11 @@
                         <div class="course-img-wrap">
                             <c:choose>
                                 <c:when test="${not empty course.thumbnailUrl}">
-                                    <img class="course-card-img" src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>">
+                                    <img class="course-card-img" src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>"
+                                         onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/images/default-course.svg';">
                                 </c:when>
                                 <c:otherwise>
-                                    <div class="course-img-placeholder"></div>
+                                    <img class="course-card-img" src="${pageContext.request.contextPath}/assets/images/default-course.svg" alt="Default Thumbnail">
                                 </c:otherwise>
                             </c:choose>
                             <c:if test="${not empty course.categoryName}">
@@ -156,7 +162,7 @@
         <div class="footer-grid" style="align-items: flex-start;">
             <div class="footer-col brand-col">
                 <a href="<%=request.getContextPath()%>/" class="lms-logo footer-logo" style="margin-bottom: 16px;">
-                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">EduViet LMS</span>
+                    <span class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="logo-text">UTEdu LMS</span>
                 </a>
                 <p class="footer-desc">Nền tảng học trực tuyến hàng đầu Việt Nam.</p>
             </div>
@@ -176,7 +182,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 EduViet LMS</p>
+            <p>&copy; 2026 UTEdu LMS</p>
         </div>
     </div>
 </footer>
