@@ -24,7 +24,9 @@ import java.util.List;
 @WebServlet(urlPatterns = {
     "/instructor/quizzes/new",
     "/instructor/quizzes/manage",
+    "/instructor/quizzes/delete",
     "/instructor/quizzes/questions/add",
+    "/instructor/quizzes/questions/edit",
     "/instructor/quizzes/questions/delete"
 })
 public class QuizManageServlet extends HttpServlet {
@@ -107,8 +109,17 @@ public class QuizManageServlet extends HttpServlet {
             if ("/instructor/quizzes/new".equals(path)) {
                 handleCreateQuiz(request, response, currentUser);
 
+            } else if ("/instructor/quizzes/delete".equals(path)) {
+                int quizId = Integer.parseInt(request.getParameter("quizId"));
+                int courseId = Integer.parseInt(request.getParameter("courseId"));
+                quizService.deleteQuiz(quizId, currentUser.getId());
+                response.sendRedirect(request.getContextPath() + "/instructor/courses/manage?id=" + courseId);
+
             } else if ("/instructor/quizzes/questions/add".equals(path)) {
                 handleAddQuestion(request, response, currentUser);
+
+            } else if ("/instructor/quizzes/questions/edit".equals(path)) {
+                handleEditQuestion(request, response, currentUser);
 
             } else if ("/instructor/quizzes/questions/delete".equals(path)) {
                 handleDeleteQuestion(request, response, currentUser);
@@ -121,9 +132,11 @@ public class QuizManageServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("flashError",
                     e instanceof java.time.format.DateTimeParseException ? "Ngày giờ không hợp lệ!" : e.getMessage());
-            // Quay lại trang phù hợp tùy ngữ cảnh - đơn giản hóa bằng cách quay về courseId nếu có
+            String quizId = request.getParameter("quizId");
             String courseId = request.getParameter("courseId");
-            if (courseId != null) {
+            if (quizId != null && !quizId.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/instructor/quizzes/manage?id=" + quizId);
+            } else if (courseId != null && !courseId.isEmpty()) {
                 response.sendRedirect(request.getContextPath() + "/instructor/courses/manage?id=" + courseId);
             } else {
                 response.sendRedirect(request.getContextPath() + "/instructor/courses");
@@ -213,6 +226,37 @@ public class QuizManageServlet extends HttpServlet {
         }
 
         Question question = quizService.addQuestion(currentUser.getId(), quizId, content, questionType, options);
+
+        response.sendRedirect(request.getContextPath() + "/instructor/quizzes/manage?id=" + quizId);
+    }
+
+    private void handleEditQuestion(HttpServletRequest request, HttpServletResponse response, User currentUser)
+            throws IOException {
+
+        int quizId = Integer.parseInt(request.getParameter("quizId"));
+        int questionId = Integer.parseInt(request.getParameter("questionId"));
+        String content = request.getParameter("content");
+        String questionType = request.getParameter("questionType");
+
+        String[] optionContents = request.getParameterValues("optionContent");
+        String[] correctIndicesStr = request.getParameterValues("correctOption");
+
+        List<AnswerOption> options = new ArrayList<>();
+        if (optionContents != null) {
+            java.util.Set<Integer> correctIndices = new java.util.HashSet<>();
+            if (correctIndicesStr != null) {
+                for (String s : correctIndicesStr) {
+                    correctIndices.add(Integer.parseInt(s));
+                }
+            }
+
+            for (int i = 0; i < optionContents.length; i++) {
+                boolean isCorrect = correctIndices.contains(i);
+                options.add(new AnswerOption(questionId, optionContents[i], isCorrect));
+            }
+        }
+
+        quizService.updateQuestion(currentUser.getId(), questionId, content, questionType, options);
 
         response.sendRedirect(request.getContextPath() + "/instructor/quizzes/manage?id=" + quizId);
     }

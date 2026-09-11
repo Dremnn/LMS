@@ -17,7 +17,12 @@ import java.io.IOException;
     "/instructor/courses/manage",
     "/courses/manage",
     "/instructor/courses/sections/add",
-    "/instructor/courses/lessons/add"
+    "/instructor/courses/sections/edit",
+    "/instructor/courses/sections/delete",
+    "/instructor/courses/sections/reorder",
+    "/instructor/courses/lessons/add",
+    "/instructor/courses/lessons/edit",
+    "/instructor/courses/lessons/delete"
 })
 public class CourseContentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -98,8 +103,24 @@ public class CourseContentServlet extends HttpServlet {
             if ("/instructor/courses/sections/add".equals(path)) {
                 courseId = Integer.parseInt(request.getParameter("courseId"));
                 String title = request.getParameter("title");
-
                 courseService.addSection(courseId, currentUser.getId(), title);
+
+            } else if ("/instructor/courses/sections/edit".equals(path)) {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+                int sectionId = Integer.parseInt(request.getParameter("sectionId"));
+                String title = request.getParameter("title");
+                courseService.updateSection(sectionId, currentUser.getId(), title);
+
+            } else if ("/instructor/courses/sections/delete".equals(path)) {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+                int sectionId = Integer.parseInt(request.getParameter("sectionId"));
+                courseService.deleteSection(sectionId, currentUser.getId());
+
+            } else if ("/instructor/courses/sections/reorder".equals(path)) {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+                int sectionId = Integer.parseInt(request.getParameter("sectionId"));
+                int targetOrder = Integer.parseInt(request.getParameter("targetOrder"));
+                courseService.reorderSection(sectionId, currentUser.getId(), targetOrder);
 
             } else if ("/instructor/courses/lessons/add".equals(path)) {
                 int sectionId = Integer.parseInt(request.getParameter("sectionId"));
@@ -114,6 +135,25 @@ public class CourseContentServlet extends HttpServlet {
                         ? Integer.parseInt(durationStr) : null;
 
                 courseService.addLesson(sectionId, currentUser.getId(), title, videoUrl, documentUrl, duration);
+
+            } else if ("/instructor/courses/lessons/edit".equals(path)) {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+                int lessonId = Integer.parseInt(request.getParameter("lessonId"));
+
+                String title = request.getParameter("title");
+                String videoUrl = request.getParameter("videoUrl");
+                String documentUrl = request.getParameter("documentUrl");
+                String durationStr = request.getParameter("durationMinutes");
+
+                Integer duration = (durationStr != null && !durationStr.isEmpty())
+                        ? Integer.parseInt(durationStr) : null;
+
+                courseService.updateLesson(lessonId, currentUser.getId(), title, videoUrl, documentUrl, duration);
+
+            } else if ("/instructor/courses/lessons/delete".equals(path)) {
+                courseId = Integer.parseInt(request.getParameter("courseId"));
+                int lessonId = Integer.parseInt(request.getParameter("lessonId"));
+                courseService.deleteLesson(lessonId, currentUser.getId());
 
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);

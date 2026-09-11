@@ -269,6 +269,49 @@ public class CourseService {
         return section;
     }
 
+    public void updateSection(int sectionId, int currentInstructorId, String title) {
+        Section section = sectionDAO.findById(sectionId);
+        if (section == null) {
+            throw new IllegalArgumentException("Chương học không tồn tại!");
+        }
+        getCourseAndVerifyOwnership(section.getCourseId(), currentInstructorId);
+
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên chương không được để trống!");
+        }
+
+        boolean updated = sectionDAO.updateTitle(sectionId, title.trim());
+        if (!updated) {
+            throw new RuntimeException("Có lỗi xảy ra khi đổi tên chương!");
+        }
+    }
+
+    public void deleteSection(int sectionId, int currentInstructorId) {
+        Section section = sectionDAO.findById(sectionId);
+        if (section == null) {
+            throw new IllegalArgumentException("Chương học không tồn tại!");
+        }
+        getCourseAndVerifyOwnership(section.getCourseId(), currentInstructorId);
+
+        boolean deleted = sectionDAO.deleteAndShiftOrder(sectionId, section.getCourseId());
+        if (!deleted) {
+            throw new RuntimeException("Có lỗi xảy ra khi xóa chương!");
+        }
+    }
+
+    public void reorderSection(int sectionId, int currentInstructorId, int targetOrder) {
+        Section section = sectionDAO.findById(sectionId);
+        if (section == null) {
+            throw new IllegalArgumentException("Chương học không tồn tại!");
+        }
+        getCourseAndVerifyOwnership(section.getCourseId(), currentInstructorId);
+
+        boolean reordered = sectionDAO.reorderSection(sectionId, section.getCourseId(), targetOrder);
+        if (!reordered) {
+            throw new RuntimeException("Có lỗi xảy ra khi đổi số thứ tự chương!");
+        }
+    }
+
     // =========================================================================
     // 11. QUẢN LÝ BÀI HỌC (Lesson)
     // =========================================================================
@@ -300,6 +343,56 @@ public class CourseService {
             throw new RuntimeException("Có lỗi xảy ra khi thêm bài học!");
         }
         return lesson;
+    }
+
+    public void updateLesson(int lessonId, int currentInstructorId, String title,
+                             String videoUrl, String documentUrl, Integer durationMinutes) {
+        Lesson lesson = lessonDAO.findById(lessonId);
+        if (lesson == null) {
+            throw new IllegalArgumentException("Bài học không tồn tại!");
+        }
+
+        Section section = sectionDAO.findById(lesson.getSectionId());
+        if (section == null) {
+            throw new IllegalArgumentException("Chương học chứa bài này không tồn tại!");
+        }
+        getCourseAndVerifyOwnership(section.getCourseId(), currentInstructorId);
+
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên bài học không được để trống!");
+        }
+        if ((videoUrl == null || videoUrl.trim().isEmpty()) &&
+            (documentUrl == null || documentUrl.trim().isEmpty())) {
+            throw new IllegalArgumentException("Bài học cần có ít nhất 1 video hoặc 1 tài liệu!");
+        }
+
+        lesson.setTitle(title.trim());
+        lesson.setVideoUrl(videoUrl != null && !videoUrl.trim().isEmpty() ? videoUrl.trim() : null);
+        lesson.setDocumentUrl(documentUrl != null && !documentUrl.trim().isEmpty() ? documentUrl.trim() : null);
+        lesson.setDurationMinutes(durationMinutes);
+
+        boolean updated = lessonDAO.update(lesson);
+        if (!updated) {
+            throw new RuntimeException("Có lỗi xảy ra khi cập nhật bài học!");
+        }
+    }
+
+    public void deleteLesson(int lessonId, int currentInstructorId) {
+        Lesson lesson = lessonDAO.findById(lessonId);
+        if (lesson == null) {
+            throw new IllegalArgumentException("Bài học không tồn tại!");
+        }
+
+        Section section = sectionDAO.findById(lesson.getSectionId());
+        if (section == null) {
+            throw new IllegalArgumentException("Chương học chứa bài này không tồn tại!");
+        }
+        getCourseAndVerifyOwnership(section.getCourseId(), currentInstructorId);
+
+        boolean deleted = lessonDAO.delete(lessonId);
+        if (!deleted) {
+            throw new RuntimeException("Có lỗi xảy ra khi xóa bài học!");
+        }
     }
 
     // =========================================================================

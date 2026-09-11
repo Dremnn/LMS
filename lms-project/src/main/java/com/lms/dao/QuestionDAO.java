@@ -147,17 +147,99 @@ public class QuestionDAO {
         }
     }
 
-    // 5. Xóa câu hỏi (CASCADE tự xóa answer_options liên quan)
-    public boolean delete(int questionId) {
-        String sql = "DELETE FROM questions WHERE id = ?";
+    // 5. Cập nhật câu hỏi và danh sách đáp án trong 1 Transaction
+    public boolean updateWithOptions(Question question) {
+        String updateQuestionSql = "UPDATE questions SET content = ?, question_type = ? WHERE id = ?";
+        String delAttemptAnswersSql = "DELETE FROM attempt_answers WHERE question_id = ?";
+        String delOptionsSql = "DELETE FROM answer_options WHERE question_id = ?";
+        String insertOptionSql = "INSERT INTO answer_options (question_id, content, is_correct) VALUES (?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
 
-            stmt.setInt(1, questionId);
-            return stmt.executeUpdate() > 0;
+            try (PreparedStatement qStmt = conn.prepareStatement(updateQuestionSql)) {
+                qStmt.setString(1, question.getContent());
+                qStmt.setString(2, question.getQuestionType());
+                qStmt.setInt(3, question.getId());
+                qStmt.executeUpdate();
+            }
+
+            // Xóa attempt_answers của câu hỏi này để tránh lỗi khóa ngoại khi thay đổi đáp án
+            try (PreparedStatement aStmt = conn.prepareStatement(delAttemptAnswersSql)) {
+                aStmt.setInt(1, question.getId());
+                aStmt.executeUpdate();
+            }
+
+            // Xóa các đáp án cũ
+            try (PreparedStatement oDelStmt = conn.prepareStatement(delOptionsSql)) {
+                oDelStmt.setInt(1, question.getId());
+                oDelStmt.executeUpdate();
+            }
+
+            // Chèn lại các đáp án mới
+            try (PreparedStatement oInsStmt = conn.prepareStatement(insertOptionSql)) {
+                for (AnswerOption opt : question.getOptions()) {
+                    oInsStmt.setInt(1, question.getId());
+                    oInsStmt.setString(2, opt.getContent());
+                    oInsStmt.setBoolean(3, opt.isCorrect());
+                    oInsStmt.addBatch();
+                }
+                oInsStmt.executeBatch();
+            }
+
+            conn.commit();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        }
+        return false;
+    }
+
+    // 6. Xóa câu hỏi an toàn (dọn attempt_answers trước)
+    public boolean delete(int questionId) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            String delAttemptAnswersSql = "DELETE FROM attempt_answers WHERE question_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(delAttemptAnswersSql)) {
+                stmt.setInt(1, questionId);
+                stmt.executeUpdate();
+            }
+
+            String delOptionsSql = "DELETE FROM answer_options WHERE question_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(delOptionsSql)) {
+                stmt.setInt(1, questionId);
+                stmt.executeUpdate();
+            }
+
+            String sql = "DELETE FROM questions WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, questionId);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
         }
         return false;
     }

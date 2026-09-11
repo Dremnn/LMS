@@ -13,6 +13,16 @@
     <style>
         .btn-danger-sm{padding:6px 14px;background:#fed7d7;color:#9b2c2c;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;}
         .btn-danger-sm:hover{background:#fc8181;color:#fff;}
+        .btn-action-sm{background:#edf2f7;color:#4a5568;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:background .2s;}
+        .btn-action-sm:hover{background:#e2e8f0;color:#1a202c;}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;}
+        .modal-overlay.active{display:flex;}
+        .modal-card{background:#fff;border-radius:16px;padding:24px 28px;width:90%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalSlide .25s ease;}
+        @keyframes modalSlide{from{transform:translateY(-20px) scale(.96);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+        .modal-header h3{font-size:17px;font-weight:700;color:#1e293b;}
+        .btn-close{background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;line-height:1;}
+        .btn-close:hover{color:#0f172a;}
         .main{max-width:900px;margin:36px auto;padding:0 24px;}
         .page-header{margin-bottom:28px;}
         .page-title{font-size:24px;font-weight:800;color:#1a202c;}
@@ -144,13 +154,24 @@
                             </div>
                         </c:forEach>
                     </div>
-                    <div class="question-footer">
+                    <div id="qdata_${question.id}" style="display:none;"
+                         data-id="${question.id}"
+                         data-content="<c:out value="${question.content}" escapeXml="true"/>"
+                         data-type="${question.questionType}">
+                        <c:forEach var="opt" items="${question.options}">
+                            <span class="opt-item" data-content="<c:out value="${opt.content}" escapeXml="true"/>" data-correct="${opt.correct}"></span>
+                        </c:forEach>
+                    </div>
+                    <div class="question-footer" style="display:flex; justify-content:flex-end; gap:8px;">
+                        <button type="button" class="btn-action-sm" onclick="openEditQuestionModal(${question.id})">
+                            <i class="fa-solid fa-pen-to-square"></i> Sửa câu hỏi
+                        </button>
                         <form action="${pageContext.request.contextPath}/instructor/quizzes/questions/delete"
                               method="post"
                               onsubmit="return confirm('Xác nhận xóa câu hỏi này?')">
                             <input type="hidden" name="questionId" value="${question.id}" />
                             <input type="hidden" name="quizId" value="${quiz.id}" />
-                            <button type="submit" class="btn-danger-sm">🗑 Xóa câu hỏi</button>
+                            <button type="submit" class="btn-danger-sm"><i class="fa-solid fa-trash"></i> Xóa câu hỏi</button>
                         </form>
                     </div>
                 </div>
@@ -212,11 +233,52 @@
     </div>
 </div>
 
+<%-- MODAL CHỈNH SỬA CÂU HỎI --%>
+<div class="modal-overlay" id="editQuestionModal" onclick="if(event.target===this)closeEditQuestionModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>✏️ Chỉnh sửa câu hỏi</h3>
+            <button type="button" class="btn-close" onclick="closeEditQuestionModal()">&times;</button>
+        </div>
+        <form action="${pageContext.request.contextPath}/instructor/quizzes/questions/edit" method="post">
+            <input type="hidden" name="quizId" value="${quiz.id}" />
+            <input type="hidden" name="questionId" id="modalEditQuestionId" />
+
+            <div class="form-group">
+                <label for="editContent">Nội dung câu hỏi *</label>
+                <textarea id="editContent" name="content" required placeholder="Nhập nội dung câu hỏi..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="editQuestionType">Loại câu hỏi *</label>
+                <select id="editQuestionType" name="questionType">
+                    <option value="single_choice">1 đáp án đúng (Single choice)</option>
+                    <option value="multi_choice">Nhiều đáp án đúng (Multi choice)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Các đáp án *</label>
+                <div class="options-container" id="editOptionsContainer">
+                    <!-- Sẽ được điền động bằng JS -->
+                </div>
+                <button type="button" class="btn-add-option" onclick="addEditOption()">+ Thêm đáp án</button>
+                <div class="hint">💡 Với loại "1 đáp án đúng", chỉ được tick đúng 1 ô "Đáp án đúng".</div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeEditQuestionModal()">Hủy</button>
+                <button type="submit" class="btn-submit" style="padding:8px 20px;">💾 Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function addOption() {
         var container = document.getElementById('optionsContainer');
         var idx = container.children.length;
-        var letters = ['A','B','C','D','E','F','G','H'];
+        var letters = ['A','B','C','D','E','F','G','H','I','J'];
         var letter = idx < letters.length ? letters[idx] : (idx + 1);
         var div = document.createElement('div');
         div.className = 'option-row';
@@ -224,6 +286,59 @@
             '<input type="text" name="optionContent" placeholder="Nội dung đáp án ' + letter + '" required />' +
             '<label><input type="checkbox" name="correctOption" value="' + idx + '" /> Đáp án đúng</label>';
         container.appendChild(div);
+    }
+
+    function openEditQuestionModal(questionId) {
+        var dataEl = document.getElementById('qdata_' + questionId);
+        if (!dataEl) return;
+
+        document.getElementById('modalEditQuestionId').value = questionId;
+        document.getElementById('editContent').value = dataEl.getAttribute('data-content');
+        document.getElementById('editQuestionType').value = dataEl.getAttribute('data-type');
+
+        var container = document.getElementById('editOptionsContainer');
+        container.innerHTML = '';
+
+        var optItems = dataEl.getElementsByClassName('opt-item');
+        var letters = ['A','B','C','D','E','F','G','H','I','J'];
+
+        for (var i = 0; i < optItems.length; i++) {
+            var optContent = optItems[i].getAttribute('data-content');
+            var isCorrect = optItems[i].getAttribute('data-correct') === 'true';
+            var letter = i < letters.length ? letters[i] : (i + 1);
+
+            var div = document.createElement('div');
+            div.className = 'option-row';
+            div.innerHTML =
+                '<input type="text" name="optionContent" value="' + escapeHtml(optContent) + '" placeholder="Nội dung đáp án ' + letter + '" required />' +
+                '<label><input type="checkbox" name="correctOption" value="' + i + '" ' + (isCorrect ? 'checked' : '') + ' /> Đáp án đúng</label>';
+            container.appendChild(div);
+        }
+
+        document.getElementById('editQuestionModal').classList.add('active');
+    }
+
+    function closeEditQuestionModal() {
+        document.getElementById('editQuestionModal').classList.remove('active');
+    }
+
+    function addEditOption() {
+        var container = document.getElementById('editOptionsContainer');
+        var idx = container.children.length;
+        var letters = ['A','B','C','D','E','F','G','H','I','J'];
+        var letter = idx < letters.length ? letters[idx] : (idx + 1);
+
+        var div = document.createElement('div');
+        div.className = 'option-row';
+        div.innerHTML =
+            '<input type="text" name="optionContent" placeholder="Nội dung đáp án ' + letter + '" required />' +
+            '<label><input type="checkbox" name="correctOption" value="' + idx + '" /> Đáp án đúng</label>';
+        container.appendChild(div);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 </script>
 </body>

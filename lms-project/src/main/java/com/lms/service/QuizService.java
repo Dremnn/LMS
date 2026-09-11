@@ -158,6 +158,65 @@ public class QuizService {
     }
 
     // =========================================================================
+    // 2c. INSTRUCTOR: XÓA QUIZ
+    // =========================================================================
+    public void deleteQuiz(int quizId, int currentInstructorId) {
+        getQuizAndVerifyOwnership(quizId, currentInstructorId);
+
+        boolean deleted = quizDAO.delete(quizId);
+        if (!deleted) {
+            throw new RuntimeException("Có lỗi xảy ra khi xóa Quiz!");
+        }
+    }
+
+    // =========================================================================
+    // 2d. INSTRUCTOR: CẬP NHẬT CÂU HỎI
+    // =========================================================================
+    public Question updateQuestion(int currentInstructorId, int questionId, String content,
+                                   String questionType, List<AnswerOption> options) {
+        Question existing = questionDAO.findById(questionId);
+        if (existing == null) {
+            throw new IllegalArgumentException("Câu hỏi không tồn tại!");
+        }
+
+        getQuizAndVerifyOwnership(existing.getQuizId(), currentInstructorId);
+
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nội dung câu hỏi không được để trống!");
+        }
+        if (!"single_choice".equals(questionType) && !"multi_choice".equals(questionType)) {
+            throw new IllegalArgumentException("Loại câu hỏi không hợp lệ!");
+        }
+        if (options == null || options.size() < 2) {
+            throw new IllegalArgumentException("Câu hỏi cần có ít nhất 2 đáp án!");
+        }
+
+        long correctCount = options.stream().filter(AnswerOption::isCorrect).count();
+        if (correctCount == 0) {
+            throw new IllegalArgumentException("Câu hỏi cần có ít nhất 1 đáp án đúng!");
+        }
+        if ("single_choice".equals(questionType) && correctCount > 1) {
+            throw new IllegalArgumentException("Câu hỏi 1 đáp án đúng (single choice) chỉ được chọn đúng 1 đáp án đúng!");
+        }
+
+        for (AnswerOption opt : options) {
+            if (opt.getContent() == null || opt.getContent().trim().isEmpty()) {
+                throw new IllegalArgumentException("Nội dung đáp án không được để trống!");
+            }
+        }
+
+        Question question = new Question(existing.getQuizId(), content.trim(), questionType);
+        question.setId(questionId);
+        question.setOptions(options);
+
+        boolean updated = questionDAO.updateWithOptions(question);
+        if (!updated) {
+            throw new RuntimeException("Có lỗi xảy ra khi cập nhật câu hỏi!");
+        }
+        return question;
+    }
+
+    // =========================================================================
     // 2b. Lấy toàn bộ danh sách quiz của 1 khóa học (dùng cho trang quản lý nội dung)
     // Trả về List các quiz thuộc về khóa học (courseId) và các chương (sectionId) của nó
     // =========================================================================

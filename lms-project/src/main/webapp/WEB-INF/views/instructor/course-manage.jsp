@@ -54,6 +54,18 @@
         .btn-submit-review{padding:12px 32px;background:linear-gradient(135deg,#f6ad55,#ed8936);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;}
         .btn-submit-review:hover{opacity:.9;transform:translateY(-1px);}
         .readonly-notice{background:#fffff0;border:1px solid #f6e05e;color:#744210;padding:12px 16px;border-radius:9px;font-size:13px;margin-bottom:20px;}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;}
+        .modal-overlay.active{display:flex;}
+        .modal-card{background:#fff;border-radius:16px;padding:24px 28px;width:90%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalSlide .25s ease;}
+        @keyframes modalSlide{from{transform:translateY(-20px) scale(.96);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+        .modal-header h3{font-size:17px;font-weight:700;color:#1e293b;}
+        .btn-close{background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;line-height:1;}
+        .btn-close:hover{color:#0f172a;}
+        .btn-danger-sm{background:#fed7d7;color:#9b2c2c;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;transition:background .2s;}
+        .btn-danger-sm:hover{background:#feb2b2;}
+        .btn-action-sm{background:#edf2f7;color:#4a5568;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;transition:background .2s;}
+        .btn-action-sm:hover{background:#e2e8f0;color:#1a202c;}
     </style>
 </head>
 <body class="mesh-bg">
@@ -135,8 +147,38 @@
             <c:forEach var="section" items="${course.sectionsCache}" varStatus="st">
                 <div class="section-block">
                     <div class="section-head">
-                        <h3><i class="fa-solid fa-book-open"></i> Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
-                        <span style="font-size:12px;color:#a0aec0;">${section.lessons.size()} bài học</span>
+                        <div>
+                            <h3><i class="fa-solid fa-book-open"></i> Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
+                            <span style="font-size:12px;color:#a0aec0;">${section.lessons.size()} bài học</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <%-- Đổi thứ tự chương (tự động dồn các chương khác) --%>
+                            <form action="${pageContext.request.contextPath}/instructor/courses/sections/reorder" method="post" style="display:inline-flex;align-items:center;gap:4px;">
+                                <input type="hidden" name="courseId" value="${course.id}">
+                                <input type="hidden" name="sectionId" value="${section.id}">
+                                <span style="font-size:12px;color:#718096;font-weight:600;">Vị trí:</span>
+                                <select name="targetOrder" onchange="this.form.submit()" class="form-control" style="width:auto;padding:3px 8px;font-size:12px;height:30px;cursor:pointer;background:#fff;">
+                                    <c:forEach var="i" begin="1" end="${course.sectionsCache.size()}">
+                                        <option value="${i}" ${i == (st.index + 1) ? 'selected' : ''}>Chương ${i}</option>
+                                    </c:forEach>
+                                </select>
+                            </form>
+
+                            <%-- Đổi tên chương --%>
+                            <button type="button" class="btn-action-sm" onclick="openEditSectionModal(${section.id}, '<c:out value="${section.title}" escapeXml="true"/>')">
+                                <i class="fa-solid fa-pen-to-square"></i> Đổi tên
+                            </button>
+
+                            <%-- Xóa chương --%>
+                            <form action="${pageContext.request.contextPath}/instructor/courses/sections/delete" method="post" style="display:inline;"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa Chương ${st.index + 1}: ${section.title}? Tất cả bài học trong chương này sẽ bị xóa và các chương sau sẽ tự động dồn số thứ tự!');">
+                                <input type="hidden" name="courseId" value="${course.id}">
+                                <input type="hidden" name="sectionId" value="${section.id}">
+                                <button type="submit" class="btn-danger-sm">
+                                    <i class="fa-solid fa-trash"></i> Xóa
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     <div class="lesson-list">
                         <c:choose>
@@ -148,12 +190,26 @@
                                                 <c:out value="${lesson.title}"/>
                                             </a>
                                         </span>
-                                        <span class="lesson-dur">
-                                            <c:choose>
-                                                <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
-                                                <c:otherwise>N/A</c:otherwise>
-                                            </c:choose>
-                                        </span>
+                                        <div style="display:flex;align-items:center;gap:8px;">
+                                            <span class="lesson-dur">
+                                                <c:choose>
+                                                    <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
+                                                    <c:otherwise>N/A</c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                            <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;"
+                                                    onclick="openEditLessonModal(${lesson.id}, '<c:out value="${lesson.title}" escapeXml="true"/>', '${lesson.durationMinutes != null ? lesson.durationMinutes : ''}', '<c:out value="${lesson.videoUrl}" escapeXml="true"/>', '<c:out value="${lesson.documentUrl}" escapeXml="true"/>')">
+                                                <i class="fa-solid fa-pen"></i> Sửa
+                                            </button>
+                                            <form action="${pageContext.request.contextPath}/instructor/courses/lessons/delete" method="post" style="display:inline;"
+                                                  onsubmit="return confirm('Bạn có chắc muốn xóa bài học: ${lesson.title}?');">
+                                                <input type="hidden" name="courseId" value="${course.id}">
+                                                <input type="hidden" name="lessonId" value="${lesson.id}">
+                                                <button type="submit" class="btn-danger-sm" style="padding:3px 8px;font-size:11px;">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </c:forEach>
                             </c:when>
@@ -225,42 +281,133 @@
             </form>
         </div>
     </c:if>
-        <%-- ===== PHẦN QUIZ ===== --%>
-        <div style="background:#fff;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.06);padding:24px 28px;margin-bottom:24px;border-left:4px solid #f6ad55;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                <h3 style="font-size:16px;font-weight:700;color:#1a202c;">📝 Quiz khóa học</h3>
-                <a href="${pageContext.request.contextPath}/instructor/quizzes/new?courseId=${course.id}"
-                   class="btn btn-primary btn-sm">➕ Tạo Quiz mới</a>
-            </div>
-            <p style="font-size:13px;color:#718096;margin-bottom:16px;">Tạo bài kiểm tra tổng kết cho toàn bộ khóa học hoặc cho từng chương cụ thể.</p>
-            
-            <c:choose>
-                <c:when test="${not empty quizzes}">
-                    <div style="display:flex;flex-direction:column;gap:12px;">
-                        <c:forEach var="quiz" items="${quizzes}">
-                            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fffaf0;border:1px solid #feebc8;border-radius:8px;">
-                                <div>
-                                    <div style="font-size:14px;font-weight:700;color:#c05621;"><c:out value="${quiz.title}"/></div>
-                                    <div style="font-size:12px;color:#dd6b20;margin-top:4px;">
-                                        ${quiz.totalQuestions} câu hỏi · Điểm đạt: ${quiz.passScore}/100
-                                        <c:choose>
-                                            <c:when test="${quiz.courseId != null}"> (Quiz tổng kết)</c:when>
-                                            <c:otherwise> (Quiz chương ID: ${quiz.sectionId})</c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </div>
-                                <a href="${pageContext.request.contextPath}/instructor/quizzes/manage?id=${quiz.id}" class="btn btn-outline btn-sm" style="border-color:#dd6b20;color:#dd6b20;">Quản lý câu hỏi</a>
-                            </div>
-                        </c:forEach>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <div style="padding:16px;background:#f7fafc;border-radius:8px;text-align:center;font-size:13px;color:#a0aec0;font-style:italic;">
-                        Chưa có Quiz nào được tạo.
-                    </div>
-                </c:otherwise>
-            </c:choose>
+
+    <%-- ===== PHẦN QUIZ ===== --%>
+    <div style="background:#fff;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.06);padding:24px 28px;margin-bottom:24px;border-left:4px solid #f6ad55;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <h3 style="font-size:16px;font-weight:700;color:#1a202c;">📝 Quiz khóa học</h3>
+            <a href="${pageContext.request.contextPath}/instructor/quizzes/new?courseId=${course.id}"
+               class="btn btn-primary btn-sm">➕ Tạo Quiz mới</a>
         </div>
+        <p style="font-size:13px;color:#718096;margin-bottom:16px;">Tạo bài kiểm tra tổng kết cho toàn bộ khóa học hoặc cho từng chương cụ thể.</p>
+        
+        <c:choose>
+            <c:when test="${not empty quizzes}">
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <c:forEach var="quiz" items="${quizzes}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fffaf0;border:1px solid #feebc8;border-radius:8px;">
+                            <div>
+                                <div style="font-size:14px;font-weight:700;color:#c05621;"><c:out value="${quiz.title}"/></div>
+                                <div style="font-size:12px;color:#dd6b20;margin-top:4px;">
+                                    ${quiz.totalQuestions} câu hỏi · Điểm đạt: ${quiz.passScore}/100
+                                    <c:choose>
+                                        <c:when test="${quiz.courseId != null}"> (Quiz tổng kết)</c:when>
+                                        <c:otherwise> (Quiz chương ID: ${quiz.sectionId})</c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <a href="${pageContext.request.contextPath}/instructor/quizzes/manage?id=${quiz.id}" class="btn btn-outline btn-sm" style="border-color:#dd6b20;color:#dd6b20;">
+                                    <i class="fa-solid fa-pen-to-square"></i> Quản lý câu hỏi
+                                </a>
+                                <form action="${pageContext.request.contextPath}/instructor/quizzes/delete" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa Quiz: ${quiz.title}? Toàn bộ câu hỏi và kết quả làm bài của quiz này sẽ bị xóa!');">
+                                    <input type="hidden" name="courseId" value="${course.id}">
+                                    <input type="hidden" name="quizId" value="${quiz.id}">
+                                    <button type="submit" class="btn-danger-sm">
+                                        <i class="fa-solid fa-trash"></i> Xóa
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div style="padding:16px;background:#f7fafc;border-radius:8px;text-align:center;font-size:13px;color:#a0aec0;font-style:italic;">
+                    Chưa có Quiz nào được tạo.
+                </div>
+            </c:otherwise>
+        </c:choose>
+    </div>
 </div>
+
+<%-- MODAL SỬA TÊN CHƯƠNG --%>
+<div class="modal-overlay" id="editSectionModal" onclick="if(event.target===this)closeEditSectionModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>✏️ Đổi tên chương học</h3>
+            <button type="button" class="btn-close" onclick="closeEditSectionModal()">&times;</button>
+        </div>
+        <form action="${pageContext.request.contextPath}/instructor/courses/sections/edit" method="post">
+            <input type="hidden" name="courseId" value="${course.id}">
+            <input type="hidden" name="sectionId" id="modalEditSectionId">
+            <div class="form-group" style="margin-bottom:18px;">
+                <label>Tên chương mới *</label>
+                <input type="text" name="title" id="modalEditSectionTitle" class="form-control" required style="margin-top:6px;">
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeEditSectionModal()">Hủy</button>
+                <button type="submit" class="btn btn-primary btn-sm">💾 Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%-- MODAL SỬA BÀI HỌC --%>
+<div class="modal-overlay" id="editLessonModal" onclick="if(event.target===this)closeEditLessonModal()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>✏️ Chỉnh sửa bài học</h3>
+            <button type="button" class="btn-close" onclick="closeEditLessonModal()">&times;</button>
+        </div>
+        <form action="${pageContext.request.contextPath}/instructor/courses/lessons/edit" method="post">
+            <input type="hidden" name="courseId" value="${course.id}">
+            <input type="hidden" name="lessonId" id="modalEditLessonId">
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>Tên bài học *</label>
+                <input type="text" name="title" id="modalEditLessonTitle" class="form-control" required style="margin-top:4px;">
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>Thời lượng (phút)</label>
+                <input type="number" name="durationMinutes" id="modalEditLessonDuration" class="form-control" min="1" style="margin-top:4px;">
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+                <label>URL Video</label>
+                <input type="text" name="videoUrl" id="modalEditLessonVideo" class="form-control" placeholder="https://youtube.com/..." style="margin-top:4px;">
+            </div>
+            <div class="form-group" style="margin-bottom:18px;">
+                <label>URL Tài liệu</label>
+                <input type="text" name="documentUrl" id="modalEditLessonDoc" class="form-control" placeholder="https://drive.google.com/..." style="margin-top:4px;">
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeEditLessonModal()">Hủy</button>
+                <button type="submit" class="btn btn-primary btn-sm">💾 Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditSectionModal(sectionId, title) {
+        document.getElementById('modalEditSectionId').value = sectionId;
+        document.getElementById('modalEditSectionTitle').value = title;
+        document.getElementById('editSectionModal').classList.add('active');
+    }
+    function closeEditSectionModal() {
+        document.getElementById('editSectionModal').classList.remove('active');
+    }
+    function openEditLessonModal(lessonId, title, duration, videoUrl, docUrl) {
+        document.getElementById('modalEditLessonId').value = lessonId;
+        document.getElementById('modalEditLessonTitle').value = title;
+        document.getElementById('modalEditLessonDuration').value = duration || '';
+        document.getElementById('modalEditLessonVideo').value = videoUrl || '';
+        document.getElementById('modalEditLessonDoc').value = docUrl || '';
+        document.getElementById('editLessonModal').classList.add('active');
+    }
+    function closeEditLessonModal() {
+        document.getElementById('editLessonModal').classList.remove('active');
+    }
+</script>
 </body>
 </html>
