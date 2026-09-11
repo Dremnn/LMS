@@ -72,23 +72,8 @@
         .badge.none     { background: #6b7280; }
         .badge.event    { background: #7c3aed; }
 
-<<<<<<< HEAD
         .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
         .btn-primary { background: #2563eb; color: #fff; }
-=======
-        .modal-overlay {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 1000;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-box { background: #fff; border-radius: 10px; padding: 24px; width: 400px; }
-        .modal-box h3 { margin-top: 0; }
-        .modal-box label { display: block; margin: 10px 0 4px; font-size: 13px; color: #555; }
-        .modal-box input, .modal-box select, .modal-box textarea {
-            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
-        }
-        .modal-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; }
->>>>>>> f97b1d1d52e1ebd4905ecdd946f022412ef02217
         .btn-secondary { background: #e5e7eb; color: #333; }
         .btn-danger-outline { background: #fff; border: 1px solid #ccc; color: #333; }
 
@@ -147,6 +132,114 @@
         .view-modal-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #444; }
         .view-modal-row a { color: #2563eb; text-decoration: none; }
         .view-modal-actions { padding: 0 16px 16px; display: flex; justify-content: flex-end; gap: 8px; }
+
+        /* Khối ngăn kéo (Drawer) bên phải */
+        .drawer-toggle-btn {
+            position: fixed;
+            top: 20%;
+            right: 0;
+            background: #212121;
+            color: #fff;
+            border: none;
+            border-radius: 20px 0 0 20px;
+            width: 40px;
+            height: 48px;
+            cursor: pointer;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: right 0.3s ease;
+        }
+        .drawer-toggle-btn:hover { background: #333; }
+        .drawer-toggle-btn svg { width: 20px; height: 20px; fill: currentColor; }
+        
+        .right-drawer {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            height: 100vh;
+            background: #fff;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            border-left: 1px solid #e5e7eb;
+        }
+        .right-drawer.open { right: 0; }
+        
+        .drawer-header {
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px;
+        }
+        .drawer-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #4b5563;
+        }
+        .drawer-close-btn:hover { color: #111; }
+        
+        .drawer-content { padding: 0 20px 20px; }
+        .drawer-title {
+            font-size: 18px;
+            color: #1f2937;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 12px;
+            margin-top: 0;
+            font-weight: 500;
+        }
+        .recent-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 10px;
+            text-decoration: none;
+            color: inherit;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+        .recent-item:hover { background: #f3f4f6; }
+        .recent-icon {
+            margin-right: 12px;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+        }
+        .recent-icon svg { width: 28px; height: 28px; }
+        .recent-info { flex: 1; overflow: hidden; }
+        .recent-name {
+            font-size: 15px;
+            color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .recent-course {
+            font-size: 13px;
+            color: #2563eb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        .show-more-btn {
+            width: 150px;
+            padding: 8px;
+            background: #fff;
+            border: 1px solid #4b5563;
+            border-radius: 4px;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .show-more-btn:hover { background: #f9fafb; }
     </style>
     <!-- TinyMCE CDN (Phiên bản Open Source không cần API key) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js" referrerpolicy="origin"></script>
@@ -367,12 +460,7 @@
                 </div>
 
                 <div class="modal-actions">
-<<<<<<< HEAD
                     <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Huỷ</button>
-=======
-                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Huỷ</button>
-                    <button type="button" class="btn btn-danger" style="background:#ef4444;color:#fff;">Xoá</button>
->>>>>>> f97b1d1d52e1ebd4905ecdd946f022412ef02217
                     <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
             </form>
@@ -412,6 +500,44 @@
                     <input type="hidden" name="month" value="<%= month %>">
                     <button type="submit" class="btn btn-primary">Xóa sự kiện</button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RIGHT DRAWER ================= -->
+    <button id="drawerToggleBtn" class="drawer-toggle-btn" title="Mở ngăn kéo tài liệu" onclick="toggleDrawer()">
+        <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+    </button>
+
+    <div id="rightDrawer" class="right-drawer">
+        <div class="drawer-header">
+            <button class="drawer-close-btn" onclick="toggleDrawer()">&times;</button>
+        </div>
+        <div class="drawer-content">
+            <h3 class="drawer-title">Recently accessed items</h3>
+            <div class="recent-items-list">
+                <% if (myCourses != null && !myCourses.isEmpty()) { 
+                    int count = 0;
+                    for (Course c : myCourses) { 
+                        if (count >= 5) break;
+                        count++;
+                %>
+                <a href="<%= request.getContextPath() %>/courses/detail?id=<%= c.getId() %>" class="recent-item">
+                    <div class="recent-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    </div>
+                    <div class="recent-info">
+                        <div class="recent-name"><%= esc.apply(c.getTitle()) %></div>
+                        <div class="recent-course">Course ID: <%= c.getId() %></div>
+                    </div>
+                </a>
+                <% } } else { %>
+                    <p style="color: #666; font-size: 14px; text-align: center; margin-top: 20px;">Bạn chưa tham gia khóa học nào.</p>
+                <% } %>
+
+                <% if (myCourses != null && myCourses.size() > 5) { %>
+                    <a href="<%= request.getContextPath() %>/student/my-courses" style="text-decoration:none;"><button class="show-more-btn" style="width: 100%;">Xem thêm</button></a>
+                <% } %>
             </div>
         </div>
     </div>
@@ -559,6 +685,12 @@
         }
         function closeDeleteConfirm() {
             document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        // ---------- Ngăn kéo (Drawer) ----------
+        function toggleDrawer() {
+            var drawer = document.getElementById('rightDrawer');
+            drawer.classList.toggle('open');
         }
     </script>
     <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
