@@ -65,6 +65,14 @@ a { text-decoration: none; color: inherit; transition: color var(--t-fast); }
   display: flex; align-items: center; gap: 8px;
   font-size: 22px; font-weight: 800; color: var(--text);
   text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--t-smooth);
+}
+.lms-logo:hover {
+  transform: translateY(-1px);
+}
+.lms-logo:active {
+  transform: scale(0.96);
 }
 .lms-logo-img {
   height: 36px;
@@ -72,10 +80,26 @@ a { text-decoration: none; color: inherit; transition: color var(--t-fast); }
   width: auto;
   display: block;
   object-fit: contain;
+  transition: transform var(--t-smooth), filter var(--t-smooth);
 }
-.logo-icon { font-size: 28px; }
+.lms-logo:hover .lms-logo-img {
+  transform: scale(1.06);
+  filter: drop-shadow(0 4px 12px rgba(18, 105, 176, 0.32));
+}
+.logo-icon { font-size: 28px; transition: transform var(--t-smooth); }
+.lms-logo:hover .logo-icon { transform: rotate(-8deg) scale(1.1); }
 .logo-text { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.logo-tag { font-size: 11px; background: #0A426E; color: #fff; padding: 2px 7px; border-radius: 6px; font-weight: 700; letter-spacing: 0.5px; vertical-align: middle; -webkit-text-fill-color: #fff; }
+.logo-tag {
+  font-size: 11px; background: #0A426E; color: #fff; padding: 2px 7px;
+  border-radius: 6px; font-weight: 700; letter-spacing: 0.5px;
+  vertical-align: middle; -webkit-text-fill-color: #fff;
+  transition: all var(--t-smooth);
+}
+.lms-logo:hover .logo-tag {
+  background: linear-gradient(135deg, #1269B0, #0A426E);
+  box-shadow: 0 3px 10px rgba(10, 66, 110, 0.35);
+  transform: translateY(-1px) scale(1.05);
+}
 
 .nav-links { display: flex; align-items: center; gap: 24px; }
 .nav-link {
