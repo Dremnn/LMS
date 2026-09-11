@@ -54,6 +54,7 @@
         .btn-submit-review{padding:12px 32px;background:linear-gradient(135deg,#f6ad55,#ed8936);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;}
         .btn-submit-review:hover{opacity:.9;transform:translateY(-1px);}
         .readonly-notice{background:#fffff0;border:1px solid #f6e05e;color:#744210;padding:12px 16px;border-radius:9px;font-size:13px;margin-bottom:20px;}
+    </style>
 </head>
 <body class="mesh-bg">
 <% 

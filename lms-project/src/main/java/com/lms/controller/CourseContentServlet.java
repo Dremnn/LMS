@@ -15,6 +15,7 @@ import java.io.IOException;
 
 @WebServlet(urlPatterns = {
     "/instructor/courses/manage",
+    "/courses/manage",
     "/instructor/courses/sections/add",
     "/instructor/courses/lessons/add"
 })
@@ -46,9 +47,19 @@ public class CourseContentServlet extends HttpServlet {
             session.removeAttribute("flashError");
         }
 
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/instructor/courses");
+            return;
+        }
+
         try {
-            int courseId = Integer.parseInt(request.getParameter("id"));
+            int courseId = Integer.parseInt(idParam);
             Course course = courseService.getCourseDetail(courseId);
+            if (course == null) {
+                response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                return;
+            }
 
             // Instructor chỉ được xem khóa học của mình.
             // Admin được xem tất cả (để kiểm tra nội dung trước khi duyệt).
