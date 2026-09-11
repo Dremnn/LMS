@@ -102,8 +102,8 @@ public class AuthFilter implements Filter {
             }
         }
 
-        // 3.3. Phân quyền khu vực HỌC VIÊN (/student/*)
-        if (path.startsWith("/student/")) {
+        // 3.3. Phân quyền khu vực HỌC VIÊN (/student/* hoặc /courses/reviews*)
+        if (path.startsWith("/student/") || path.startsWith("/courses/reviews")) {
             if (!"student".equalsIgnoreCase(role)) {
                 httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Khu vực này chỉ dành cho Học viên!");
                 return;

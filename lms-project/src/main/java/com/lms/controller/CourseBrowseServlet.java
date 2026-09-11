@@ -2,9 +2,11 @@ package com.lms.controller;
 
 import com.lms.model.Course;
 import com.lms.model.Enrollment;
+import com.lms.model.Review;
 import com.lms.model.User;
 import com.lms.service.CourseService;
 import com.lms.service.EnrollmentService;
+import com.lms.service.ReviewService;
 import com.lms.dao.CategoryDAO;
 
 import jakarta.servlet.ServletException;
@@ -25,12 +27,14 @@ public class CourseBrowseServlet extends HttpServlet {
     private CourseService courseService;
     private CategoryDAO categoryDAO;
     private EnrollmentService enrollmentService;
+    private ReviewService reviewService;
 
     @Override
     public void init() throws ServletException {
         this.courseService = new CourseService();
         this.categoryDAO = new CategoryDAO();
         this.enrollmentService = new EnrollmentService();
+        this.reviewService = new ReviewService();
     }
 
     @Override
@@ -75,11 +79,17 @@ public class CourseBrowseServlet extends HttpServlet {
     private void showCourseDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Đọc flash message (nếu vừa redirect từ EnrollmentServlet với lỗi)
+        // Đọc flash message (nếu vừa redirect từ EnrollmentServlet/ReviewServlet với lỗi/thành công)
         HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute("flashError") != null) {
-            request.setAttribute("error", session.getAttribute("flashError"));
-            session.removeAttribute("flashError");
+        if (session != null) {
+            if (session.getAttribute("flashError") != null) {
+                request.setAttribute("error", session.getAttribute("flashError"));
+                session.removeAttribute("flashError");
+            }
+            if (session.getAttribute("flashSuccess") != null) {
+                request.setAttribute("success", session.getAttribute("flashSuccess"));
+                session.removeAttribute("flashSuccess");
+            }
         }
 
         String idParam = request.getParameter("id");
@@ -102,13 +112,20 @@ public class CourseBrowseServlet extends HttpServlet {
             request.setAttribute("course", course);
 
             // Kiểm tra: nếu đang đăng nhập VÀ là student, xem đã enroll khóa học này chưa
-            // Kết quả dùng để JSP quyết định: hiện nút "Đăng ký học" hay cho phép click vào bài học
+            // Kết quả dùng để JSP quyết định: hiện nút "Đăng ký học" hay cho phép click vào bài học, đánh giá
             User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
             Enrollment enrollment = null;
+            Review myReview = null;
             if (currentUser != null && "student".equalsIgnoreCase(currentUser.getRole())) {
                 enrollment = enrollmentService.getEnrollmentIfExists(currentUser.getId(), courseId);
+                myReview = reviewService.getStudentReview(currentUser.getId(), courseId);
             }
             request.setAttribute("enrollment", enrollment); // null nếu chưa đăng ký (hoặc không phải student)
+            request.setAttribute("myReview", myReview);
+
+            // Lấy toàn bộ đánh giá của khóa học
+            List<Review> reviews = reviewService.getCourseReviews(courseId);
+            request.setAttribute("reviews", reviews);
 
             request.getRequestDispatcher("/WEB-INF/views/student/course-detail.jsp")
                     .forward(request, response);

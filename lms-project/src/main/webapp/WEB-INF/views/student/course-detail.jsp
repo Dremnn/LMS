@@ -49,6 +49,47 @@
         .progress-box{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px 20px;margin-bottom:20px;}
         .progress-bar-bg{background:#E2E8F0;border-radius:10px;height:8px;overflow:hidden;margin-top:10px;}
         .progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#4F46E5,#06B6D4);}
+
+        /* Reviews & Ratings Section */
+        .reviews-section{margin-top:56px;}
+        .reviews-summary{background:#fff;border-radius:16px;border:1px solid #E2E8F0;padding:28px 32px;display:flex;align-items:center;gap:36px;margin-bottom:24px;box-shadow:0 4px 20px rgba(0,0,0,.03);}
+        .reviews-summary-score{text-align:center;min-width:140px;border-right:1px solid #E2E8F0;padding-right:36px;}
+        .score-big{font-size:48px;font-weight:800;color:#0F172A;line-height:1;margin-bottom:8px;}
+        .score-stars{color:#F59E0B;font-size:18px;margin-bottom:6px;display:flex;justify-content:center;gap:3px;}
+        .score-count{font-size:13px;color:#64748B;font-weight:600;}
+        .reviews-summary-info{flex:1;}
+        .reviews-summary-info h4{font-size:17px;font-weight:700;color:#0F172A;margin-bottom:6px;}
+        .reviews-summary-info p{font-size:14px;color:#64748B;line-height:1.5;margin:0;}
+
+        .review-form-card{background:#fff;border-radius:16px;border:1px solid #E2E8F0;padding:24px 28px;margin-bottom:28px;box-shadow:0 4px 20px rgba(0,0,0,.03);}
+        .review-form-card h4{font-size:16px;font-weight:700;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        
+        .star-rating-select{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:8px;margin-bottom:16px;}
+        .star-rating-select input[type="radio"]{display:none;}
+        .star-rating-select label{font-size:28px;color:#CBD5E1;cursor:pointer;transition:color .15s, transform .15s;}
+        .star-rating-select label:hover,
+        .star-rating-select label:hover ~ label,
+        .star-rating-select input[type="radio"]:checked ~ label{color:#F59E0B;}
+        .star-rating-select label:hover{transform:scale(1.2);}
+
+        .review-textarea{width:100%;min-height:90px;border:1px solid #CBD5E1;border-radius:12px;padding:12px 16px;font-family:inherit;font-size:14px;color:#1E293B;resize:vertical;box-sizing:border-box;transition:border-color .15s;outline:none;}
+        .review-textarea:focus{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.12);}
+        .review-form-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+        .btn-submit-review{background:linear-gradient(135deg,#4F46E5,#06B6D4);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s, box-shadow .15s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(79,70,229,.2);}
+        .btn-submit-review:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(79,70,229,.3);}
+        .btn-delete-review{background:#FEE2E2;color:#991B1B;border:none;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;gap:6px;}
+        .btn-delete-review:hover{background:#FECACA;}
+
+        .review-item{background:#fff;border-radius:16px;border:1px solid #E2E8F0;padding:22px 26px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.02);transition:box-shadow .15s;}
+        .review-item:hover{box-shadow:0 6px 20px rgba(0,0,0,.06);}
+        .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+        .review-user-info{display:flex;align-items:center;gap:12px;}
+        .review-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #EEF2FF;background:#EEF2FF;}
+        .review-avatar-placeholder{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#06B6D4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;}
+        .review-name{font-size:15px;font-weight:700;color:#0F172A;}
+        .review-date{font-size:12px;color:#94A3B8;font-weight:500;margin-top:2px;}
+        .review-stars{color:#F59E0B;font-size:14px;display:flex;gap:3px;}
+        .review-comment{font-size:14px;color:#334155;line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0;}
     </style>
 </head>
 <body class="mesh-bg">
@@ -98,6 +139,11 @@
                 </span>
             </c:if>
             <h1><c:out value="${course.title}"/></h1>
+            <c:if test="${not empty success}">
+                <div style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:16px;">
+                    <i class="fa-solid fa-circle-check"></i> ${success}
+                </div>
+            </c:if>
             <c:if test="${not empty error}">
                 <div style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:16px;">
                     <i class="fa-solid fa-triangle-exclamation"></i> ${error}
@@ -111,7 +157,7 @@
             <p class="desc"><c:out value="${course.description}"/></p>
             <div class="hero-meta">
                 <span class="instructor-tag"><i class="fa-solid fa-chalkboard-user"></i> <c:out value="${course.instructorName}"/></span>
-                <span class="rating-tag"><i class="fa-solid fa-star"></i> ${course.avgRating} / 5</span>
+                <span class="rating-tag"><a href="#reviews-section" style="color:inherit;text-decoration:none;"><i class="fa-solid fa-star"></i> ${course.avgRating} / 5 (${reviews != null ? reviews.size() : 0} đánh giá)</a></span>
                 <span><i class="fa-solid fa-users"></i> ${course.totalStudents} học viên</span>
                 <span><i class="fa-solid fa-book-open"></i> ${course.totalLessons} bài học</span>
             </div>
@@ -229,6 +275,184 @@
             </div>
         </c:otherwise>
     </c:choose>
+
+    <!-- ============================================================ -->
+    <!-- PHẦN ĐÁNH GIÁ & NHẬN XÉT (COURSE REVIEWS & RATINGS) -->
+    <!-- ============================================================ -->
+    <div id="reviews-section" class="reviews-section">
+        <div class="curriculum-title">
+            <i class="fa-solid fa-star" style="color:#F59E0B;"></i> Đánh giá & Nhận xét
+            <span style="font-size:16px;color:#64748B;font-weight:600;">(${reviews != null ? reviews.size() : 0})</span>
+        </div>
+
+        <!-- Khối tổng quan đánh giá -->
+        <div class="reviews-summary">
+            <div class="reviews-summary-score">
+                <div class="score-big">${course.avgRating}</div>
+                <div class="score-stars">
+                    <c:forEach var="i" begin="1" end="5">
+                        <c:choose>
+                            <c:when test="${course.avgRating >= i}">
+                                <i class="fa-solid fa-star"></i>
+                            </c:when>
+                            <c:when test="${course.avgRating >= (i - 0.5)}">
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            </c:when>
+                            <c:otherwise>
+                                <i class="fa-solid fa-star" style="color:#E2E8F0;"></i>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                </div>
+                <div class="score-count">${reviews != null ? reviews.size() : 0} lượt đánh giá</div>
+            </div>
+            <div class="reviews-summary-info">
+                <h4>Trải nghiệm từ học viên</h4>
+                <p>Tất cả đánh giá đến từ các học viên đã thực tế tham gia học tập khóa học này tại UTEdu LMS. Mọi ý kiến đóng góp giúp nâng cao chất lượng nội dung và giảng dạy.</p>
+            </div>
+        </div>
+
+        <!-- Form gửi / cập nhật đánh giá (chỉ dành cho học viên đã đăng ký) -->
+        <c:choose>
+            <c:when test="${not empty enrollment}">
+                <div class="review-form-card">
+                    <h4>
+                        <i class="fa-solid fa-pen-to-square" style="color:#4F46E5;"></i>
+                        <c:choose>
+                            <c:when test="${not empty myReview}">
+                                Chỉnh sửa đánh giá của bạn
+                            </c:when>
+                            <c:otherwise>
+                                Viết đánh giá của bạn về khóa học
+                            </c:otherwise>
+                        </c:choose>
+                    </h4>
+
+                    <form action="${pageContext.request.contextPath}/courses/reviews" method="post">
+                        <input type="hidden" name="courseId" value="${course.id}" />
+
+                        <div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px;">
+                            Chọn điểm đánh giá:
+                        </div>
+                        <div class="star-rating-select">
+                            <input type="radio" id="star5" name="rating" value="5" ${myReview != null && myReview.rating == 5 ? 'checked' : ''} required />
+                            <label for="star5" title="5 sao - Xuất sắc"><i class="fa-solid fa-star"></i></label>
+                            
+                            <input type="radio" id="star4" name="rating" value="4" ${myReview != null && myReview.rating == 4 ? 'checked' : ''} />
+                            <label for="star4" title="4 sao - Rất tốt"><i class="fa-solid fa-star"></i></label>
+                            
+                            <input type="radio" id="star3" name="rating" value="3" ${myReview != null && myReview.rating == 3 ? 'checked' : ''} />
+                            <label for="star3" title="3 sao - Bình thường"><i class="fa-solid fa-star"></i></label>
+                            
+                            <input type="radio" id="star2" name="rating" value="2" ${myReview != null && myReview.rating == 2 ? 'checked' : ''} />
+                            <label for="star2" title="2 sao - Tạm được"><i class="fa-solid fa-star"></i></label>
+                            
+                            <input type="radio" id="star1" name="rating" value="1" ${myReview != null && myReview.rating == 1 ? 'checked' : ''} />
+                            <label for="star1" title="1 sao - Kém"><i class="fa-solid fa-star"></i></label>
+                        </div>
+
+                        <div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px;">
+                            Nhận xét chi tiết (tùy chọn):
+                        </div>
+                        <textarea name="comment" class="review-textarea" placeholder="Hãy chia sẻ những điều bạn thích hoặc cần cải thiện về khóa học này..."><c:out value="${myReview != null ? myReview.comment : ''}"/></textarea>
+
+                        <div class="review-form-actions">
+                            <button type="submit" class="btn-submit-review">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <c:choose>
+                                    <c:when test="${not empty myReview}">Cập nhật đánh giá</c:when>
+                                    <c:otherwise>Gửi đánh giá</c:otherwise>
+                                </c:choose>
+                            </button>
+                        </div>
+                    </form>
+
+                    <c:if test="${not empty myReview}">
+                        <form action="${pageContext.request.contextPath}/courses/reviews/delete" method="post"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa đánh giá của mình không?')"
+                              style="margin-top:-38px; display:flex; justify-content:flex-end;">
+                            <input type="hidden" name="courseId" value="${course.id}" />
+                            <button type="submit" class="btn-delete-review">
+                                <i class="fa-solid fa-trash-can"></i> Xóa đánh giá
+                            </button>
+                        </form>
+                    </c:if>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <%-- Chưa đăng ký khóa học --%>
+                <div style="padding:18px 24px; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:14px; font-size:14px; color:#64748B; margin-bottom:28px; display:flex; align-items:center; gap:12px;">
+                    <i class="fa-solid fa-circle-info" style="color:#4F46E5;font-size:18px;"></i>
+                    <c:choose>
+                        <c:when test="${empty currentUser}">
+                            <span>Vui lòng <a href="${pageContext.request.contextPath}/login" style="color:#4F46E5;font-weight:700;text-decoration:none;">Đăng nhập</a> và đăng ký khóa học để có thể gửi đánh giá.</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span>Bạn cần đăng ký khóa học này trước khi có thể gửi nhận xét & đánh giá.</span>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </c:otherwise>
+        </c:choose>
+
+        <!-- Danh sách các đánh giá từ học viên -->
+        <c:choose>
+            <c:when test="${not empty reviews}">
+                <div class="reviews-list">
+                    <c:forEach var="review" items="${reviews}">
+                        <div class="review-item">
+                            <div class="review-header">
+                                <div class="review-user-info">
+                                    <c:choose>
+                                        <c:when test="${not empty review.studentAvatar}">
+                                            <img src="${pageContext.request.contextPath}${review.studentAvatar}"
+                                                 alt="<c:out value='${review.studentName}'/>"
+                                                 class="review-avatar"
+                                                 onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                            <div class="review-avatar-placeholder" style="display:none;">
+                                                <c:out value="${not empty review.studentName ? review.studentName.substring(0, 1).toUpperCase() : 'U'}"/>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="review-avatar-placeholder">
+                                                <c:out value="${not empty review.studentName ? review.studentName.substring(0, 1).toUpperCase() : 'U'}"/>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <div>
+                                        <div class="review-name"><c:out value="${review.studentName}"/></div>
+                                        <div class="review-date">${review.formattedCreatedAt}</div>
+                                    </div>
+                                </div>
+                                <div class="review-stars">
+                                    <c:forEach var="i" begin="1" end="5">
+                                        <c:choose>
+                                            <c:when test="${i <= review.rating}">
+                                                <i class="fa-solid fa-star"></i>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <i class="fa-solid fa-star" style="color:#E2E8F0;"></i>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:forEach>
+                                </div>
+                            </div>
+                            <c:if test="${not empty review.comment}">
+                                <p class="review-comment"><c:out value="${review.comment}"/></p>
+                            </c:if>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div style="text-align:center;padding:48px 20px;background:#fff;border-radius:16px;border:1px solid #E2E8F0;color:#94A3B8;">
+                    <div style="font-size:36px;margin-bottom:10px;color:#CBD5E1;"><i class="fa-regular fa-comment-dots"></i></div>
+                    <p style="margin:0;font-size:15px;color:#64748B;font-weight:500;">Chưa có đánh giá nào cho khóa học này.</p>
+                    <p style="margin-top:6px;font-size:13px;color:#94A3B8;">Hãy là học viên đầu tiên trải nghiệm và chia sẻ nhận xét nhé!</p>
+                </div>
+            </c:otherwise>
+        </c:choose>
+    </div>
 </div>
 </body>
 </html>
