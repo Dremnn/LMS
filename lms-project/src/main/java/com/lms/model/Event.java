@@ -8,23 +8,32 @@ public class Event implements Serializable {
 
     private int id;
     private int userId;
-    private Integer courseId;      // nullable - sự kiện có thể không gắn với khóa học nào
+    private Integer courseId;
     private String title;
     private LocalDateTime eventDate;
     private String description;
+    private String address;
+    private String durationType;       // "none" | "until" | "minutes"
+    private LocalDateTime durationEnd;  // dùng khi durationType = "until"
+    private Integer durationMinutes;    // dùng khi durationType = "minutes"
     private LocalDateTime createdAt;
 
-    // Trường bổ sung từ JOIN - không map trực tiếp cột DB
-    private String courseTitle;
+    private String courseTitle; // từ JOIN, không map cột DB
 
     public Event() {}
 
-    public Event(int userId, Integer courseId, String title, LocalDateTime eventDate, String description) {
+    public Event(int userId, Integer courseId, String title, LocalDateTime eventDate,
+                 String description, String address, String durationType,
+                 LocalDateTime durationEnd, Integer durationMinutes) {
         this.userId = userId;
         this.courseId = courseId;
         this.title = title;
         this.eventDate = eventDate;
         this.description = description;
+        this.address = address;
+        this.durationType = durationType;
+        this.durationEnd = durationEnd;
+        this.durationMinutes = durationMinutes;
     }
 
     public int getId() { return id; }
@@ -44,6 +53,18 @@ public class Event implements Serializable {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getDurationType() { return durationType; }
+    public void setDurationType(String durationType) { this.durationType = durationType; }
+
+    public LocalDateTime getDurationEnd() { return durationEnd; }
+    public void setDurationEnd(LocalDateTime durationEnd) { this.durationEnd = durationEnd; }
+
+    public Integer getDurationMinutes() { return durationMinutes; }
+    public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

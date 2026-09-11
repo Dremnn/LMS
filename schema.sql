@@ -1,3 +1,37 @@
+DROP TRIGGER IF EXISTS trg_lesson_update_total_lessons ON lessons;
+CREATE TRIGGER trg_lesson_update_total_lessons
+AFTER INSERT OR DELETE OR UPDATE OF section_id ON lessons
+FOR EACH ROW EXECUTE FUNCTION trg_lesson_update_total_lessons_fn();
+
+INSERT INTO users (full_name, email, password_hash, role, status)
+VALUES (
+    'Admin',
+    'admin@lms.com',
+    '$2a$12$s7BCaCoYxbUZlpNj9H.Gx.wA.5kwBLezvFNmglpgcxrMd54FApCey',
+    'admin',
+    'active'
+);
+
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id),
+    type VARCHAR(30) NOT NULL,          -- 'quiz_deadline' | 'enrollment' | 'event_reminder'
+    title VARCHAR(255) NOT NULL,
+    message TEXT,
+    related_url VARCHAR(255),
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE notification_settings (
+    user_id INT PRIMARY KEY REFERENCES users(id),
+    quiz_deadline_enabled BOOLEAN DEFAULT TRUE,
+    enrollment_enabled BOOLEAN DEFAULT TRUE,
+    event_reminder_enabled BOOLEAN DEFAULT TRUE
+);
+
+ALTER TABLE quizzes ADD COLUMN notified_deadline BOOLEAN DEFAULT FALSE;
+
 -- ============================================================
 -- 1. NHÓM TÀI KHOẢN & NGƯỜI DÙNG
 -- ============================================================
@@ -24,6 +58,10 @@ create table events (
   title VARCHAR(255) not null,
   event_date TIMESTAMP not null,
   description TEXT,
+  address VARCHAR(255),
+  duration_type VARCHAR(20) DEFAULT 'none',
+  duration_end TIMESTAMP,
+  duration_minutes INT,
   created_at TIMESTAMP default NOW()
 );
 
@@ -440,16 +478,3 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_lesson_update_total_lessons ON lessons;
-CREATE TRIGGER trg_lesson_update_total_lessons
-AFTER INSERT OR DELETE OR UPDATE OF section_id ON lessons
-FOR EACH ROW EXECUTE FUNCTION trg_lesson_update_total_lessons_fn();
-
-INSERT INTO users (full_name, email, password_hash, role, status)
-VALUES (
-    'Admin',
-    'admin@lms.com',
-    '$2a$12$s7BCaCoYxbUZlpNj9H.Gx.wA.5kwBLezvFNmglpgcxrMd54FApCey',
-    'admin',
-    'active'
-);

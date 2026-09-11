@@ -1,7 +1,9 @@
 package com.lms.dao;
 
 import com.lms.model.Enrollment;
+import com.lms.model.Quiz;
 import com.lms.util.DBConnection;
+import com.lms.model.Section;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -63,6 +65,25 @@ public class EnrollmentDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public List<Integer> findStudentIdsByCourseOrSection(int courseId){
+
+        List<Integer> StudentIds = new ArrayList<>();
+        String sql = "Select student_id from enrollments where course_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, courseId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        StudentIds.add(rs.getInt("student_id"));
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return StudentIds;
     }
 
     // 3. Lấy 1 enrollment cụ thể theo student + course
