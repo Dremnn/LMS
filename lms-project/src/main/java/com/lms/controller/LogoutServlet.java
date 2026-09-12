@@ -1,5 +1,7 @@
 package com.lms.controller;
 
+import com.lms.util.CookieUtil;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -42,7 +44,10 @@ public class LogoutServlet extends HttpServlet {
             session.invalidate();
         }
 
-        // 2. Chuyển hướng về trang đăng nhập
+        // 2. Xóa Cookie token đăng nhập tự động
+        CookieUtil.deleteCookie(response, "remember_token");
+
+        // 3. Chuyển hướng về trang đăng nhập
         response.sendRedirect(request.getContextPath() + "/login");
     }
 }

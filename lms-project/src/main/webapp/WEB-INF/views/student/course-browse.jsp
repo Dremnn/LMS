@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <%
     User currentUser = (User) session.getAttribute("currentUser");
     String role = currentUser != null ? currentUser.getRole() : "";
@@ -186,6 +186,13 @@
         </div>
     </div>
 </footer>
+
+<!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
 
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
 </body>
