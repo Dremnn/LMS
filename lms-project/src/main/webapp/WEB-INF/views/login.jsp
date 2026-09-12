@@ -65,13 +65,22 @@
           <label class="form-label" for="email">Địa chỉ Email</label>
           <input type="email" id="email" name="email" class="form-control"
                  placeholder="name@example.com"
-                 value="<c:out value='${email}' default=''/>" required autofocus>
+                 value="<c:out value='${not empty email ? email : rememberEmail}' default=''/>" required autofocus>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:12px;">
           <label class="form-label" for="password">Mật khẩu</label>
           <input type="password" id="password" name="password" class="form-control"
                  placeholder="Nhập mật khẩu của bạn" required>
         </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13.5px;color:#475569;user-select:none;">
+            <input type="checkbox" name="rememberMe" value="true" ${rememberMeChecked ? 'checked' : ''}
+                   style="width:16px;height:16px;accent-color:#4F46E5;cursor:pointer;border-radius:4px;">
+            <span>Ghi nhớ đăng nhập</span>
+          </label>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px;">
           Đăng nhập <i class="fa-solid fa-arrow-right"></i>
         </button>

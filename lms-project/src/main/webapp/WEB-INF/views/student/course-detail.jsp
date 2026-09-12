@@ -92,7 +92,7 @@
         .review-comment{font-size:14px;color:#334155;line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0;}
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <%
     User currentUser = (User) session.getAttribute("currentUser");
     String role = currentUser != null ? currentUser.getRole() : "";
@@ -454,5 +454,14 @@
         </c:choose>
     </div>
 </div>
+
+<!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
 </body>
 </html>

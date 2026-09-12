@@ -1,6 +1,9 @@
 package com.lms.filter;
 
+import com.lms.dao.UserDAO;
 import com.lms.model.User;
+import com.lms.util.CookieUtil;
+import com.lms.util.RememberTokenUtil;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -19,9 +22,11 @@ import java.io.IOException;
 @WebFilter("/*")
 public class AuthFilter implements Filter {
 
+    private UserDAO userDAO;
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // Khởi tạo filter (nếu cần cấu hình ban đầu)
+        this.userDAO = new UserDAO();
     }
 
     @Override
@@ -37,7 +42,7 @@ public class AuthFilter implements Filter {
         String path = requestURI.substring(contextPath.length());
 
         // =====================================================================
-        // 1. CHO PHÉP TRUY CẬP CÁC TÀI NGUYÊN CÔNG KHAI (Public Resources)
+        // 1. CHO PHÉP TRUY CẬP CÁC TÀI NGUYÊN CÔNG KHAI (Static Resources)
         // =====================================================================
         boolean isPublicResource = path.startsWith("/assets/") || 
                                    path.endsWith(".css") || 
@@ -45,6 +50,39 @@ public class AuthFilter implements Filter {
                                    path.endsWith(".png") || 
                                    path.endsWith(".jpg") || 
                                    path.endsWith(".jpeg");
+
+        if (isPublicResource) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // =====================================================================
+        // 2. KIỂM TRA PHIÊN & TỰ ĐỘNG ĐĂNG NHẬP TỪ COOKIE (Remember Me)
+        // =====================================================================
+        HttpSession session = httpRequest.getSession(false);
+        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+
+        // Nếu session chưa có currentUser, kiểm tra Cookie "remember_token" để tự động phục hồi đăng nhập
+        if (currentUser == null) {
+            String rememberToken = CookieUtil.getCookieValue(httpRequest, "remember_token");
+            if (rememberToken != null && !rememberToken.trim().isEmpty()) {
+                int userId = RememberTokenUtil.getUserIdFromToken(rememberToken);
+                if (userId > 0) {
+                    User dbUser = userDAO.findById(userId);
+                    if (dbUser != null && RememberTokenUtil.validateToken(rememberToken, dbUser)) {
+                        currentUser = dbUser;
+                        if (session == null) {
+                            session = httpRequest.getSession(true);
+                        }
+                        session.setAttribute("currentUser", currentUser);
+                        session.setMaxInactiveInterval(60 * 60);
+                    } else {
+                        // Token sai hoặc hết hạn -> xóa cookie
+                        CookieUtil.deleteCookie(httpResponse, "remember_token");
+                    }
+                }
+            }
+        }
 
         boolean isPublicPage = path.equals("/") || 
                                path.equals("/index.jsp") || 
@@ -55,19 +93,15 @@ public class AuthFilter implements Filter {
                                path.equals("/courses") ||           
                                path.equals("/courses/detail"); 
 
-        if (isPublicResource || isPublicPage) {
-            // Cho phép đi tiếp không cần kiểm tra đăng nhập
+        if (isPublicPage) {
+            // Cho phép đi tiếp không cần kiểm tra phân quyền
             chain.doFilter(request, response);
             return;
         }
 
         // =====================================================================
-        // 2. KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP
+        // 3. KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP CHO CÁC TRANG BẢO VỆ
         // =====================================================================
-        HttpSession session = httpRequest.getSession(false);
-        User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
-
-        // Nếu chưa đăng nhập mà cố tình vào các trang yêu cầu bảo vệ
         if (currentUser == null) {
             // Lưu lại đường dẫn họ muốn vào để sau khi đăng nhập xong chuyển họ quay lại đây
             if (session == null) {

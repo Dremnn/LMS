@@ -2,6 +2,21 @@
  * App Script - Modern Vietnam EDU LMS
  */
 
+// 0. Đọc Cookie app_theme và kích hoạt Dark Theme ngay lập tức để tránh giật giao diện
+(function() {
+    const value = '; ' + document.cookie;
+    const parts = value.split('; app_theme=');
+    if (parts.length === 2 && parts.pop().split(';').shift() === 'dark') {
+        if (document.body) {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('dark-theme');
+            });
+        }
+    }
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
     
     // 1. Scroll Reveal Logic (Intersection Observer)
@@ -148,17 +163,44 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // 8. Dynamic Island Theme Toggle
+    // Helper functions để thao tác Cookie phía Client
+    function getLmsCookie(name) {
+        const value = '; ' + document.cookie;
+        const parts = value.split('; ' + name + '=');
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    function setLmsCookie(name, value, days) {
+        let expires = '';
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = '; expires=' + date.toUTCString();
+        }
+        document.cookie = name + '=' + (value || '') + expires + '; path=/; SameSite=Lax';
+    }
+
+    // 8. Dynamic Island Theme Toggle với Cookie lưu trữ 365 ngày
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
+        const text = themeToggle.querySelector('.toggle-text');
+
+        // Đồng bộ nhãn nút theo trạng thái dark-theme hiện tại
+        const updateToggleLabel = () => {
+            const isDark = document.body.classList.contains('dark-theme');
+            if (text) {
+                text.textContent = isDark ? 'Chế độ Sáng' : 'Chế độ Tối';
+            }
+        };
+
+        updateToggleLabel();
+
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('dark-theme');
             const isDark = document.body.classList.contains('dark-theme');
-            const text = themeToggle.querySelector('.toggle-text');
-            if (isDark) {
-                text.textContent = 'Chế độ Sáng';
-            } else {
-                text.textContent = 'Chế độ Tối';
-            }
+            updateToggleLabel();
+            // Lưu tùy chọn vào Cookie với thời hạn 365 ngày
+            setLmsCookie('app_theme', isDark ? 'dark' : 'light', 365);
         });
     }

@@ -2,6 +2,8 @@ package com.lms.controller;
 
 import com.lms.model.User;
 import com.lms.service.AuthService;
+import com.lms.util.CookieUtil;
+import com.lms.util.RememberTokenUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -43,6 +45,13 @@ public class LoginServlet extends HttpServlet {
             request.setAttribute("successMessage", "Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
         }
 
+        // Đọc Cookie remember_email (nếu có) để điền sẵn vào Form
+        String rememberEmail = CookieUtil.getCookieValue(request, "remember_email");
+        if (rememberEmail != null && !rememberEmail.trim().isEmpty()) {
+            request.setAttribute("rememberEmail", rememberEmail);
+            request.setAttribute("rememberMeChecked", true);
+        }
+
         // Chuyển tiếp tới giao diện login.jsp
         request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
     }
@@ -59,6 +68,7 @@ public class LoginServlet extends HttpServlet {
 
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        String rememberMe = request.getParameter("rememberMe");
 
         try {
             // 1. Gọi Service để xác thực email & mật khẩu
@@ -74,7 +84,20 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("currentUser", user);
             session.setMaxInactiveInterval(60 * 60); // Session hết hạn sau 60 phút không hoạt động
 
-            // 3. ĐIỀU HƯỚNG THEO ROLE (Vai trò)
+            // 3. XỬ LÝ COOKIE "GHI NHỚ ĐĂNG NHẬP" (Remember Me)
+            if ("true".equalsIgnoreCase(rememberMe) || "on".equalsIgnoreCase(rememberMe)) {
+                // Lưu email trong 30 ngày (để lần sau tự điền form)
+                CookieUtil.addCookie(response, "remember_email", user.getEmail(), 30 * 24 * 60 * 60, false);
+                // Tạo token đăng nhập tự động trong 14 ngày (HttpOnly chống XSS)
+                String rememberToken = RememberTokenUtil.generateToken(user);
+                CookieUtil.addCookie(response, "remember_token", rememberToken, RememberTokenUtil.TOKEN_COOKIE_MAX_AGE, true);
+            } else {
+                // Người dùng không chọn ghi nhớ -> Dọn sạch các cookie cũ nếu có
+                CookieUtil.deleteCookie(response, "remember_email");
+                CookieUtil.deleteCookie(response, "remember_token");
+            }
+
+            // 4. ĐIỀU HƯỚNG THEO ROLE (Vai trò)
             // Nếu có lưu URL mà user muốn vào trước đó (ví dụ đang xem dở bài học bị bắt login)
             String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
             if (redirectUrl != null) {
