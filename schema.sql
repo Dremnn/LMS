@@ -32,6 +32,44 @@ CREATE TABLE notification_settings (
 
 ALTER TABLE quizzes ADD COLUMN notified_deadline BOOLEAN DEFAULT FALSE;
 
+-- Table cho Tin nhắn (Messages)
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    content TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Table cho Liên hệ / Danh bạ (Contacts)
+CREATE TABLE contacts (
+    user_id INT NOT NULL,
+    contact_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending', -- 'pending' (chờ kết bạn) hoặc 'accepted' (đã là bạn bè)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, contact_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (contact_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Table cho Cài đặt quyền riêng tư tin nhắn (Message Settings) (Tùy chọn)
+CREATE TABLE message_settings (
+    user_id INT PRIMARY KEY,
+    privacy_level VARCHAR(50) DEFAULT 'courses_and_contacts', -- 'contacts_only' hoặc 'courses_and_contacts'
+    email_notifications BOOLEAN DEFAULT TRUE,
+    enter_to_send BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Indexes để tăng tốc độ truy vấn
+CREATE INDEX idx_messages_sender ON messages(sender_id);
+CREATE INDEX idx_messages_receiver ON messages(receiver_id);
+CREATE INDEX idx_contacts_status ON contacts(status);
+
+
 -- ============================================================
 -- 1. NHÓM TÀI KHOẢN & NGƯỜI DÙNG
 -- ============================================================
