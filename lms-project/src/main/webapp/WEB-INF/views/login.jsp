@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -7,10 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đăng nhập — UTEdu LMS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=3">
-  <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=3">
+  <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=26">
+  <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=26">
 </head>
-<body style="margin:0;padding:0;">
+<body class="${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}" style="margin:0;padding:0;">
 <div class="auth-wrapper">
 
   <!-- Left: Brand Panel -->
@@ -76,7 +76,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
           <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13.5px;color:#475569;user-select:none;">
             <input type="checkbox" name="rememberMe" value="true" ${rememberMeChecked ? 'checked' : ''}
-                   style="width:16px;height:16px;accent-color:#4F46E5;cursor:pointer;border-radius:4px;">
+                   style="width:16px;height:16px;accent-color:#076FA4;cursor:pointer;border-radius:4px;">
             <span>Ghi nhớ đăng nhập</span>
           </label>
         </div>
@@ -93,6 +93,14 @@
   </div>
 
 </div>
-<script src="${pageContext.request.contextPath}/assets/js/lms-app.js"></script>
+
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=26"></script>
 </body>
 </html>

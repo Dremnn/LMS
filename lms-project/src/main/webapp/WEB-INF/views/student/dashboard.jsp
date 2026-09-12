@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.time.LocalDate, java.util.*, com.lms.model.Quiz, com.lms.model.Event, com.lms.model.Course, com.lms.model.User" %>
 <%
     int year = (Integer) request.getAttribute("year");
@@ -30,41 +30,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Điều Khiển - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=26">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=26">
     <style>
-        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f5f6fa; }
+        body { margin: 0; padding: 0; min-height: 100vh; }
         .dashboard-container { max-width: 1200px; margin: 24px auto 40px; padding: 0 24px; }
-        .panel { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-        .panel h2 { margin-top: 0; }
+        .panel { background: #fff; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(9,60,98,.06); border: 1px solid #C6D8E3; }
+        .panel h2 { margin-top: 0; color: #093C62; font-weight: 800; }
 
         .filter-row { display: flex; gap: 12px; margin-bottom: 16px; }
         .filter-row select, .filter-row input {
-            padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
+            padding: 8px 12px; border: 1.5px solid #C6D8E3; border-radius: 8px; font-size: 14px; color: #093C62; outline: none;
         }
+        .filter-row select:focus, .filter-row input:focus { border-color: #076FA4; }
 
         .upcoming-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 0; border-bottom: 1px solid #eee;
+            padding: 12px 0; border-bottom: 1px solid #E2EEF5;
         }
         .upcoming-item:last-child { border-bottom: none; }
-        .upcoming-item a { text-decoration: none; color: #1f2937; font-weight: 500; }
-        .upcoming-item .meta { font-size: 12px; color: #888; }
-        .no-items { color: #999; text-align: center; padding: 20px; }
+        .upcoming-item a { text-decoration: none; color: #093C62; font-weight: 600; }
+        .upcoming-item a:hover { color: #076FA4; }
+        .upcoming-item .meta { font-size: 12px; color: #5C7688; }
+        .no-items { color: #5C7688; text-align: center; padding: 20px; }
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .calendar-header a { text-decoration: none; color: #2563eb; font-weight: bold; }
+        .calendar-header a { text-decoration: none; color: #076FA4; font-weight: bold; }
+        .calendar-header h3 { color: #093C62; margin: 0; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .dow-label { font-weight: bold; text-align: center; color: #666; padding-bottom: 4px; }
+        .dow-label { font-weight: bold; text-align: center; color: #5C7688; padding-bottom: 4px; }
         .cell {
-            min-height: 90px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 6px;
-            cursor: pointer; transition: background 0.15s;
+            min-height: 90px; border: 1px solid #C6D8E3; border-radius: 8px; padding: 6px;
+            cursor: pointer; transition: background 0.15s; background: #fff;
         }
-        .cell:hover { background: #f9fafb; }
-        .cell.empty { border: none; cursor: default; }
+        .cell:hover { background: #F0F6FA; }
+        .cell.empty { border: none; cursor: default; background: transparent; }
         .cell.empty:hover { background: none; }
-        .cell.today { border: 2px solid #2563eb; background: #eff6ff; }
-        .day-number { font-weight: bold; font-size: 13px; color: #333; }
+        .cell.today { border: 2px solid #076FA4; background: #E2EEF5; }
+        .day-number { font-weight: bold; font-size: 13px; color: #093C62; }
 
         .badge { display: block; margin-top: 4px; padding: 3px 6px; border-radius: 5px; font-size: 11px;
                  text-decoration: none; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -72,24 +75,44 @@
         .badge.urgent   { background: #dc2626; }
         .badge.upcoming { background: #f59e0b; }
         .badge.none     { background: #6b7280; }
-        .badge.event    { background: #7c3aed; }
+        .badge.event    { background: #076FA4; }
 
         .modal-overlay {
             display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 1000;
+            background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000;
         }
         .modal-overlay.show { display: flex; }
-        .modal-box { background: #fff; border-radius: 10px; padding: 24px; width: 400px; }
-        .modal-box h3 { margin-top: 0; }
-        .modal-box label { display: block; margin: 10px 0 4px; font-size: 13px; color: #555; }
+        .modal-box { background: #fff; border-radius: 14px; padding: 24px; width: 400px; border: 1px solid #C6D8E3; box-shadow: 0 20px 60px rgba(9,60,98,.2); }
+        .modal-box h3 { margin-top: 0; color: #093C62; }
+        .modal-box label { display: block; margin: 10px 0 4px; font-size: 13px; color: #093C62; font-weight: 600; }
         .modal-box input, .modal-box select, .modal-box textarea {
-            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+            width: 100%; padding: 8px 12px; border: 1.5px solid #C6D8E3; border-radius: 6px; box-sizing: border-box; color: #093C62; outline: none;
         }
+        .modal-box input:focus, .modal-box select:focus, .modal-box textarea:focus { border-color: #076FA4; }
         .modal-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 8px; }
-        .btn-secondary { background: #e5e7eb; color: #333; }
+        .btn-secondary { background: #E2EEF5; color: #093C62; }
+
+        /* Dark Theme (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme .panel { background: #182535; border-color: #093C62; box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+        body.dark-theme .panel h2 { color: #F4F8FA; }
+        body.dark-theme .upcoming-item { border-bottom-color: #093C62; }
+        body.dark-theme .upcoming-item a { color: #F4F8FA; }
+        body.dark-theme .upcoming-item .meta { color: #9DB9CB; }
+        body.dark-theme .filter-row select, body.dark-theme .filter-row input { background: #111312; border-color: #093C62; color: #F4F8FA; }
+        body.dark-theme .calendar-header a { color: #076FA4; }
+        body.dark-theme .calendar-header h3 { color: #F4F8FA; }
+        body.dark-theme .dow-label { color: #9DB9CB; }
+        body.dark-theme .cell { border-color: #093C62; background: #182535; }
+        body.dark-theme .cell:hover { background: #111312; }
+        body.dark-theme .cell.today { border-color: #076FA4; background: #093C62; }
+        body.dark-theme .day-number { color: #F4F8FA; }
+        body.dark-theme .modal-box { background: #182535; border: 1px solid #093C62; color: #F4F8FA; }
+        body.dark-theme .modal-box h3 { color: #F4F8FA; }
+        body.dark-theme .modal-box label { color: #9DB9CB; }
+        body.dark-theme .modal-box input, body.dark-theme .modal-box select, body.dark-theme .modal-box textarea { background: #111312; border-color: #093C62; color: #F4F8FA; }
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
     <!-- NAVBAR -->
     <nav class="lms-navbar">
         <a href="<%=request.getContextPath()%>/" class="lms-logo">
@@ -263,7 +286,14 @@
             document.getElementById('eventModal').classList.remove('show');
         }
     </script>
-    <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
 
+    <!-- Dynamic Island Theme Toggle -->
+    <div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+        <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+        <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+        <span class="toggle-text">Chế độ Tối</span>
+    </div>
+
+    <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=26"></script>
 </body>
 </html>

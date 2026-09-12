@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Quiz - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=26">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=26">
     <style>
         .btn-danger-sm{padding:6px 14px;background:#fed7d7;color:#9b2c2c;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;}
         .btn-danger-sm:hover{background:#fc8181;color:#fff;}
@@ -25,47 +25,63 @@
         .btn-close:hover{color:#0f172a;}
         .main{max-width:900px;margin:36px auto;padding:0 24px;}
         .page-header{margin-bottom:28px;}
-        .page-title{font-size:24px;font-weight:800;color:#1a202c;}
-        .page-meta{font-size:14px;color:#718096;margin-top:6px;display:flex;gap:20px;}
+        .page-title{font-size:24px;font-weight:800;color:#093C62;}
+        .page-meta{font-size:14px;color:#5C7688;margin-top:6px;display:flex;gap:20px;}
         .page-meta span{display:flex;align-items:center;gap:4px;}
         .alert-danger{background:#fed7d7;color:#822727;border:1px solid #fc8181;padding:12px 16px;border-radius:9px;font-size:14px;margin-bottom:20px;}
-        .section-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a0aec0;margin-bottom:14px;}
-        /* ---- CÂUU HỎI ---- */
-        .question-card{background:#fff;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.06);margin-bottom:16px;overflow:hidden;border-left:4px solid #667eea;}
+        .section-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#5C7688;margin-bottom:14px;}
+        /* ---- CÂU HỎI ---- */
+        .question-card{background:#fff;border-radius:12px;box-shadow:0 3px 12px rgba(9,60,98,.06);margin-bottom:16px;overflow:hidden;border:1px solid #C6D8E3;border-left:4px solid #076FA4;}
         .question-header{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 20px 12px;}
-        .question-num{font-size:11px;font-weight:700;color:#a0aec0;text-transform:uppercase;margin-bottom:4px;}
-        .question-content{font-size:15px;font-weight:600;color:#1a202c;line-height:1.5;}
-        .question-type{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:700;background:#e9d8fd;color:#553c9a;}
+        .question-num{font-size:11px;font-weight:700;color:#5C7688;text-transform:uppercase;margin-bottom:4px;}
+        .question-content{font-size:15px;font-weight:600;color:#093C62;line-height:1.5;}
+        .question-type{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:700;background:#E2EEF5;color:#093C62;}
         .options-list{padding:0 20px 16px;display:flex;flex-direction:column;gap:7px;}
-        .option-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;font-size:14px;background:#f7f8ff;}
+        .option-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;font-size:14px;background:#F0F6FA;color:#093C62;}
         .option-item.correct{background:#c6f6d5;color:#22543d;font-weight:600;}
         .option-item.correct .tick{color:#38a169;font-size:15px;}
-        .option-item .dot{width:8px;height:8px;border-radius:50%;background:#cbd5e0;flex-shrink:0;}
+        .option-item .dot{width:8px;height:8px;border-radius:50%;background:#9DB9CB;flex-shrink:0;}
         .question-footer{padding:0 20px 14px;display:flex;justify-content:flex-end;}
-        .empty-questions{text-align:center;padding:40px;background:#fff;border-radius:12px;color:#a0aec0;}
+        .empty-questions{text-align:center;padding:40px;background:#fff;border-radius:12px;color:#5C7688;border:1px solid #C6D8E3;}
         /* ---- FORM THÊM CÂU HỎI ---- */
-        .add-form-card{background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(0,0,0,.07);padding:28px;margin-top:32px;}
-        .add-form-title{font-size:18px;font-weight:700;color:#1a202c;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid #f0f4f8;}
+        .add-form-card{background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(9,60,98,.07);padding:28px;margin-top:32px;border:1px solid #C6D8E3;}
+        .add-form-title{font-size:18px;font-weight:700;color:#093C62;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid #E2EEF5;}
         .form-group{margin-bottom:18px;}
-        .form-group label{display:block;font-size:13px;font-weight:600;color:#4a5568;margin-bottom:6px;}
-        .form-group textarea{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;resize:vertical;min-height:80px;outline:none;transition:border-color .2s;}
-        .form-group textarea:focus{border-color:#667eea;}
-        .form-group select{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;background:#fff;cursor:pointer;}
-        .form-group select:focus{border-color:#667eea;}
+        .form-group label{display:block;font-size:13px;font-weight:600;color:#093C62;margin-bottom:6px;}
+        .form-group textarea{width:100%;padding:10px 14px;border:1.5px solid #C6D8E3;border-radius:8px;font-size:14px;resize:vertical;min-height:80px;outline:none;transition:border-color .2s;color:#093C62;}
+        .form-group textarea:focus{border-color:#076FA4;}
+        .form-group select{width:100%;padding:10px 14px;border:1.5px solid #C6D8E3;border-radius:8px;font-size:14px;outline:none;background:#fff;cursor:pointer;color:#093C62;}
+        .form-group select:focus{border-color:#076FA4;}
         .options-container{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
-        .option-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f7f8ff;border-radius:8px;border:1px solid #e2e8f0;}
-        .option-row input[type=text]{flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;outline:none;}
-        .option-row input[type=text]:focus{border-color:#667eea;}
-        .option-row label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#4a5568;white-space:nowrap;cursor:pointer;}
+        .option-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F0F6FA;border-radius:8px;border:1px solid #C6D8E3;}
+        .option-row input[type=text]{flex:1;padding:8px 12px;border:1.5px solid #C6D8E3;border-radius:7px;font-size:14px;outline:none;color:#093C62;}
+        .option-row input[type=text]:focus{border-color:#076FA4;}
+        .option-row label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#093C62;white-space:nowrap;cursor:pointer;}
         .option-row input[type=checkbox]{accent-color:#38a169;width:16px;height:16px;}
-        .btn-add-option{padding:8px 16px;background:#edf2f7;color:#4a5568;border:1.5px dashed #cbd5e0;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
-        .btn-add-option:hover{background:#e2e8f0;border-color:#a0aec0;}
-        .hint{font-size:12px;color:#a0aec0;margin-top:8px;}
-        .btn-submit{padding:11px 28px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;}
+        .btn-add-option{padding:8px 16px;background:#E2EEF5;color:#093C62;border:1.5px dashed #9DB9CB;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+        .btn-add-option:hover{background:#C6D8E3;color:#076FA4;}
+        .hint{font-size:12px;color:#5C7688;margin-top:8px;}
+        .btn-submit{padding:11px 28px;background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;}
         .btn-submit:hover{opacity:.9;}
+
+        /* Dark Theme (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme .page-title{color:#F4F8FA;}
+        body.dark-theme .page-meta{color:#9DB9CB;}
+        body.dark-theme .question-card{background:#182535;border-color:#093C62;border-left-color:#076FA4;box-shadow:0 3px 12px rgba(0,0,0,.3);}
+        body.dark-theme .question-content{color:#F4F8FA;}
+        body.dark-theme .option-item{background:#111312;color:#9DB9CB;}
+        body.dark-theme .add-form-card{background:#182535;border-color:#093C62;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+        body.dark-theme .add-form-title{color:#F4F8FA;border-bottom-color:#093C62;}
+        body.dark-theme .form-group label{color:#F4F8FA;}
+        body.dark-theme .form-group textarea, body.dark-theme .form-group select{background:#111312;border-color:#093C62;color:#F4F8FA;}
+        body.dark-theme .option-row{background:#111312;border-color:#093C62;}
+        body.dark-theme .option-row input[type=text]{background:#182535;border-color:#093C62;color:#F4F8FA;}
+        body.dark-theme .option-row label{color:#F4F8FA;}
+        body.dark-theme .modal-card{background:#182535;border:1px solid #093C62;color:#F4F8FA;}
+        body.dark-theme .modal-header h3{color:#F4F8FA;}
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 
@@ -341,5 +357,14 @@
         return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 </script>
+
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=26"></script>
 </body>
 </html>

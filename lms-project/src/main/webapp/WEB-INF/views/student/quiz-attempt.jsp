@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -8,32 +8,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${quiz.title} - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=26">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=26">
     <style>
-        .hero{background:linear-gradient(135deg,#1a202c,#2d3748);color:#fff;padding:40px 36px 48px;}
+        .hero{background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;padding:40px 36px 48px;}
         .hero-inner{max-width:780px;margin:0 auto;}
         .quiz-title{font-size:26px;font-weight:800;margin-bottom:10px;}
         .quiz-meta{display:flex;gap:24px;font-size:14px;opacity:.85;}
         .main{max-width:780px;margin:-16px auto 48px;padding:0 24px;}
         .alert-danger{background:#fed7d7;color:#822727;border:1px solid #fc8181;padding:12px 16px;border-radius:9px;font-size:14px;margin-bottom:20px;}
-        .question-card{background:#fff;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.07);margin-bottom:20px;overflow:hidden;}
-        .question-header{padding:18px 24px 14px;border-bottom:1px solid #f0f4f8;}
-        .question-num{font-size:11px;font-weight:700;color:#a0aec0;text-transform:uppercase;margin-bottom:6px;}
-        .question-content{font-size:16px;font-weight:600;color:#1a202c;line-height:1.55;}
-        .question-type-badge{display:inline-block;margin-top:8px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#ebf8ff;color:#2b6cb0;}
+        .question-card{background:#fff;border-radius:14px;box-shadow:0 4px 14px rgba(9,60,98,.07);margin-bottom:20px;overflow:hidden;border:1px solid #C6D8E3;}
+        .question-header{padding:18px 24px 14px;border-bottom:1px solid #E2EEF5;}
+        .question-num{font-size:11px;font-weight:700;color:#5C7688;text-transform:uppercase;margin-bottom:6px;}
+        .question-content{font-size:16px;font-weight:600;color:#093C62;line-height:1.55;}
+        .question-type-badge{display:inline-block;margin-top:8px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#E2EEF5;color:#093C62;}
         .options-list{padding:16px 24px;display:flex;flex-direction:column;gap:10px;}
-        .option-label{display:flex;align-items:center;gap:12px;padding:11px 16px;border:1.5px solid #e2e8f0;border-radius:9px;cursor:pointer;transition:all .15s;font-size:14px;color:#2d3748;}
-        .option-label:hover{border-color:#667eea;background:#f7f8ff;}
-        .option-label input[type=radio]{accent-color:#667eea;width:16px;height:16px;flex-shrink:0;}
-        .option-label input[type=checkbox]{accent-color:#667eea;width:16px;height:16px;flex-shrink:0;}
-        .submit-bar{background:#fff;border-top:1px solid #e2e8f0;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.07);margin-top:8px;}
-        .submit-bar-info{font-size:14px;color:#718096;}
-        .btn-submit{padding:13px 36px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+        .option-label{display:flex;align-items:center;gap:12px;padding:11px 16px;border:1.5px solid #C6D8E3;border-radius:9px;cursor:pointer;transition:all .15s;font-size:14px;color:#093C62;}
+        .option-label:hover{border-color:#076FA4;background:#E2EEF5;}
+        .option-label input[type=radio]{accent-color:#076FA4;width:16px;height:16px;flex-shrink:0;}
+        .option-label input[type=checkbox]{accent-color:#076FA4;width:16px;height:16px;flex-shrink:0;}
+        .submit-bar{background:#fff;border:1px solid #C6D8E3;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-radius:14px;box-shadow:0 4px 14px rgba(9,60,98,.07);margin-top:8px;}
+        .submit-bar-info{font-size:14px;color:#5C7688;}
+        .btn-submit{padding:13px 36px;background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;}
         .btn-submit:hover{opacity:.9;}
+
+        /* Dark Theme (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme .hero{background:linear-gradient(135deg,#182535,#093C62);}
+        body.dark-theme .question-card{background:#182535;border-color:#093C62;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+        body.dark-theme .question-header{border-bottom-color:#093C62;}
+        body.dark-theme .question-content{color:#F4F8FA;}
+        body.dark-theme .question-num{color:#9DB9CB;}
+        body.dark-theme .question-type-badge{background:#093C62;color:#F4F8FA;}
+        body.dark-theme .option-label{border-color:#093C62;background:#111312;color:#9DB9CB;}
+        body.dark-theme .option-label:hover{border-color:#076FA4;background:#182535;color:#F4F8FA;}
+        body.dark-theme .submit-bar{background:#182535;border-color:#093C62;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+        body.dark-theme .submit-bar-info{color:#9DB9CB;}
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 
@@ -176,5 +188,14 @@
     })();
 </script>
 </c:if>
+
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=26"></script>
 </body>
 </html>

@@ -2,26 +2,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Colors */
-  --primary: #4F46E5;       
-  --primary-light: #818CF8; 
-  --secondary: #06B6D4;     
-  --accent: #F59E0B;        
+  /* Colors - 5-Shade Harmonious Palette */
+  /* Chế độ Sáng (Light Mode): 3 màu dưới cùng (Ô 3: #093C62, Ô 4: #076FA4, Ô 5: #9DB9CB) */
+  --primary: #076FA4;            /* Ô 4 (Xanh đại dương / Ocean Blue) */
+  --primary-dark: #093C62;       /* Ô 3 (Xanh biển đậm / Deep Navy) */
+  --primary-light: #9DB9CB;      /* Ô 5 (Xanh xám nhạt / Soft Slate Blue) */
+  --secondary: #093C62;          /* Ô 3 (Deep Navy) */
+  --accent: #076FA4;             /* Ô 4 (Ocean Blue) */
+  --accent-soft: #9DB9CB;        /* Ô 5 (Soft Slate Blue) */
   --success: #10B981;
   --danger: #EF4444;
-  --bg: #F8FAFF;            
+  --bg: #F4F8FA;                 
   --surface: #FFFFFF;
-  --text: #0F172A;
-  --text-muted: #64748B;
-  --border: #E2E8F0;
+  --text: #093C62;               /* Ô 3 (Deep Navy cho text/heading) */
+  --text-muted: #5C7688;
+  --border: #C6D8E3;             /* Sắc thái mềm mại từ Ô 5 */
   
   /* Radii & Shadows */
   --radius-sm: 8px;
   --radius: 14px;
   --radius-lg: 24px;
-  --shadow-sm: 0 2px 8px rgba(79,70,229,.08);
-  --shadow-md: 0 8px 28px rgba(79,70,229,.14);
-  --shadow-lg: 0 20px 60px rgba(79,70,229,.18);
+  --shadow-sm: 0 2px 8px rgba(9, 60, 98, 0.08);
+  --shadow-md: 0 8px 28px rgba(7, 111, 164, 0.14);
+  --shadow-lg: 0 20px 60px rgba(9, 60, 98, 0.18);
   
   /* Transitions */
   --t-fast: 0.15s ease;
@@ -138,20 +141,21 @@ a { text-decoration: none; color: inherit; transition: color var(--t-fast); }
 .btn:active { transform: scale(0.96); }
 
 .btn-primary {
-  background: var(--primary); color: white;
-  box-shadow: 0 4px 12px rgba(79,70,229,.2);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  box-shadow: 0 4px 12px rgba(7, 111, 164, 0.28);
 }
 .btn-primary:hover {
-  background: var(--primary-light);
+  background: linear-gradient(135deg, #087db8, #0b4b7a);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 22px rgba(7, 111, 164, 0.38);
 }
 .btn-outline {
-  background: transparent; border: 1.5px solid var(--border); color: var(--text);
+  background: transparent; border: 1.5px solid var(--primary); color: var(--primary);
 }
 .btn-outline:hover {
-  border-color: var(--primary); color: var(--primary);
-  background: rgba(79,70,229,.05);
+  border-color: var(--primary-dark); color: var(--primary-dark);
+  background: rgba(157, 185, 203, 0.2);
 }
 .btn-danger { background: var(--danger); color: white; }
 .btn-danger:hover { background: #DC2626; box-shadow: 0 4px 12px rgba(239,68,68,.3); }
@@ -177,7 +181,7 @@ a { text-decoration: none; color: inherit; transition: color var(--t-fast); }
 }
 .form-control:focus {
   border-color: var(--primary); outline: none;
-  box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+  box-shadow: 0 0 0 3px rgba(7, 111, 164, 0.18);
 }
 
 /* ----------------- ALERTS ----------------- */
@@ -360,6 +364,7 @@ a { text-decoration: none; color: inherit; transition: color var(--t-fast); }
 .modern-footer {
     position: relative;
     border-top: 1px solid rgba(255,255,255,0.05) !important;
+    margin-top: 0 !important;
 }
 /* Gradient glowing top line */
 .modern-footer::before {
@@ -472,48 +477,240 @@ a { text-decoration: none; color: inherit; transition: color var(--t-fast); }
 
 /* =========================================
    DARK MODE THEME OVERRIDES
+   Chế độ Tối: 3 màu trên cùng:
+   Ô 1 (Đen): #111312
+   Ô 2 (Xanh đen đậm): #182535
+   Ô 3 (Xanh biển đậm / Deep Navy): #093C62
    ========================================= */
-body.dark-theme {
-    --bg: #0B0F19;
-    --surface: #1E293B;
-    --text: #F8FAFC;
-    --text-muted: #94A3B8;
-    --border: rgba(255,255,255,0.1);
-    background-color: var(--bg);
-    color: var(--text);
+body.dark-theme,
+body.dark-theme.mesh-bg {
+    --bg: #111312;               /* Ô 1 (Đen) */
+    --surface: #182535;          /* Ô 2 (Xanh đen đậm) */
+    --primary: #076FA4;          /* Highlight */
+    --primary-dark: #093C62;     /* Ô 3 (Xanh biển đậm) */
+    --secondary: #9DB9CB;        /* Ô 5 cho tương phản cao */
+    --border: #093C62;           /* Ô 3 */
+    --text: #F4F8FA;
+    --text-muted: #9DB9CB;       /* Ô 5 cho chữ mô tả dịu mắt */
+    background: #111312 !important;
+    background-color: #111312 !important;
+    color: #F4F8FA !important;
 }
+
+body.dark-theme.mesh-bg,
 body.dark-theme .mesh-bg {
-    background-color: #0B0F19;
+    background: #111312 !important;
+    background-color: #111312 !important;
     background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+        radial-gradient(at 15% 15%, rgba(9, 60, 98, 0.4) 0px, transparent 55%),
+        radial-gradient(at 85% 85%, rgba(24, 37, 53, 0.7) 0px, transparent 55%),
+        radial-gradient(at 50% 50%, rgba(17, 19, 18, 1) 0px, transparent 100%) !important;
+    animation: none !important;
 }
-body.dark-theme .hero-content h1 { color: #FFFFFF; }
-body.dark-theme .hero-content p { color: #94A3B8; }
-body.dark-theme .features-section { background: rgba(11, 15, 25, 0.8); }
+
+body.dark-theme h1, 
+body.dark-theme h2, 
+body.dark-theme h3, 
+body.dark-theme h4, 
+body.dark-theme h5, 
+body.dark-theme h6 {
+    color: #FFFFFF;
+}
+
+body.dark-theme .hero-section {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.dark-theme .hero-content h1 { color: #FFFFFF !important; }
+body.dark-theme .hero-content h1 span {
+    background: linear-gradient(135deg, #38BDF8, #9DB9CB) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+body.dark-theme .hero-content p { color: #9DB9CB !important; }
+body.dark-theme .features-section {
+    background: #111312 !important;
+    border-top: 1px solid #093C62 !important;
+}
+body.dark-theme .section-title {
+    background: linear-gradient(135deg, #FFFFFF, #9DB9CB) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+body.dark-theme .section-subtitle {
+    color: #9DB9CB !important;
+}
 
 /* Update Floating Widgets for Dark Mode */
 body.dark-theme .floating-widget {
-    background: rgba(30, 41, 59, 0.75);
-    border-color: rgba(255,255,255,0.1);
+    background: rgba(24, 37, 53, 0.95) !important;
+    border: 1px solid #093C62 !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
 }
-body.dark-theme .floating-widget .widget-text h4 { color: #F8FAFC; }
-body.dark-theme .floating-widget .widget-text p { color: #94A3B8; }
-body.dark-theme .floating-widget:hover { background: rgba(30, 41, 59, 0.95); border-color: rgba(255,255,255,0.2); }
+body.dark-theme .floating-widget .widget-text h4 { color: #FFFFFF !important; }
+body.dark-theme .floating-widget .widget-text p { color: #9DB9CB !important; }
+body.dark-theme .floating-widget:hover { background: #182535 !important; border-color: #076FA4 !important; }
 
-/* Update Feature Cards for Dark Mode */
-body.dark-theme .feature-card { background: rgba(30, 41, 59, 0.5); border-color: rgba(255,255,255,0.1); }
-body.dark-theme .feature-card:hover { background: rgba(30, 41, 59, 0.85); border-color: rgba(255,255,255,0.2); }
-body.dark-theme .feature-card p { color: #94A3B8; }
+/* Update Cards for Dark Mode */
+body.dark-theme .card,
+body.dark-theme .feature-card,
+body.dark-theme .course-card,
+body.dark-theme .section-card,
+body.dark-theme .mycourse-card,
+body.dark-theme .reviews-summary,
+body.dark-theme .review-form-card,
+body.dark-theme .review-item,
+body.dark-theme .progress-box,
+body.dark-theme .search-section,
+body.dark-theme .stat-card {
+    background: #182535 !important;
+    border-color: #093C62 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+body.dark-theme .feature-card p,
+body.dark-theme .course-card-instructor,
+body.dark-theme .course-card-meta,
+body.dark-theme .stat-card p,
+body.dark-theme .review-comment,
+body.dark-theme .reviews-summary-info p,
+body.dark-theme .page-header p,
+body.dark-theme .hero-info .desc {
+    color: #9DB9CB !important;
+}
+
+body.dark-theme .course-card-title a,
+body.dark-theme .lesson-name a,
+body.dark-theme .hero-info h1,
+body.dark-theme .curriculum-title,
+body.dark-theme .page-header h1,
+body.dark-theme .mycourse-title {
+    color: #FFFFFF !important;
+}
+body.dark-theme .course-card-title a:hover,
+body.dark-theme .lesson-name a:hover {
+    color: #9DB9CB !important;
+}
+
+body.dark-theme .page-header {
+    background: linear-gradient(135deg, #182535, #093C62) !important;
+    border-bottom: 1px solid #093C62 !important;
+}
+
+/* Course Detail Tags (Instructor, Students, Lessons) in Dark Mode */
+body.dark-theme .hero-meta span {
+    background: #182535 !important;
+    border: 1px solid #093C62 !important;
+    color: #FFFFFF !important;
+}
+body.dark-theme .hero-meta span.instructor-tag {
+    background: #182535 !important;
+    border: 1px solid #093C62 !important;
+    color: #FFFFFF !important;
+}
+body.dark-theme .hero-meta span i,
+body.dark-theme .hero-meta span.instructor-tag i {
+    color: #38BDF8 !important;
+}
+body.dark-theme .hero-meta span.rating-tag {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    color: #F59E0B !important;
+}
+body.dark-theme .hero-meta span.rating-tag i {
+    color: #F59E0B !important;
+}
+
+body.dark-theme .section-header {
+    background: #151F2E !important;
+    border-bottom: 1px solid #093C62 !important;
+    border-left: 4px solid #076FA4 !important;
+}
+body.dark-theme .section-header h3 {
+    color: #FFFFFF !important;
+}
+body.dark-theme .lesson-item {
+    border-top: 1px solid #093C62 !important;
+}
+body.dark-theme .lesson-item:hover {
+    background: rgba(9, 60, 98, 0.25) !important;
+}
 
 /* Update Navbar for Dark Mode */
 body.dark-theme .lms-navbar {
-    background: rgba(30, 41, 59, 0.6) !important;
-    border-color: rgba(255,255,255,0.1) !important;
+    background: rgba(24, 37, 53, 0.85) !important;
+    border-color: #093C62 !important;
 }
-body.dark-theme .lms-navbar.scrolled { background: rgba(11, 15, 25, 0.95) !important; }
-body.dark-theme .nav-link { color: #E2E8F0; }
+body.dark-theme .lms-navbar.scrolled {
+    background: rgba(17, 19, 18, 0.95) !important;
+}
+body.dark-theme .nav-link { color: #9DB9CB; }
+body.dark-theme .nav-link:hover { color: #FFFFFF; }
 body.dark-theme .lms-logo { color: #FFFFFF; }
+body.dark-theme .user-badge {
+    background: #182535;
+    border-color: #093C62;
+    color: #FFFFFF;
+}
+
+/* Buttons in Dark Mode */
+body.dark-theme .btn-primary,
+body.dark-theme .btn-enroll,
+body.dark-theme .btn-submit-review {
+    background: linear-gradient(135deg, #093C62, #076FA4) !important;
+    border: 1px solid #093C62;
+    box-shadow: 0 4px 16px rgba(9, 60, 98, 0.5);
+    color: #FFFFFF !important;
+}
+body.dark-theme .btn-primary:hover,
+body.dark-theme .btn-enroll:hover,
+body.dark-theme .btn-submit-review:hover {
+    background: linear-gradient(135deg, #0b4b7a, #087db8) !important;
+    box-shadow: 0 6px 22px rgba(7, 111, 164, 0.55);
+}
+body.dark-theme .btn-outline {
+    border-color: #093C62;
+    color: #9DB9CB;
+}
+body.dark-theme .btn-outline:hover,
+body.dark-theme .btn-outline.active,
+body.dark-theme .btn-outline:active {
+    background: #093C62 !important;
+    border-color: #076FA4 !important;
+    color: #FFFFFF !important;
+}
+
+/* Form inputs in Dark Mode */
+body.dark-theme .form-control,
+body.dark-theme .search-input,
+body.dark-theme .search-select,
+body.dark-theme .review-textarea {
+    background: #182535 !important;
+    color: #FFFFFF !important;
+    border-color: #093C62 !important;
+}
+body.dark-theme .form-control:focus,
+body.dark-theme .search-input:focus,
+body.dark-theme .search-select:focus,
+body.dark-theme .review-textarea:focus {
+    border-color: #076FA4 !important;
+    box-shadow: 0 0 0 3px rgba(7, 111, 164, 0.25) !important;
+}
+body.dark-theme .form-label {
+    color: #E2E8F0;
+}
+
+/* Footer in Dark Mode */
+body.dark-theme .lms-footer {
+    background: #111312;
+    border-top: 1px solid #093C62;
+}
+body.dark-theme .footer-bottom {
+    border-top-color: #093C62;
+    color: #9DB9CB;
+}
 
 /* =========================================
    DYNAMIC ISLAND THEME TOGGLE
@@ -523,9 +720,9 @@ body.dark-theme .lms-logo { color: #FFFFFF; }
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(135deg, #FFFFFF, #E2E8F0);
-    border: 1px solid rgba(255,255,255,0.9);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #FFFFFF, #E2EEF5);
+    border: 1.5px solid #9DB9CB;
+    box-shadow: 0 10px 25px rgba(9, 60, 98, 0.15);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-radius: 100px;
@@ -546,14 +743,14 @@ body.dark-theme .lms-logo { color: #FFFFFF; }
     width: 150px;
     gap: 12px;
     padding: 6px 16px 6px 8px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    box-shadow: 0 15px 35px rgba(9, 60, 98, 0.22);
 }
 
 .theme-toggle-island .toggle-text {
     white-space: nowrap;
     font-weight: 700;
     font-size: 14px;
-    color: #1E293B;
+    color: #093C62;
     opacity: 0;
     transform: translateX(-10px) scale(0.9);
     transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
@@ -576,18 +773,19 @@ body.dark-theme .lms-logo { color: #FFFFFF; }
 }
 
 /* Opposing Gradients */
-.sun-icon { background: linear-gradient(135deg, #F59E0B, #EF4444); color: white; }
-.moon-icon { background: linear-gradient(135deg, #818CF8, #3B82F6); color: white; display: none; }
+.sun-icon { background: linear-gradient(135deg, #F59E0B, #076FA4); color: white; }
+.moon-icon { background: linear-gradient(135deg, #093C62, #076FA4); color: white; display: none; }
 
 /* Dark Theme State for the Island Button */
 body.dark-theme .theme-toggle-island {
-    background: linear-gradient(135deg, #1E293B, #0F172A);
-    border-color: rgba(255,255,255,0.1);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    background: linear-gradient(135deg, #182535, #111312);
+    border-color: #093C62;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
 }
 body.dark-theme .theme-toggle-island:hover {
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(129, 140, 248, 0.2);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.7), 0 0 20px rgba(9, 60, 98, 0.4);
+    border-color: #076FA4;
 }
-body.dark-theme .theme-toggle-island .toggle-text { color: #F8FAFC; }
+body.dark-theme .theme-toggle-island .toggle-text { color: #F4F8FA; }
 body.dark-theme .sun-icon { display: none; }
 body.dark-theme .moon-icon { display: flex; }

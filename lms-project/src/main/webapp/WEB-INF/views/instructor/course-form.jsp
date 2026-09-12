@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -14,30 +14,40 @@
         - LMS Instructor
     </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=26">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=26">
     <style>
-        .page-header{padding:36px 40px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
+        .page-header{padding:36px 40px;background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;}
         .page-header h1{font-size:26px;font-weight:800;}
         .page-header p{opacity:.85;font-size:14px;margin-top:6px;}
         .main{max-width:720px;margin:40px auto;padding:0 24px;}
-        .card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 20px rgba(0,0,0,.07);}
+        .card{background:#fff;border-radius:16px;padding:40px;box-shadow:0 4px 20px rgba(9,60,98,.07);border:1px solid #C6D8E3;}
         .alert-danger{background:#fff5f5;color:#c53030;border:1px solid #feb2b2;padding:14px 18px;border-radius:9px;font-size:14px;margin-bottom:24px;}
         .form-group{margin-bottom:22px;}
-        .form-group label{display:block;margin-bottom:8px;color:#374151;font-size:14px;font-weight:600;}
+        .form-group label{display:block;margin-bottom:8px;color:#093C62;font-size:14px;font-weight:600;}
         .form-group label .required{color:#e53e3e;margin-left:2px;}
-        .form-control{width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;color:#2d3748;outline:none;transition:border-color .2s,box-shadow .2s;}
-        .form-control:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.15);}
+        .form-control{width:100%;padding:11px 14px;border:1.5px solid #C6D8E3;border-radius:9px;font-size:14px;color:#093C62;outline:none;transition:border-color .2s,box-shadow .2s;}
+        .form-control:focus{border-color:#076FA4;box-shadow:0 0 0 3px rgba(7,111,164,.15);}
         textarea.form-control{min-height:130px;resize:vertical;line-height:1.6;}
-        .form-hint{font-size:12px;color:#a0aec0;margin-top:5px;}
-        .btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:9px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:10px;}
+        .form-hint{font-size:12px;color:#5C7688;margin-top:5px;}
+        .btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,#093C62,#076FA4);border:none;border-radius:9px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:10px;}
         .btn-submit:hover{opacity:.92;transform:translateY(-1px);}
         .back-link{display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.8);text-decoration:none;font-size:14px;margin-bottom:18px;transition:color .2s;}
         .back-link:hover{color:#fff;}
-        .divider{border:none;border-top:1px solid #f0f4f8;margin:24px 0;}
+        .divider{border:none;border-top:1px solid #C6D8E3;margin:24px 0;}
+
+        /* Dark Theme (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme .page-header{background:linear-gradient(135deg,#182535,#093C62);}
+        body.dark-theme .card{background:#182535;border-color:#093C62;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+        body.dark-theme .form-group label{color:#F4F8FA;}
+        body.dark-theme .form-control{background:#111312;border-color:#093C62;color:#F4F8FA;}
+        body.dark-theme .form-control:focus{border-color:#076FA4;}
+        body.dark-theme .form-hint{color:#9DB9CB;}
+        body.dark-theme #thumbnailPreviewContainer{background:#111312 !important;border-color:#093C62 !important;}
+        body.dark-theme .divider{border-top-color:#093C62;}
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <% 
     User currentUser = (User) session.getAttribute("currentUser"); 
     String role = currentUser != null ? currentUser.getRole() : "";
@@ -142,7 +152,7 @@
             </div>
 
             <div class="form-group">
-                <label for="thumbnailUrl"><i class="fa-solid fa-image" style="color:#4F46E5;"></i> Ảnh thu nhỏ khóa học (Thumbnail URL)</label>
+                <label for="thumbnailUrl"><i class="fa-solid fa-image" style="color:#076FA4;"></i> Ảnh thu nhỏ khóa học (Thumbnail URL)</label>
                 <input type="text" id="thumbnailUrl" name="thumbnailUrl" class="form-control"
                        placeholder="https://images.unsplash.com/... hoặc đường dẫn ảnh..."
                        value="<c:out value='${course.thumbnailUrl}' default=''/>"
@@ -197,5 +207,14 @@ function handleImageError() {
     placeholder.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:28px; color:#EF4444; margin-bottom:8px; display:block;"></i><span style="color:#EF4444; font-weight:600;">Link ảnh không tải được hoặc không đúng định dạng</span>';
 }
 </script>
+
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=26"></script>
 </body>
 </html>

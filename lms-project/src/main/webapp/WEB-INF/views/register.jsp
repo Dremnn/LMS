@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -11,25 +11,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=3">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=26">
     
     <style>
         .auth-layout { display: flex; min-height: 100vh; background: var(--bg); }
         
         .auth-left {
-            flex: 1; background: linear-gradient(135deg, #06B6D4, #3730A3);
+            flex: 1; background: linear-gradient(135deg, #093C62, #076FA4);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: white; padding: 40px; text-align: center; position: relative; overflow: hidden;
         }
         .auth-left::before { 
             content: ''; position: absolute; width: 700px; height: 700px; 
-            background: rgba(255,255,255,0.03); border-radius: 50%; top: -150px; left: -150px; 
+            background: rgba(255,255,255,0.04); border-radius: 50%; top: -150px; left: -150px; 
         }
         
         .auth-quote { z-index: 1; max-width: 440px; }
         .auth-quote h2 { font-size: 32px; margin-bottom: 16px; color: #FFFFFF; font-weight: 800; }
-        .auth-quote p { font-size: 16px; color: #E0F2FE; line-height: 1.6; }
+        .auth-quote p { font-size: 16px; color: #9DB9CB; line-height: 1.6; }
         
         .auth-right {
             flex: 1.2; display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--bg);
@@ -71,7 +71,7 @@
         @media (max-width: 600px) { .form-row { flex-direction: column; gap: 0; } }
     </style>
 </head>
-<body>
+<body class="${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 
 <div class="auth-layout">
     <!-- Left Panel with 3D Illustration Equivalent -->
@@ -157,6 +157,13 @@
     </div>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/lms-app.js"></script>
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=26"></script>
 </body>
 </html>

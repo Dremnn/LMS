@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -18,11 +18,11 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=15">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=15">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=26">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=26">
 
     <style>
-        .hero-section { display: flex; align-items: center; justify-content: space-between; padding: 60px 0; min-height: 80vh; gap: 40px; }
+        .hero-section { display: flex; align-items: center; justify-content: space-between; padding: 60px 0; min-height: 80vh; gap: 40px; background: transparent !important; }
         .hero-content { flex: 1; max-width: 600px; }
         .hero-content h1 { font-size: 52px; font-weight: 800; line-height: 1.15; margin-bottom: 24px; color: var(--text); }
         .hero-content h1 span { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -31,7 +31,7 @@
         .hero-visual { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; height: 500px; width: 100%; border-radius: 20px; overflow: hidden; }
 
         .features-section { padding: 80px 0; background: rgba(255, 255, 255, 0.4); border-top: 1px solid var(--border); position: relative; z-index: 5; }
-        .section-title { text-align: center; font-size: 38px; margin-bottom: 16px; font-weight: 800; background: linear-gradient(135deg, #1E1B4B, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section-title { text-align: center; font-size: 38px; margin-bottom: 16px; font-weight: 800; background: linear-gradient(135deg, #093C62, #076FA4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .section-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 56px; font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto; font-weight: 500; }
 
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; }
@@ -43,23 +43,24 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             box-shadow: 0 10px 30px rgba(0,0,0,0.02);
         }
-        .feature-card:hover { transform: translateY(-8px); border-color: white; box-shadow: 0 20px 40px rgba(79, 70, 229, 0.1); background: rgba(255, 255, 255, 0.85); }
+        .feature-card:hover { transform: translateY(-8px); border-color: white; box-shadow: 0 20px 40px rgba(7, 111, 164, 0.12); background: rgba(255, 255, 255, 0.85); }
 
         .feature-icon { width: 90px; height: 90px; margin: 0 auto 20px auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; color: #fff; }
-        .feature-card:nth-child(1) .feature-icon { background: linear-gradient(135deg, #4f46e5, #ec4899); }
-        .feature-card:nth-child(2) .feature-icon { background: linear-gradient(135deg, #8b5cf6, #d946ef); }
+        .feature-card:nth-child(1) .feature-icon { background: linear-gradient(135deg, #093C62, #076FA4); }
+        .feature-card:nth-child(2) .feature-icon { background: linear-gradient(135deg, #076FA4, #9DB9CB); }
         .feature-card:nth-child(3) .feature-icon { background: linear-gradient(135deg, #10b981, #0ea5e9); }
         .feature-card:nth-child(4) .feature-icon { background: linear-gradient(135deg, #f59e0b, #ef4444); }
 
         .feature-card h3 { font-size: 22px; margin-bottom: 16px; font-weight: 800; }
-        .feature-card:nth-child(1) h3 { background: linear-gradient(135deg, #4f46e5, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .feature-card:nth-child(2) h3 { background: linear-gradient(135deg, #8b5cf6, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .feature-card:nth-child(1) h3 { background: linear-gradient(135deg, #093C62, #076FA4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .feature-card:nth-child(2) h3 { background: linear-gradient(135deg, #076FA4, #9DB9CB); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .feature-card:nth-child(3) h3 { background: linear-gradient(135deg, #10b981, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .feature-card:nth-child(4) h3 { background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         .feature-card p { color: #4b5563; font-size: 15px; line-height: 1.6; font-weight: 500; }
 
-        .stats-section { padding: 100px 0; background: radial-gradient(circle at top center, #312E81 0%, #0B0F19 100%); color: white; text-align: center; position: relative; overflow: hidden; }
+        .stats-section { padding: 80px 0; background: radial-gradient(circle at top center, #182535 0%, #111312 100%); color: white; text-align: center; position: relative; overflow: hidden; margin-bottom: 0 !important; }
+        .modern-footer, footer.lms-footer { margin-top: 0 !important; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; position: relative; z-index: 10; }
 
         .stat-card {
@@ -67,9 +68,9 @@
             border-radius: 24px; backdrop-filter: blur(8px);
             box-shadow: 0 10px 40px rgba(0,0,0,0.3); transition: border-color 0.3s ease;
         }
-        .stat-card:hover { border-color: rgba(56, 189, 248, 0.4); }
+        .stat-card:hover { border-color: rgba(7, 111, 164, 0.4); }
 
-        .stat-card h2 { font-size: 64px; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; font-weight: 900; }
+        .stat-card h2 { font-size: 64px; background: linear-gradient(135deg, #9DB9CB, #076FA4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; font-weight: 900; }
         .stat-card p { font-size: 16px; color: #94A3B8; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
 
         .widget-pos { position: absolute; z-index: 5; pointer-events: auto; }
@@ -93,6 +94,69 @@
         .widget-text p { font-size: 13px; color: #64748B; margin: 0; font-weight: 500; }
 
         @keyframes floatOrganic { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+
+        /* DARK THEME CHO INDEX (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme,
+        body.dark-theme.mesh-bg {
+            background: #111312 !important;
+            background-color: #111312 !important;
+        }
+        body.dark-theme .hero-section {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        body.dark-theme .hero-content h1 {
+            color: #FFFFFF !important;
+        }
+        body.dark-theme .hero-content h1 span {
+            background: linear-gradient(135deg, #38BDF8, #9DB9CB) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+        }
+        body.dark-theme .hero-content p {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .features-section {
+            background: #111312 !important;
+            border-top: 1px solid #093C62 !important;
+        }
+        body.dark-theme .section-title {
+            background: linear-gradient(135deg, #FFFFFF, #9DB9CB) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+        }
+        body.dark-theme .section-subtitle {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .feature-card {
+            background: #182535 !important;
+            border: 1px solid #093C62 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+        }
+        body.dark-theme .feature-card:hover {
+            border-color: #076FA4 !important;
+            background: #1e2f42 !important;
+            box-shadow: 0 20px 40px rgba(7, 111, 164, 0.25) !important;
+        }
+        body.dark-theme .feature-card p {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .floating-widget {
+            background: rgba(24, 37, 53, 0.95) !important;
+            border: 1px solid #093C62 !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important;
+        }
+        body.dark-theme .floating-widget:hover {
+            border-color: #076FA4 !important;
+            box-shadow: 0 20px 40px rgba(7, 111, 164, 0.3) !important;
+        }
+        body.dark-theme .widget-text h4 {
+            color: #FFFFFF !important;
+        }
+        body.dark-theme .widget-text p {
+            color: #9DB9CB !important;
+        }
 
         @media (max-width: 992px) {
             .widget-pos { display: none; }
@@ -309,6 +373,6 @@
 </div>
 
 <!-- App Scripts -->
-<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=16"></script>
+<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=26"></script>
 </body>
 </html>
