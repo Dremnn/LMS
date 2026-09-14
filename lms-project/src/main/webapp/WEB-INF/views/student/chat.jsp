@@ -81,7 +81,7 @@
         </div>
         <div class="nav-links">
             <a href="<%=request.getContextPath()%>/student/dashboard">Bảng điều khiển</a>
-            <a href="<%=request.getContextPath()%>/student/courses">Khóa học của tôi</a>
+            <a href="<%=request.getContextPath()%>/courses">Khóa học của tôi</a>
             <a href="<%=request.getContextPath()%>/student/chat" class="active">Tin nhắn</a>
         </div>
         <div class="user-menu">
