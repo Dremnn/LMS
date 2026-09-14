@@ -33,4 +33,10 @@ public class QuizAttempt implements Serializable {
 
     public LocalDateTime getSubmittedAt() { return submittedAt; }
     public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
+    private static final java.time.format.DateTimeFormatter DISPLAY_FMT =
+        java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+    public String getSubmittedAtFormatted() {
+        return submittedAt != null ? submittedAt.format(DISPLAY_FMT) : "";
+    }
+
 }

@@ -183,7 +183,7 @@
                                 </c:choose>
                             </td>
                             <td>${course.totalStudents}</td>
-                            <td>${course.createdAt}</td>
+                            <td>${course.createdAtFormatted}</td>
                             <td>
                                 <div class="actions">
                                     <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>

@@ -108,7 +108,7 @@
                 </c:when>
                 <c:otherwise>
                     <div class="alert alert-danger-soft">
-                        😔 Rất tiếc, bạn chưa đạt điểm yêu cầu (<strong>${quiz.passScore} điểm</strong>). Hãy thử lại nếu còn lượt làm bài!
+                        Rất tiếc, bạn chưa đạt điểm yêu cầu (<strong>${quiz.passScore} điểm</strong>). Hãy thử lại nếu còn lượt làm bài!
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -126,7 +126,7 @@
             </div>
             <div class="meta-row">
                 <span class="label"><i class="fa-regular fa-clock"></i> Thời gian nộp</span>
-                <span class="value">${attempt.submittedAt}</span>
+                <span class="value">${attempt.submittedAtFormatted}</span>
             </div>
         </div>
 

@@ -3,10 +3,13 @@ package com.lms.service;
 import com.lms.dao.CourseDAO;
 import com.lms.dao.EnrollmentDAO;
 import com.lms.dao.LessonProgressDAO;
+import com.lms.dao.UserDAO;
 import com.lms.model.Course;
 import com.lms.model.Enrollment;
 import com.lms.model.LessonProgress;
+import com.lms.model.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class EnrollmentService {
@@ -14,15 +17,21 @@ public class EnrollmentService {
     private final EnrollmentDAO enrollmentDAO;
     private final LessonProgressDAO lessonProgressDAO;
     private final CourseDAO courseDAO;
+    private final UserDAO userDAO;
+    private final WalletService walletService;
 
     public EnrollmentService() {
         this.enrollmentDAO = new EnrollmentDAO();
         this.lessonProgressDAO = new LessonProgressDAO();
         this.courseDAO = new CourseDAO();
+        this.userDAO = new UserDAO();
+        this.walletService = new WalletService();
     }
 
     // =========================================================================
     // 1. STUDENT: ĐĂNG KÝ (GHI DANH) 1 KHÓA HỌC
+    // Nếu khóa học có phí (price > 0) -> kiểm tra & trừ tiền trong ví trước.
+    // Nếu số dư không đủ -> ném IllegalStateException, KHÔNG tạo enrollment.
     // =========================================================================
     public Enrollment enroll(int studentId, int courseId) {
 
@@ -38,10 +47,37 @@ public class EnrollmentService {
             throw new IllegalStateException("Bạn đã đăng ký khóa học này rồi!");
         }
 
+        BigDecimal price = course.getPrice();
+        boolean isPaidCourse = price != null && price.compareTo(BigDecimal.ZERO) > 0;
+
+        // Kiểm tra trước để báo lỗi rõ ràng, thân thiện (kèm số dư hiện tại/còn thiếu)
+        if (isPaidCourse) {
+            User student = userDAO.findById(studentId);
+            BigDecimal currentBalance = (student != null) ? student.getBalance() : BigDecimal.ZERO;
+            if (currentBalance.compareTo(price) < 0) {
+                BigDecimal missing = price.subtract(currentBalance);
+                throw new IllegalStateException(String.format(
+                        "Số dư trong ví không đủ để đăng ký khóa học này (cần %sđ, còn thiếu %sđ). " +
+                        "Vui lòng ăn cắp thêm để nạp tiền vào ví!",
+                        price.toPlainString(), missing.toPlainString()));
+            }
+        }
+
         Enrollment enrollment = new Enrollment(studentId, courseId);
         boolean saved = enrollmentDAO.save(enrollment);
         if (!saved) {
             throw new RuntimeException("Có lỗi xảy ra khi đăng ký khóa học. Vui lòng thử lại!");
+        }
+
+        // Trừ tiền SAU KHI enrollment đã được tạo thành công. Nếu vì lý do nào đó
+        // (race-condition hiếm gặp) số dư không còn đủ nữa thì hoàn tác (xóa enrollment vừa tạo).
+        if (isPaidCourse) {
+            try {
+                walletService.payForCourse(studentId, courseId, price);
+            } catch (IllegalStateException e) {
+                enrollmentDAO.delete(studentId, courseId);
+                throw e;
+            }
         }
 
         // Lưu ý: total_students của course được Trigger trg_enrollment_update_total_students
