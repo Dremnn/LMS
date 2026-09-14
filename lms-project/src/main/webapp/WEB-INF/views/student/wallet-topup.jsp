@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nạp tiền vào ví - LMS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=30">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=26">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=26">
     <style>
@@ -47,10 +47,22 @@
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
     <!-- NAVBAR -->
     <nav class="lms-navbar">
+        <div class="nav-left">
         <a href="${pageContext.request.contextPath}/" class="lms-logo">
-            <img src="${pageContext.request.contextPath}/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+            <img src="${pageContext.request.contextPath}/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
             <span class="logo-tag">LMS</span>
         </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
         <div class="nav-links">
             <a href="${pageContext.request.contextPath}/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
@@ -140,5 +152,7 @@
             event.target.classList.add('active');
         }
     </script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>
