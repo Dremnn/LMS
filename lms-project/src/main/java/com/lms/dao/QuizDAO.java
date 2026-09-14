@@ -5,6 +5,7 @@ import com.lms.util.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -243,6 +244,33 @@ public class QuizDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public List<Quiz> findQuizzesClosingSoonNotNotified(LocalDateTime now, LocalDateTime threshold) {
+        List<Quiz> list = new ArrayList<>();
+        String sql = "SELECT id, section_id, course_id, title, pass_score, max_attempts, " +
+                    "time_limit_minutes, open_at, close_at " +
+                    "FROM quizzes WHERE close_at BETWEEN ? AND ? AND notified_deadline = FALSE";
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setTimestamp(1, Timestamp.valueOf(now));
+            stmt.setTimestamp(2, Timestamp.valueOf(threshold));
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) list.add(mapResultSetToQuiz(rs));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public boolean markDeadlineNotified(int quizId) {
+        String sql = "UPDATE quizzes SET notified_deadline = TRUE WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, quizId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
     }
 
     private Quiz mapResultSetToQuiz(ResultSet rs) throws SQLException {

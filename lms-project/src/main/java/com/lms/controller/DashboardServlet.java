@@ -3,7 +3,8 @@ package com.lms.controller;
 import com.lms.model.*;
 import com.lms.service.EventService;
 import com.lms.service.QuizService;
-import com.lms.service.CourseService;
+import com.lms.dao.CourseDAO;
+import com.lms.dao.EnrollmentDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,19 +18,26 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@WebServlet(urlPatterns = {"/student/dashboard", "/student/dashboard/events/new"})
+@WebServlet(urlPatterns = {
+    "/student/dashboard",
+    "/student/dashboard/events/new",
+    "/student/dashboard/events/edit",
+    "/student/dashboard/events/delete"
+})
 public class DashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private QuizService quizService;
     private EventService eventService;
-    private CourseService courseService;
+    private CourseDAO courseDAO;
+    private EnrollmentDAO enrollmentDAO;
 
     @Override
     public void init() throws ServletException {
         this.quizService = new QuizService();
         this.eventService = new EventService();
-        this.courseService = new CourseService();
+        this.courseDAO = new CourseDAO();
+        this.enrollmentDAO = new EnrollmentDAO();
     }
 
     private User getCurrentUser(HttpServletRequest request) {
@@ -43,7 +51,6 @@ public class DashboardServlet extends HttpServlet {
 
         User currentUser = getCurrentUser(request);
 
-        // Đọc flash message nếu có (sau khi tạo sự kiện xong redirect về đây)
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("flashError") != null) {
             request.setAttribute("error", session.getAttribute("flashError"));
@@ -56,7 +63,6 @@ public class DashboardServlet extends HttpServlet {
         if (month < 1) { month = 12; year--; }
         else if (month > 12) { month = 1; year++; }
 
-        // Tham số cho bảng "Mốc thời gian"
         String dueFilter = request.getParameter("dueFilter");
         if (dueFilter == null || dueFilter.isEmpty()) dueFilter = "7";
         String sortBy = request.getParameter("sortBy");
@@ -66,11 +72,9 @@ public class DashboardServlet extends HttpServlet {
                 ? Integer.parseInt(courseIdStr) : null;
 
         try {
-            // 1. Danh sách "Mốc thời gian" (upcoming panel)
             List<Quiz> upcomingQuizzes = quizService.getUpcomingQuizzesForStudent(
                     currentUser.getId(), dueFilter, sortBy, courseIdFilter);
 
-            // 2. Dữ liệu Timetable tháng hiện tại - gộp cả Quiz deadline + Event tự tạo
             List<Quiz> monthQuizzes = quizService.getQuizzesByCloseAtMonth(year, month);
             List<Event> monthEvents = eventService.getEventsByMonth(currentUser.getId(), year, month);
 
@@ -88,14 +92,12 @@ public class DashboardServlet extends HttpServlet {
                 eventsByDay.computeIfAbsent(day, k -> new ArrayList<>()).add(e);
             }
 
+            // Danh sách khóa học Student đã enroll - dùng cho listbox lọc + dropdown gắn sự kiện
             List<Course> myCourses = new ArrayList<>();
-            List<Enrollment> myEnrollments = new com.lms.dao.EnrollmentDAO().findByStudent(currentUser.getId());
-            com.lms.dao.CourseDAO courseDAOTemp = new com.lms.dao.CourseDAO();
-            for (Enrollment e : myEnrollments) {
-                Course c = courseDAOTemp.findById(e.getCourseId());
-                if (c != null) {
-                    myCourses.add(c);
-                }
+            List<Enrollment> myEnrollments = enrollmentDAO.findByStudent(currentUser.getId());
+            for (Enrollment en : myEnrollments) {
+                Course c = courseDAO.findById(en.getCourseId());
+                if (c != null) myCourses.add(c);
             }
 
             request.setAttribute("year", year);
@@ -123,27 +125,30 @@ public class DashboardServlet extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
+        String path = request.getServletPath();
         User currentUser = getCurrentUser(request);
 
         try {
-            String title = request.getParameter("title");
-            String dateStr = request.getParameter("eventDate"); // format "yyyy-MM-ddTHH:mm"
-            String description = request.getParameter("description");
-            String courseIdStr = request.getParameter("courseId");
+            if ("/student/dashboard/events/new".equals(path)) {
+                handleCreateEvent(request, response, currentUser);
 
-            LocalDateTime eventDate = LocalDateTime.parse(dateStr);
-            Integer courseId = (courseIdStr != null && !courseIdStr.isEmpty())
-                    ? Integer.parseInt(courseIdStr) : null;
+            } else if ("/student/dashboard/events/edit".equals(path)) {
+                handleEditEvent(request, response, currentUser);
 
-            eventService.createEvent(currentUser.getId(), courseId, title, eventDate, description);
+            } else if ("/student/dashboard/events/delete".equals(path)) {
+                handleDeleteEvent(request, response, currentUser);
 
-            response.sendRedirect(request.getContextPath() + "/student/dashboard?year="
-                    + eventDate.getYear() + "&month=" + eventDate.getMonthValue());
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
 
         } catch (IllegalArgumentException e) {
             HttpSession session = request.getSession();
             session.setAttribute("flashError", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/student/dashboard");
+
+        } catch (SecurityException e) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -151,6 +156,75 @@ public class DashboardServlet extends HttpServlet {
             session.setAttribute("flashError", "Đã xảy ra lỗi hệ thống!");
             response.sendRedirect(request.getContextPath() + "/student/dashboard");
         }
+    }
+
+    private void handleCreateEvent(HttpServletRequest request, HttpServletResponse response, User currentUser)
+            throws IOException {
+        EventFormData data = readEventForm(request);
+        eventService.createEvent(currentUser.getId(), data.courseId, data.title, data.eventDate,
+                data.description, data.address, data.durationType, data.durationEnd, data.durationMinutes);
+
+        response.sendRedirect(request.getContextPath() + "/student/dashboard?year="
+                + data.eventDate.getYear() + "&month=" + data.eventDate.getMonthValue());
+    }
+
+    private void handleEditEvent(HttpServletRequest request, HttpServletResponse response, User currentUser)
+            throws IOException {
+        int eventId = Integer.parseInt(request.getParameter("eventId"));
+        EventFormData data = readEventForm(request);
+
+        eventService.updateEvent(eventId, currentUser.getId(), data.courseId, data.title, data.eventDate,
+                data.description, data.address, data.durationType, data.durationEnd, data.durationMinutes);
+
+        response.sendRedirect(request.getContextPath() + "/student/dashboard?year="
+                + data.eventDate.getYear() + "&month=" + data.eventDate.getMonthValue());
+    }
+
+    private void handleDeleteEvent(HttpServletRequest request, HttpServletResponse response, User currentUser)
+            throws IOException {
+        int eventId = Integer.parseInt(request.getParameter("eventId"));
+        String year = request.getParameter("year");
+        String month = request.getParameter("month");
+
+        eventService.deleteEvent(eventId, currentUser.getId());
+
+        response.sendRedirect(request.getContextPath() + "/student/dashboard?year=" + year + "&month=" + month);
+    }
+
+    // Gom việc đọc form vào 1 chỗ, dùng chung cho create/edit
+    private EventFormData readEventForm(HttpServletRequest request) {
+        EventFormData data = new EventFormData();
+        data.title = request.getParameter("title");
+        data.eventDate = LocalDateTime.parse(request.getParameter("eventDate"));
+        data.description = request.getParameter("description");
+        data.address = request.getParameter("address");
+
+        String courseIdStr = request.getParameter("courseId");
+        data.courseId = (courseIdStr != null && !courseIdStr.isEmpty()) ? Integer.parseInt(courseIdStr) : null;
+
+        data.durationType = request.getParameter("durationType");
+        if (data.durationType == null) data.durationType = "none";
+
+        String durationEndStr = request.getParameter("durationEnd");
+        data.durationEnd = (durationEndStr != null && !durationEndStr.isEmpty())
+                ? LocalDateTime.parse(durationEndStr) : null;
+
+        String durationMinutesStr = request.getParameter("durationMinutes");
+        data.durationMinutes = (durationMinutesStr != null && !durationMinutesStr.isEmpty())
+                ? Integer.parseInt(durationMinutesStr) : null;
+
+        return data;
+    }
+
+    private static class EventFormData {
+        String title;
+        LocalDateTime eventDate;
+        String description;
+        String address;
+        Integer courseId;
+        String durationType;
+        LocalDateTime durationEnd;
+        Integer durationMinutes;
     }
 
     private int parseOrDefault(String value, int defaultValue) {
