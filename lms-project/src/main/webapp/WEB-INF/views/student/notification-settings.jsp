@@ -70,5 +70,8 @@
         </form>
     </div>
 
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>
+

@@ -3,103 +3,264 @@
 <%
     List<Notification> notifications = (List<Notification>) request.getAttribute("notifications");
     Notification selected = (Notification) request.getAttribute("selected");
+    com.lms.model.User currentUser = (com.lms.model.User) session.getAttribute("currentUser");
+    String role = currentUser != null ? currentUser.getRole() : "";
 %>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Các thông báo - LMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo - EduViet LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f5f6fa; }
-        .header { background: #fff; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
-        .avatar { width: 48px; height: 48px; border-radius: 50%; background: #14b8a6; color: #fff;
-                  display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
-        .container { display: flex; background: #fff; margin: 0 24px 24px; border-radius: 8px; overflow: hidden; min-height: 500px; }
-        .list-col { width: 340px; border-right: 1px solid #eee; overflow-y: auto; }
-        .list-col h2 { padding: 16px; margin: 0; font-size: 18px; border-bottom: 1px solid #eee; }
-        .n-item { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .n-item:hover { background: #f9fafb; }
-        .n-item.active { background: #2563eb; color: #fff; }
-        .n-item.active a, .n-item.active .n-time { color: #dbeafe; }
-        .n-item .n-title { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; }
-        .n-item .n-time { font-size: 12px; color: #999; margin-top: 4px; margin-left: 24px; }
-        .n-item.unread .n-title { font-weight: bold; }
-
-        .detail-col { flex: 1; padding: 24px; }
-        .detail-col .n-title-row { display: flex; align-items: flex-start; gap: 8px; }
-        .detail-col .n-meta { font-size: 12px; color: #999; margin: 4px 0 16px 24px; }
-        .detail-col .n-breadcrumb { margin: 16px 0; }
-        .detail-col .n-breadcrumb a { color: #2563eb; text-decoration: none; }
-        .detail-col hr { border: none; border-top: 1px solid #eee; margin: 16px 0; }
-        .detail-col .n-message { line-height: 1.6; }
-        .no-selection { color: #999; text-align: center; padding: 60px 20px; }
+        .notifications-wrapper {
+            max-width: 1100px;
+            margin: -40px auto 40px;
+            position: relative;
+            z-index: 10;
+        }
+        .notif-layout {
+            display: flex;
+            gap: 24px;
+            background: transparent;
+        }
+        
+        /* Sidebar Danh sách */
+        .notif-sidebar {
+            width: 380px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: calc(100vh - 200px);
+            min-height: 500px;
+        }
+        .sidebar-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-header h2 { margin: 0; font-size: 18px; color: var(--text); }
+        .sidebar-header a { font-size: 13px; color: var(--primary); text-decoration: none; font-weight: 600; }
+        .sidebar-header a:hover { text-decoration: underline; }
+        
+        .notif-list {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--surface);
+        }
+        .n-item {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all var(--t-fast);
+            position: relative;
+        }
+        .n-item:hover { background: rgba(79, 70, 229, 0.03); }
+        .n-item.active { background: rgba(79, 70, 229, 0.08); border-left: 4px solid var(--primary); padding-left: 20px; }
+        .n-item.unread { background: #F0F9FF; }
+        .n-item.unread.active { background: rgba(79, 70, 229, 0.08); }
+        
+        .n-item .n-title { font-size: 15px; color: var(--text); margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
+        .n-item.unread .n-title { font-weight: 700; color: var(--primary-dark); }
+        .n-item .n-time { font-size: 12px; color: var(--text-muted); margin-left: 28px; display: flex; align-items: center; gap: 4px; }
+        
+        /* Cột Chi tiết */
+        .notif-detail {
+            flex: 1;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 200px);
+            min-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .detail-header { border-bottom: 2px solid var(--border); padding-bottom: 20px; margin-bottom: 24px; }
+        .detail-title { font-size: 22px; color: var(--text); font-weight: 700; display: flex; align-items: flex-start; gap: 12px; line-height: 1.4; margin: 0 0 10px 0; }
+        .detail-meta { display: flex; align-items: center; gap: 16px; color: var(--text-muted); font-size: 13px; }
+        .detail-body { font-size: 15px; color: var(--text); line-height: 1.8; flex: 1; }
+        
+        .no-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .no-selection i { font-size: 64px; color: var(--border); margin-bottom: 16px; }
+        
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 24px;
+            transition: all var(--t-fast);
+        }
+        .link-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); }
+        
     </style>
 </head>
-<body>
+<body class="mesh-bg">
 
-    <div class="header">
-        <div class="avatar"><%= currentUserInitial(request) %></div>
-        <div>
-            <strong><%= ((com.lms.model.User) request.getSession().getAttribute("currentUser")).getFullName() %></strong>
+<!-- DYNAMIC ISLAND NAVBAR -->
+<nav class="lms-navbar">
+    <div class="nav-left">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
+        <span class="logo-tag">LMS</span>
+    </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
         </div>
+        <% } %>
     </div>
+    <div class="nav-links">
+        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+        <% if (currentUser != null) { %>
+            <% if ("student".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+            <% } %>
+            <div class="user-badge">
+                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <span><%=currentUser.getFullName()%></span>
+                <span class="role-tag"><%=role%></span>
+            </div>
+            <% if ("instructor".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <% } else if ("admin".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+            <% } else { %>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
+            <% } %>
+            <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger btn-sm"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a>
+        <% } %>
+    </div>
+</nav>
 
-    <div class="container">
-        <div class="list-col">
-            <h2>Các thông báo</h2>
-            <% if (notifications == null || notifications.isEmpty()) { %>
-                <div class="no-selection">Chưa có thông báo nào.</div>
-            <% } else {
-                for (Notification n : notifications) {
-                    boolean isActive = selected != null && selected.getId() == n.getId();
-                    String itemClass = "n-item" + (isActive ? " active" : "") + (!n.isRead() ? " unread" : "");
-            %>
-                <div class="<%= itemClass %>"
-                     onclick="location.href='<%= request.getContextPath() %>/student/notifications?id=<%= n.getId() %>'">
-                    <div class="n-title">💡 <%= n.getTitle() %></div>
-                    <div class="n-time"><%= timeAgo(n.getCreatedAt()) %></div>
-                </div>
-            <%  }
-            } %>
+<!-- PAGE HEADER -->
+<div class="page-header" style="padding-bottom: 80px; text-align: left;">
+    <div class="container" style="max-width: 1100px;">
+        <h1><i class="fa-solid fa-envelope-open-text"></i> Hộp thư thông báo</h1>
+        <p>Quản lý các tin nhắn và cập nhật quan trọng từ hệ thống.</p>
+    </div>
+</div>
+
+<div class="notifications-wrapper reveal reveal-d1">
+    <div class="notif-layout">
+        
+        <!-- SIDEBAR -->
+        <div class="notif-sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-inbox"></i> Tất cả thông báo</h2>
+                <a href="<%= request.getContextPath() %>/student/notifications/mark-all-read"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc</a>
+            </div>
+            <div class="notif-list">
+                <% if (notifications == null || notifications.isEmpty()) { %>
+                    <div style="padding: 40px 20px; text-align: center; color: var(--text-muted);">
+                        <i class="fa-solid fa-box-open" style="font-size: 32px; color: var(--border); margin-bottom: 12px;"></i>
+                        <p>Chưa có thông báo nào.</p>
+                    </div>
+                <% } else {
+                    for (Notification n : notifications) {
+                        boolean isActive = selected != null && selected.getId() == n.getId();
+                        String itemClass = "n-item" + (isActive ? " active" : "") + (!n.isRead() ? " unread" : "");
+                %>
+                    <div class="<%= itemClass %>" onclick="location.href='<%= request.getContextPath() %>/student/notifications?id=<%= n.getId() %>'">
+                        <div class="n-title">
+                            <% if (!n.isRead()) { %>
+                                <i class="fa-solid fa-circle" style="color: var(--primary); font-size: 8px; margin-top: 6px;"></i>
+                            <% } else { %>
+                                <i class="fa-regular fa-bell" style="color: var(--text-muted); font-size: 14px; margin-top: 2px;"></i>
+                            <% } %>
+                            <span><%= n.getTitle() %></span>
+                        </div>
+                        <div class="n-time"><i class="fa-regular fa-clock"></i> <%= timeAgo(n.getCreatedAt()) %></div>
+                    </div>
+                <%  }
+                } %>
+            </div>
         </div>
 
-        <div class="detail-col">
+        <!-- DETAIL COLUMN -->
+        <div class="notif-detail">
             <% if (selected == null) { %>
-                <div class="no-selection">Chọn 1 thông báo để xem chi tiết.</div>
+                <div class="no-selection">
+                    <i class="fa-regular fa-comments"></i>
+                    <h3>Chưa chọn thông báo</h3>
+                    <p>Hãy chọn một thông báo từ danh sách bên trái để xem chi tiết.</p>
+                </div>
             <% } else { %>
-                <div class="n-title-row">💡 <strong><%= selected.getTitle() %></strong></div>
-                <div class="n-meta"><%= timeAgo(selected.getCreatedAt()) %></div>
+                <div class="detail-header">
+                    <h2 class="detail-title">
+                        <i class="fa-solid fa-envelope-open" style="color: var(--primary); margin-top: 4px; font-size: 20px;"></i>
+                        <%= selected.getTitle() %>
+                    </h2>
+                    <div class="detail-meta">
+                        <span><i class="fa-solid fa-calendar-day"></i> <%= selected.getCreatedAt().toString().replace("T", " ") %></span>
+                        <span><i class="fa-regular fa-clock"></i> <%= timeAgo(selected.getCreatedAt()) %></span>
+                    </div>
+                </div>
 
-                <hr>
-                <div class="n-message"><%= selected.getMessage() %></div>
-
-                <% if (selected.getRelatedUrl() != null && !selected.getRelatedUrl().isEmpty()) { %>
-                    <p style="margin-top:20px;">
-                        <a href="<%= request.getContextPath() %><%= selected.getRelatedUrl() %>">Đi tới liên kết liên quan</a>
-                    </p>
-                <% } %>
+                <div class="detail-body">
+                    <%= selected.getMessage().replace("\n", "<br>") %>
+                    
+                    <% if (selected.getRelatedUrl() != null && !selected.getRelatedUrl().isEmpty()) { %>
+                        <div>
+                            <a href="<%= request.getContextPath() %><%= selected.getRelatedUrl() %>" class="link-btn">
+                                Truy cập liên kết <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
             <% } %>
         </div>
+
     </div>
+</div>
+
+<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
+</body>
+</html>
 
 <%!
-    // Hàm phụ trợ hiển thị "cách đây X phút/giờ/ngày" - đặt trong JSP declaration để tái sử dụng
     public String timeAgo(java.time.LocalDateTime dateTime) {
         if (dateTime == null) return "";
         long minutes = java.time.temporal.ChronoUnit.MINUTES.between(dateTime, java.time.LocalDateTime.now());
-        if (minutes < 60) return "cách đây " + minutes + " phút";
+        if (minutes < 1) return "Vừa xong";
+        if (minutes < 60) return minutes + " phút trước";
         long hours = minutes / 60;
-        if (hours < 24) return "cách đây " + hours + " giờ";
+        if (hours < 24) return hours + " giờ trước";
         long days = hours / 24;
-        return "cách đây " + days + " ngày";
-    }
-
-    public String currentUserInitial(jakarta.servlet.http.HttpServletRequest request) {
-        com.lms.model.User u = (com.lms.model.User) request.getSession().getAttribute("currentUser");
-        if (u == null || u.getFullName() == null || u.getFullName().isEmpty()) return "?";
-        return u.getFullName().substring(0, 1).toUpperCase();
+        return days + " ngày trước";
     }
 %>
-
-</body>
-</html>

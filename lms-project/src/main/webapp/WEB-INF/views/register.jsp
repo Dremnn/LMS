@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -11,8 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=26">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=30">
     
     <style>
         .auth-layout { display: flex; min-height: 100vh; background: var(--bg); }
@@ -164,6 +164,9 @@
     <span class="toggle-text">Chế độ Tối</span>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=26"></script>
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>
+

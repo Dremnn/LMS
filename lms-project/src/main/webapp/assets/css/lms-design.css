@@ -789,3 +789,134 @@ body.dark-theme .theme-toggle-island:hover {
 body.dark-theme .theme-toggle-island .toggle-text { color: #F4F8FA; }
 body.dark-theme .sun-icon { display: none; }
 body.dark-theme .moon-icon { display: flex; }
+
+/* Quick Actions Navbar */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    border-left: 1px solid var(--border);
+    padding-left: 16px;
+    margin-left: 8px;
+}
+.quick-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    width: 34px;
+    height: 34px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+.quick-action-btn i {
+    font-size: 16px;
+    min-width: 18px;
+    text-align: center;
+}
+.quick-action-text {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    visibility: hidden;
+}
+.quick-action-btn:hover {
+    background: #f1f5f9;
+    color: var(--primary);
+    width: 120px;
+    padding: 8px 12px;
+}
+.quick-action-btn:hover .quick-action-text {
+    opacity: 1;
+    visibility: visible;
+}
+/* ================= RIGHT DRAWER (GLOBAL) ================= */
+.right-drawer {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 320px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    border-left: 1px solid #e5e7eb;
+}
+.right-drawer.open {
+    right: 0;
+}
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+.drawer-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+.drawer-close-btn:hover { color: #111827; }
+.drawer-content { padding: 20px; flex: 1; overflow-y: auto; }
+.drawer-title { font-size: 16px; font-weight: 600; color: #111827; margin-top: 0; margin-bottom: 16px; }
+.recent-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 10px;
+    text-decoration: none;
+    color: inherit;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: background 0.2s;
+}
+.recent-item:hover { background: #f3f4f6; }
+.recent-icon {
+    margin-right: 12px;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+}
+.recent-icon svg { width: 24px; height: 24px; }
+.recent-info { flex: 1; min-width: 0; }
+.recent-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+.recent-course { font-size: 12px; color: #6b7280; }
+.show-more-btn {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.show-more-btn:hover { background: #f9fafb; }

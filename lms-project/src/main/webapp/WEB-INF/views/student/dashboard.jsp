@@ -34,8 +34,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Điều Khiển - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f5f6fa; }
         .dashboard-container { max-width: 1200px; margin: 24px auto 40px; padding: 0 24px; }
@@ -315,11 +315,23 @@
 <body class="mesh-bg">
     <!-- NAVBAR -->
     <nav class="lms-navbar">
+        <div class="nav-left">
         <a href="<%=request.getContextPath()%>/" class="lms-logo">
-            <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+            <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
             <span class="logo-tag">LMS</span>
         </a>
-        <div class="nav-links">
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
+    <div class="nav-links">
             <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
                 <% if ("student".equals(role)) { %>
@@ -673,43 +685,7 @@
         </div>
     </div>
 
-    <!-- ================= RIGHT DRAWER ================= -->
-    <button id="drawerToggleBtn" class="drawer-toggle-btn" title="Mở ngăn kéo tài liệu" onclick="toggleDrawer()">
-        <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
-    </button>
-
-    <div id="rightDrawer" class="right-drawer">
-        <div class="drawer-header">
-            <button class="drawer-close-btn" onclick="toggleDrawer()">&times;</button>
-        </div>
-        <div class="drawer-content">
-            <h3 class="drawer-title">Recently accessed items</h3>
-            <div class="recent-items-list">
-                <% if (myCourses != null && !myCourses.isEmpty()) { 
-                    int count = 0;
-                    for (Course c : myCourses) { 
-                        if (count >= 5) break;
-                        count++;
-                %>
-                <a href="<%= request.getContextPath() %>/courses/detail?id=<%= c.getId() %>" class="recent-item">
-                    <div class="recent-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    </div>
-                    <div class="recent-info">
-                        <div class="recent-name"><%= esc.apply(c.getTitle()) %></div>
-                        <div class="recent-course">Course ID: <%= c.getId() %></div>
-                    </div>
-                </a>
-                <% } } else { %>
-                    <p style="color: #666; font-size: 14px; text-align: center; margin-top: 20px;">Bạn chưa tham gia khóa học nào.</p>
-                <% } %>
-
-                <% if (myCourses != null && myCourses.size() > 5) { %>
-                    <a href="<%= request.getContextPath() %>/student/my-courses" style="text-decoration:none;"><button class="show-more-btn" style="width: 100%;">Xem thêm</button></a>
-                <% } %>
-            </div>
-        </div>
-    </div>
+    
 
     <script>
         // Khởi tạo TinyMCE
@@ -941,13 +917,11 @@
             document.getElementById('deleteModal').classList.remove('show');
         }
 
-        // ---------- Ngăn kéo (Drawer) ----------
-        function toggleDrawer() {
-            var drawer = document.getElementById('rightDrawer');
-            drawer.classList.toggle('open');
-        }
+        
     </script>
-    <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
 
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>
