@@ -3,23 +3,64 @@ package com.lms.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "quizzes")
 public class Quiz implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "section_id")
     private Integer sectionId;   // nullable - quiz gắn vào Section
+
+    @Column(name = "course_id")
     private Integer courseId;    // nullable - quiz gắn vào toàn bộ Course
+
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "pass_score", nullable = false)
     private BigDecimal passScore;
+
+    @Column(name = "max_attempts")
     private Integer maxAttempts; // null = không giới hạn số lần làm
 
+    @Column(name = "time_limit_minutes")
     private Integer timeLimitMinutes;
+
+    @Column(name = "open_at")
     private LocalDateTime openAt;
+
+    @Column(name = "close_at")
     private LocalDateTime closeAt;
 
+    // Quan hệ ORM
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "section_id", insertable = false, updatable = false)
+    private Section section;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", insertable = false, updatable = false)
+    private Course course;
+
+    @OneToMany(mappedBy = "quiz")
+    private List<Question> questions = new ArrayList<>();
+
     // Bổ sung từ JOIN - không map trực tiếp cột DB
+    @Transient
     private String sectionTitle;
+
+    @Transient
     private String courseTitle;
+
+    @Transient
     private int totalQuestions;
 
     public Quiz() {}
@@ -87,4 +128,13 @@ public class Quiz implements Serializable {
 
     public int getTotalQuestions() { return totalQuestions; }
     public void setTotalQuestions(int totalQuestions) { this.totalQuestions = totalQuestions; }
+
+    public Section getSection() { return section; }
+    public void setSection(Section section) { this.section = section; }
+
+    public Course getCourse() { return course; }
+    public void setCourse(Course course) { this.course = course; }
+
+    public List<Question> getQuestions() { return questions; }
+    public void setQuestions(List<Question> questions) { this.questions = questions; }
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0"
+             xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+    <persistence-unit name="lmsPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        
+        <!-- Cac Entity Class -->
+        <class>com.lms.model.User</class>
+        <class>com.lms.model.Category</class>
+        <class>com.lms.model.Course</class>
+        <class>com.lms.model.Section</class>
+        <class>com.lms.model.Lesson</class>
+        <class>com.lms.model.Quiz</class>
+        <class>com.lms.model.Question</class>
+        <class>com.lms.model.AnswerOption</class>
+        <class>com.lms.model.Enrollment</class>
+        <class>com.lms.model.Review</class>
+        <class>com.lms.model.QuizAttempt</class>
+        <class>com.lms.model.LessonProgress</class>
+        <class>com.lms.model.WalletTransaction</class>
+        <class>com.lms.model.Notification</class>
+
+        <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+            <property name="hibernate.show_sql" value="false" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.hbm2ddl.auto" value="none" />
+        </properties>
+    </persistence-unit>
+</persistence>

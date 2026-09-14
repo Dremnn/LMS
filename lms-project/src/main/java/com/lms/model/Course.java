@@ -4,29 +4,80 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "courses")
 public class Course implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "instructor_id", nullable = false)
     private int instructorId;
+
+    @Column(name = "category_id")
     private Integer categoryId;   // nullable
+
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "thumbnail_url")
     private String thumbnailUrl;
+
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
+
+    @Column(name = "pass_score")
     private BigDecimal passScore;
+
+    @Column(name = "status", nullable = false)
     private String status;        // draft, published, warning, appealed
+
+    @Column(name = "reject_reason")
     private String rejectReason;  // Lý do cảnh cáo của Admin
+
+    @Column(name = "appeal_message")
     private String appealMessage; // Nội dung kháng cáo của Instructor
+
+    @Column(name = "avg_rating", nullable = false)
     private BigDecimal avgRating;
+
+    @Column(name = "total_students", nullable = false)
     private int totalStudents;
+
+    @Column(name = "total_lessons", nullable = false)
     private int totalLessons;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    // Quan hệ ORM
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instructor_id", insertable = false, updatable = false)
+    private User instructor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private Category category;
+
+    @OneToMany(mappedBy = "course")
+    private List<Section> sections;
+
     // Các trường bổ sung từ JOIN (không map trực tiếp với cột DB)
+    @Transient
     private String instructorName;
+
+    @Transient
     private String categoryName;
+
+    @Transient
     private List<Section> sectionsCache; // Không map với DB - chỉ dùng tạm khi hiển thị chi tiết
 
     public Course() {}
@@ -108,4 +159,13 @@ public class Course implements Serializable {
 
     public List<Section> getSectionsCache() { return sectionsCache; }
     public void setSectionsCache(List<Section> sectionsCache) { this.sectionsCache = sectionsCache; }
+
+    public User getInstructor() { return instructor; }
+    public void setInstructor(User instructor) { this.instructor = instructor; }
+
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
+
+    public List<Section> getSections() { return sections; }
+    public void setSections(List<Section> sections) { this.sections = sections; }
 }

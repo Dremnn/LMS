@@ -2,6 +2,10 @@ package com.lms.dao;
 
 import com.lms.model.User;
 import com.lms.util.DBConnection;
+import com.lms.util.DBUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -9,102 +13,60 @@ import java.time.LocalDateTime;
 
 public class UserDAO {
 
-    // Danh sách cột dùng chung cho các câu SELECT User (đỡ lặp code)
-    private static final String SELECT_COLUMNS =
-            "id, full_name, email, password_hash, role, avatar_url, phone, balance, status, created_at ";
-
-    // 1. Tìm User theo Email (Dùng khi Đăng nhập)
+    // 1. Tìm User theo Email (Dùng khi Đăng nhập) - Chuẩn JPA Chapter 13
     public User findByEmail(String email) {
-        String sql = "SELECT " + SELECT_COLUMNS + "FROM users WHERE email = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, email);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToUser(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            return em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
+                     .setParameter("email", email)
+                     .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        } finally {
+            em.close();
         }
-        return null; // Không tìm thấy user
     }
 
     // 2. Kiểm tra Email đã tồn tại trong Database chưa (Dùng khi Đăng ký)
     public boolean existsByEmail(String email) {
-        String sql = "SELECT 1 FROM users WHERE email = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, email);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next(); // Trả về true nếu có kết quả, false nếu chưa có
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return findByEmail(email) != null;
     }
 
-    // 3. Thêm User mới vào Database (Dùng khi Đăng ký)
+    // 3. Thêm User mới vào Database (Dùng khi Đăng ký) - Chuẩn JPA Chapter 13
     public boolean save(User user) {
-        String sql = "INSERT INTO users (full_name, email, password_hash, role, status, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, user.getFullName());
-            stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getPasswordHash());
-            stmt.setString(4, user.getRole() != null ? user.getRole() : "student");
-            stmt.setString(5, user.getStatus() != null ? user.getStatus() : "active");
-            
-            // Xử lý thời gian hiện tại
-            LocalDateTime now = LocalDateTime.now();
-            stmt.setTimestamp(6, Timestamp.valueOf(now));
-
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                // Lấy ID tự tăng mà SQL Server vừa sinh ra gán ngược lại cho đối tượng user
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        user.setId(generatedKeys.getInt(1));
-                        user.setCreatedAt(now);
-                    }
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
         }
-        return false;
+        if (user.getRole() == null) {
+            user.setRole("student");
+        }
+        if (user.getStatus() == null) {
+            user.setStatus("active");
+        }
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            em.persist(user);
+            trans.commit();
+            return true;
+        } catch (Exception e) {
+            if (trans.isActive()) trans.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
     }
 
-    // 4. Tìm User theo ID
+    // 4. Tìm User theo ID - Chuẩn JPA Chapter 13
     public User findById(int id) {
-        String sql = "SELECT " + SELECT_COLUMNS + "FROM users WHERE id = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToUser(rs);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            return em.find(User.class, id);
+        } finally {
+            em.close();
         }
-        return null;
     }
 
     // 5. Hàm phụ trợ (Private Helper): Đọc 1 dòng từ ResultSet và chuyển thành đối tượng User
