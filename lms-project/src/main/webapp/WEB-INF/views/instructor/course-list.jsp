@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khóa học của tôi - LMS Instructor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .btn-sm{padding:5px 12px;font-size:12px;}
         .btn-info{background:#bee3f8;color:#2b6cb0;}
@@ -25,24 +25,33 @@
         .badge-pending{background:#fefcbf;color:#744210;}
         .badge-published{background:#c6f6d5;color:#22543d;}
         .badge-rejected{background:#fed7d7;color:#822727;}
-        .page-header{padding:36px 40px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
+        .page-header{padding:36px 40px;background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;}
         .page-header-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
         .page-header h1{font-size:28px;font-weight:800;}
         .main{max-width:1100px;margin:36px auto;padding:0 24px;}
-        table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.06);}
-        thead{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
+        table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(9,60,98,.06);border:1px solid #C6D8E3;}
+        thead{background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;}
         th{padding:14px 16px;text-align:left;font-size:13px;font-weight:600;}
-        td{padding:14px 16px;font-size:13px;border-top:1px solid #f0f4f8;vertical-align:middle;}
-        tr:hover td{background:#fafbff;}
-        .course-name{font-weight:700;color:#1a202c;font-size:14px;}
+        td{padding:14px 16px;font-size:13px;border-top:1px solid #E2EEF5;vertical-align:middle;color:#093C62;}
+        tr:hover td{background:#F4F8FA;}
+        .course-name{font-weight:700;color:#093C62;font-size:14px;}
         .reject-reason{font-size:11px;color:#e53e3e;margin-top:4px;max-width:260px;}
         .actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-        .empty-state{text-align:center;padding:80px 20px;background:#fff;border-radius:14px;color:#a0aec0;}
+        .empty-state{text-align:center;padding:80px 20px;background:#fff;border-radius:14px;color:#5C7688;border:1px solid #C6D8E3;}
         .empty-state .icon{font-size:56px;margin-bottom:14px;}
         form{display:inline;}
+
+        /* Dark Theme (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme .page-header{background:linear-gradient(135deg,#182535,#093C62);}
+        body.dark-theme table{background:#182535;border-color:#093C62;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+        body.dark-theme thead{background:linear-gradient(135deg,#111312,#182535);border-bottom:1px solid #093C62;}
+        body.dark-theme td{border-top-color:#093C62;color:#9DB9CB;}
+        body.dark-theme tr:hover td{background:#111312;}
+        body.dark-theme .course-name{color:#F4F8FA;}
+        body.dark-theme .empty-state{background:#182535;border-color:#093C62;color:#9DB9CB;}
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <% 
     User currentUser = (User) session.getAttribute("currentUser"); 
     String role = currentUser != null ? currentUser.getRole() : "";
@@ -50,10 +59,22 @@
 
 <!-- NAVBAR -->
 <nav class="lms-navbar">
-    <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+    <div class="nav-left">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
         <span class="logo-tag">LMS</span>
     </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
@@ -162,7 +183,7 @@
                                 </c:choose>
                             </td>
                             <td>${course.totalStudents}</td>
-                            <td>${course.createdAt}</td>
+                            <td>${course.createdAtFormatted}</td>
                             <td>
                                 <div class="actions">
                                     <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>
@@ -209,5 +230,16 @@
         </c:otherwise>
     </c:choose>
 </div>
+
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>

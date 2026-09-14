@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khóa học của tôi - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .page-header{background:rgba(255,255,255,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,0.8);padding:44px 40px;text-align:center;}
         .page-header h1{font-size:28px;font-weight:800;color:#0F172A;margin-bottom:8px;}
@@ -89,7 +89,7 @@
         .progress-wrap{margin:12px 0 18px;}
         .progress-label{display:flex;justify-content:space-between;font-size:13px;color:#475569;margin-bottom:6px;font-weight:600;}
         .progress-bar-bg{background:#E2E8F0;border-radius:10px;height:9px;overflow:hidden;}
-        .progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#4F46E5,#06B6D4);transition:width .4s ease;}
+        .progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#093C62,#076FA4);transition:width .4s ease;}
         .progress-bar-fill.completed{background:linear-gradient(90deg,#10B981,#059669);}
 
         .course-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #F1F5F9;padding-top:16px;margin-top:auto;}
@@ -104,6 +104,66 @@
             .mycourse-thumb{width:100%;min-width:100%;height:190px;}
             .mycourse-body{padding:20px;}
         }
+
+        /* Dark Theme overrides for My Courses */
+        body.dark-theme .page-header {
+            background: linear-gradient(135deg, #182535, #093C62) !important;
+            border-bottom: 1px solid #093C62 !important;
+        }
+        body.dark-theme .page-header h1 {
+            color: #FFFFFF !important;
+        }
+        body.dark-theme .page-header p {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .btn-outline.active,
+        body.dark-theme .btn-outline:active {
+            background: #093C62 !important;
+            border-color: #076FA4 !important;
+            color: #FFFFFF !important;
+        }
+        body.dark-theme .mycourse-card {
+            background: #182535 !important;
+            border-color: #093C62 !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,.35) !important;
+        }
+        body.dark-theme .mycourse-card:hover {
+            border-color: #076FA4 !important;
+            box-shadow: 0 12px 32px rgba(7, 111, 164, 0.25) !important;
+        }
+        body.dark-theme .mycourse-thumb {
+            background: #111312 !important;
+        }
+        body.dark-theme .mycourse-title {
+            color: #FFFFFF !important;
+        }
+        body.dark-theme .mycourse-meta {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .progress-label {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .progress-bar-bg {
+            background: #111312 !important;
+            border: 1px solid #093C62;
+        }
+        body.dark-theme .course-footer {
+            border-top-color: #093C62 !important;
+        }
+        body.dark-theme .enrolled-date {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .empty-state {
+            background: #182535 !important;
+            border-color: #093C62 !important;
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .empty-state p {
+            color: #9DB9CB !important;
+        }
+        body.dark-theme .empty-state .icon {
+            color: #093C62 !important;
+        }
     </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
@@ -113,10 +173,22 @@
 %>
 <!-- NAVBAR -->
 <nav class="lms-navbar">
-    <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+    <div class="nav-left">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
         <span class="logo-tag">LMS</span>
     </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
@@ -144,7 +216,7 @@
 </nav>
 
 <div class="page-header">
-    <h1><i class="fa-solid fa-book-open" style="color:#4F46E5;"></i> Khóa học của tôi</h1>
+    <h1><i class="fa-solid fa-book-open" style="color:#076FA4;"></i> Khóa học của tôi</h1>
     <p>Theo dõi tiến độ học tập và tiếp tục các khóa học bạn đã tham gia</p>
 </div>
 
@@ -180,7 +252,7 @@
                             </div>
 
                             <div class="mycourse-meta">
-                                <span><i class="fa-solid fa-layer-group" style="color:#4F46E5;"></i> ${enrollment.totalLessons} bài học</span>
+                                <span><i class="fa-solid fa-layer-group" style="color:#076FA4;"></i> ${enrollment.totalLessons} bài học</span>
                             </div>
 
                             <div class="progress-wrap">
@@ -227,6 +299,8 @@
     <span class="toggle-text">Chế độ Tối</span>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>

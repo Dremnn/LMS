@@ -93,6 +93,13 @@ public class Course implements Serializable {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+    private static final java.time.format.DateTimeFormatter DISPLAY_FMT =
+        java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+
+    public String getCreatedAtFormatted() {
+        return createdAt != null ? createdAt.format(DISPLAY_FMT) : "";
+    }
+
     public String getInstructorName() { return instructorName; }
     public void setInstructorName(String instructorName) { this.instructorName = instructorName; }
 

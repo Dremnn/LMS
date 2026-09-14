@@ -8,44 +8,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tạo Quiz - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .main{max-width:680px;margin:40px auto;padding:0 24px;}
-        .page-title{font-size:24px;font-weight:800;color:#1a202c;margin-bottom:24px;}
-        .card{background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(0,0,0,.07);padding:32px;}
+        .page-title{font-size:24px;font-weight:800;color:#093C62;margin-bottom:24px;}
+        .card{background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(9,60,98,.07);padding:32px;border:1px solid #C6D8E3;}
         .alert-danger{background:#fed7d7;color:#822727;border:1px solid #fc8181;padding:12px 16px;border-radius:9px;font-size:14px;margin-bottom:20px;}
         .form-group{margin-bottom:20px;}
-        .form-group label{display:block;font-size:14px;font-weight:600;color:#2d3748;margin-bottom:7px;}
+        .form-group label{display:block;font-size:14px;font-weight:600;color:#093C62;margin-bottom:7px;}
         .form-group input[type=text],
-        .form-group input[type=number]{width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;color:#2d3748;outline:none;transition:border-color .2s;}
-        .form-group input:focus{border-color:#667eea;}
-        .form-group .hint{font-size:12px;color:#a0aec0;margin-top:5px;}
+        .form-group input[type=number]{width:100%;padding:10px 14px;border:1.5px solid #C6D8E3;border-radius:8px;font-size:14px;color:#093C62;outline:none;transition:border-color .2s;}
+        .form-group input:focus{border-color:#076FA4;box-shadow:0 0 0 3px rgba(7,111,164,.15);}
+        .form-group .hint{font-size:12px;color:#5C7688;margin-top:5px;}
         .radio-group{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
-        .radio-option{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:border-color .2s;}
-        .radio-option:hover{border-color:#667eea;}
-        .radio-option input[type=radio]{margin-top:2px;accent-color:#667eea;flex-shrink:0;}
-        .radio-option-label{font-size:14px;font-weight:600;color:#2d3748;}
-        .radio-option-sub{font-size:13px;color:#718096;margin-top:3px;}
-        #sectionIdWrap{margin-top:10px;padding:12px 14px;background:#f7f8ff;border-radius:8px;border:1px solid #e2e8f0;display:none;}
-        #sectionIdWrap label{font-size:13px;font-weight:600;color:#4a5568;margin-bottom:6px;display:block;}
-        #sectionIdWrap input{width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;outline:none;}
-        #sectionIdWrap input:focus{border-color:#667eea;}
+        .radio-option{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #C6D8E3;border-radius:8px;cursor:pointer;transition:border-color .2s;}
+        .radio-option:hover{border-color:#076FA4;}
+        .radio-option input[type=radio]{margin-top:2px;accent-color:#076FA4;flex-shrink:0;}
+        .radio-option-label{font-size:14px;font-weight:600;color:#093C62;}
+        .radio-option-sub{font-size:13px;color:#5C7688;margin-top:3px;}
+        #sectionIdWrap{margin-top:10px;padding:12px 14px;background:#F0F6FA;border-radius:8px;border:1px solid #C6D8E3;display:none;}
+        #sectionIdWrap label{font-size:13px;font-weight:600;color:#093C62;margin-bottom:6px;display:block;}
+        #sectionIdWrap input{width:100%;padding:8px 12px;border:1.5px solid #C6D8E3;border-radius:7px;font-size:14px;outline:none;color:#093C62;}
+        #sectionIdWrap input:focus{border-color:#076FA4;}
         .form-actions{display:flex;gap:12px;margin-top:28px;}
-        .btn-submit{padding:11px 28px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+        .btn-submit{padding:11px 28px;background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
         .btn-submit:hover{opacity:.9;}
+
+        /* Dark Theme (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme .page-title{color:#F4F8FA;}
+        body.dark-theme .card{background:#182535;border-color:#093C62;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+        body.dark-theme .form-group label{color:#F4F8FA;}
+        body.dark-theme .form-group input[type=text],
+        body.dark-theme .form-group input[type=number]{background:#111312;border-color:#093C62;color:#F4F8FA;}
+        body.dark-theme .form-group input:focus{border-color:#076FA4;}
+        body.dark-theme .form-group .hint{color:#9DB9CB;}
+        body.dark-theme .radio-option{background:#182535;border-color:#093C62;}
+        body.dark-theme .radio-option:hover{border-color:#076FA4;}
+        body.dark-theme .radio-option-label{color:#F4F8FA;}
+        body.dark-theme .radio-option-sub{color:#9DB9CB;}
+        body.dark-theme #sectionIdWrap{background:#111312;border-color:#093C62;}
+        body.dark-theme #sectionIdWrap label{color:#F4F8FA;}
+        body.dark-theme #sectionIdWrap input{background:#182535;border-color:#093C62;color:#F4F8FA;}
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 
 <!-- NAVBAR -->
 <nav class="lms-navbar">
-    <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+    <div class="nav-left">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
         <span class="logo-tag">LMS</span>
     </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/instructor/courses" class="nav-link">← Danh sách khóa học</a>
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
@@ -169,5 +197,16 @@
         }
     }
 </script>
+
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>

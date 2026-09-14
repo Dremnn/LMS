@@ -8,39 +8,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin Quiz - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .main{max-width:680px;margin:60px auto;padding:0 24px;}
-        .intro-card{background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);overflow:hidden;}
-        .intro-header{background:linear-gradient(135deg,#2d3748,#1a202c);color:#fff;padding:40px 36px 36px;text-align:center;}
-        .intro-course{font-size:13px;color:#a0aec0;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:12px;}
+        .intro-card{background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(9,60,98,.08);overflow:hidden;border:1px solid #C6D8E3;}
+        .intro-header{background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;padding:40px 36px 36px;text-align:center;}
+        .intro-course{font-size:13px;color:#9DB9CB;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:12px;}
         .intro-title{font-size:28px;font-weight:800;margin-bottom:20px;}
         .intro-body{padding:36px;}
         .info-grid{display:grid;grid-template-columns:repeat(2, 1fr);gap:24px;margin-bottom:32px;}
-        .info-box{background:#f7f8ff;border:1px solid #e2e8f0;padding:20px;border-radius:12px;}
-        .info-label{font-size:13px;color:#718096;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
-        .info-value{font-size:20px;font-weight:800;color:#2d3748;}
-        .info-value.highlight{color:#667eea;}
+        .info-box{background:#F0F6FA;border:1px solid #C6D8E3;padding:20px;border-radius:12px;}
+        .info-label{font-size:13px;color:#5C7688;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+        .info-value{font-size:20px;font-weight:800;color:#093C62;}
+        .info-value.highlight{color:#076FA4;}
         .status-box{background:#fffff0;border:1px solid #f6e05e;padding:16px 20px;border-radius:12px;margin-bottom:32px;display:flex;align-items:center;gap:12px;}
-        .status-icon{font-size:24px;}
+        .status-icon{font-size:24px;color:#093C62 !important;}
+        .status-icon i{color:#093C62 !important;}
         .status-text{font-size:14px;color:#744210;}
         .actions{display:flex;gap:16px;justify-content:center;}
-        .btn-start{padding:14px 40px;background:linear-gradient(135deg,#68d391,#38a169);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:800;text-decoration:none;transition:transform .2s,box-shadow .2s;}
-        .btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(56,161,105,.3);}
+        .btn-start{padding:14px 40px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:800;text-decoration:none;transition:transform .2s,box-shadow .2s;}
+        .btn-start:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,.3);}
         .btn-start.disabled{background:#cbd5e0;color:#718096;pointer-events:none;box-shadow:none;}
+
+        /* Dark Theme (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+        body.dark-theme .intro-card{background:#182535;border-color:#093C62;box-shadow:0 8px 30px rgba(0,0,0,.3);}
+        body.dark-theme .intro-header{background:linear-gradient(135deg,#182535,#093C62);}
+        body.dark-theme .info-box{background:#111312;border-color:#093C62;}
+        body.dark-theme .info-label{color:#9DB9CB;}
+        body.dark-theme .info-value{color:#F4F8FA;}
+        body.dark-theme .info-value.highlight{color:#076FA4;}
+        body.dark-theme .status-icon,
+        body.dark-theme .status-icon i{color:#093C62 !important;}
     </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <% User currentUser = (User) session.getAttribute("currentUser");
    String role = currentUser != null ? currentUser.getRole() : ""; %>
 
 <!-- NAVBAR -->
 <nav class="lms-navbar">
-    <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+    <div class="nav-left">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
         <span class="logo-tag">LMS</span>
     </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link">← Chi tiết khóa học</a>
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
@@ -178,5 +201,16 @@
         </div>
     </div>
 </div>
+
+<!-- Dynamic Island Theme Toggle -->
+<div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+    <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+    <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+    <span class="toggle-text">Chế độ Tối</span>
+</div>
+
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>

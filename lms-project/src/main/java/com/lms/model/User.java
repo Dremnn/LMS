@@ -1,6 +1,7 @@
 package com.lms.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class User implements Serializable {
@@ -12,6 +13,8 @@ public class User implements Serializable {
     private String passwordHash;
     private String role;        // "student", "instructor", "admin"
     private String avatarUrl;
+    private String phone;
+    private BigDecimal balance; // Số dư ví - chỉ có ý nghĩa sử dụng với role "student"
     private String status;      // "active", "locked", "pending"
     private LocalDateTime createdAt;
 
@@ -29,14 +32,22 @@ public class User implements Serializable {
     }
 
     // 3. Constructor đầy đủ tất cả các trường (dùng khi đọc từ Database lên)
-    public User(int id, String fullName, String email, String passwordHash, String role, 
+    public User(int id, String fullName, String email, String passwordHash, String role,
                 String avatarUrl, String status, LocalDateTime createdAt) {
+        this(id, fullName, email, passwordHash, role, avatarUrl, null, BigDecimal.ZERO, status, createdAt);
+    }
+
+    // 4. Constructor đầy đủ + phone + balance (dùng khi đọc từ Database lên, có ví tiền)
+    public User(int id, String fullName, String email, String passwordHash, String role,
+                String avatarUrl, String phone, BigDecimal balance, String status, LocalDateTime createdAt) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
         this.avatarUrl = avatarUrl;
+        this.phone = phone;
+        this.balance = balance != null ? balance : BigDecimal.ZERO;
         this.status = status;
         this.createdAt = createdAt;
     }
@@ -91,6 +102,22 @@ public class User implements Serializable {
         this.avatarUrl = avatarUrl;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public BigDecimal getBalance() {
+        return balance != null ? balance : BigDecimal.ZERO;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -117,6 +144,8 @@ public class User implements Serializable {
                 ", email='" + email + '\'' +
                 ", role='" + role + '\'' +
                 ", avatarUrl='" + avatarUrl + '\'' +
+                ", phone='" + phone + '\'' +
+                ", balance=" + balance +
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 '}';

@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${course.title} - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=22">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=22">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .hero-section{background:rgba(255,255,255,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,0.8);padding:50px 40px 60px;}
         .hero-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:start;}
@@ -21,48 +21,48 @@
         .hero-info .desc::-webkit-scrollbar-thumb:hover{background:#94A3B8;}
         .hero-meta{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin-bottom:28px;}
         .hero-meta span{display:inline-flex;align-items:center;gap:6px;background:#F1F5F9;color:#475569;padding:6px 14px;border-radius:30px;font-weight:600;}
-        .hero-meta span.instructor-tag{background:#EEF2FF;color:#4F46E5;}
+        .hero-meta span.instructor-tag{background:rgba(157, 185, 203, 0.25);color:#093C62;}
         .hero-meta span.rating-tag{background:#FEF3C7;color:#D97706;}
         .hero-price{font-size:32px;font-weight:800;margin-bottom:24px;}
         .price-free{color:#10B981;}
-        .price-paid{color:#4F46E5;}
-        .btn-enroll{padding:14px 36px;background:linear-gradient(135deg,#4F46E5,#06B6D4);color:#fff;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(79,70,229,.28);}
-        .btn-enroll:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(79,70,229,.38);color:#fff;}
+        .price-paid{color:#076FA4;}
+        .btn-enroll{padding:14px 36px;background:linear-gradient(135deg,#076FA4,#093C62);color:#fff;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(7,111,164,.28);}
+        .btn-enroll:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(7,111,164,.38);color:#fff;}
         .hero-img{border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.08);border:1px solid #E2E8F0;background:#fff;}
         .hero-img img{width:100%;height:260px;object-fit:cover;display:block;}
         .back-link{display:inline-flex;align-items:center;gap:8px;color:#64748B;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:20px;transition:color .2s;}
-        .back-link:hover{color:#4F46E5;}
+        .back-link:hover{color:#076FA4;}
         .main{max-width:1160px;margin:48px auto;padding:0 24px;}
-        .curriculum-title{font-size:24px;font-weight:800;color:#0F172A;margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+        .curriculum-title{font-size:24px;font-weight:800;color:#093C62;margin-bottom:24px;display:flex;align-items:center;gap:12px;}
         .section-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.04);margin-bottom:20px;border:1px solid #E2E8F0;}
-        .section-header{padding:18px 24px;background:#F8FAFC;display:flex;justify-content:space-between;align-items:center;border-left:4px solid #4F46E5;border-bottom:1px solid #F1F5F9;}
-        .section-header h3{font-size:16px;font-weight:700;color:#0F172A;}
+        .section-header{padding:18px 24px;background:#F8FAFC;display:flex;justify-content:space-between;align-items:center;border-left:4px solid #076FA4;border-bottom:1px solid #F1F5F9;}
+        .section-header h3{font-size:16px;font-weight:700;color:#093C62;}
         .section-body{padding:0;}
         .lesson-item{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-top:1px solid #F1F5F9;transition:background .15s;}
-        .lesson-item:hover{background:#F8FAFF;}
+        .lesson-item:hover{background:#F0F6FA;}
         .lesson-name{font-size:14px;color:#1E293B;display:flex;align-items:center;gap:10px;font-weight:500;}
         .lesson-name a{color:#1E293B;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:color .15s;}
-        .lesson-name a:hover{color:#4F46E5;}
+        .lesson-name a:hover{color:#076FA4;}
         .lesson-duration{font-size:13px;color:#94A3B8;white-space:nowrap;font-weight:500;}
         .empty-lessons{padding:18px 24px;color:#94A3B8;font-size:14px;font-style:italic;}
         .empty-state{text-align:center;padding:70px 20px;color:#94A3B8;background:#fff;border-radius:16px;border:1px solid #E2E8F0;}
         .progress-box{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px 20px;margin-bottom:20px;}
         .progress-bar-bg{background:#E2E8F0;border-radius:10px;height:8px;overflow:hidden;margin-top:10px;}
-        .progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#4F46E5,#06B6D4);}
+        .progress-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#093C62,#076FA4);}
 
         /* Reviews & Ratings Section */
         .reviews-section{margin-top:56px;}
         .reviews-summary{background:#fff;border-radius:16px;border:1px solid #E2E8F0;padding:28px 32px;display:flex;align-items:center;gap:36px;margin-bottom:24px;box-shadow:0 4px 20px rgba(0,0,0,.03);}
         .reviews-summary-score{text-align:center;min-width:140px;border-right:1px solid #E2E8F0;padding-right:36px;}
-        .score-big{font-size:48px;font-weight:800;color:#0F172A;line-height:1;margin-bottom:8px;}
+        .score-big{font-size:48px;font-weight:800;color:#093C62;line-height:1;margin-bottom:8px;}
         .score-stars{color:#F59E0B;font-size:18px;margin-bottom:6px;display:flex;justify-content:center;gap:3px;}
         .score-count{font-size:13px;color:#64748B;font-weight:600;}
         .reviews-summary-info{flex:1;}
-        .reviews-summary-info h4{font-size:17px;font-weight:700;color:#0F172A;margin-bottom:6px;}
+        .reviews-summary-info h4{font-size:17px;font-weight:700;color:#093C62;margin-bottom:6px;}
         .reviews-summary-info p{font-size:14px;color:#64748B;line-height:1.5;margin:0;}
 
         .review-form-card{background:#fff;border-radius:16px;border:1px solid #E2E8F0;padding:24px 28px;margin-bottom:28px;box-shadow:0 4px 20px rgba(0,0,0,.03);}
-        .review-form-card h4{font-size:16px;font-weight:700;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .review-form-card h4{font-size:16px;font-weight:700;color:#093C62;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
         
         .star-rating-select{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:8px;margin-bottom:16px;}
         .star-rating-select input[type="radio"]{display:none;}
@@ -73,10 +73,10 @@
         .star-rating-select label:hover{transform:scale(1.2);}
 
         .review-textarea{width:100%;min-height:90px;border:1px solid #CBD5E1;border-radius:12px;padding:12px 16px;font-family:inherit;font-size:14px;color:#1E293B;resize:vertical;box-sizing:border-box;transition:border-color .15s;outline:none;}
-        .review-textarea:focus{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.12);}
+        .review-textarea:focus{border-color:#076FA4;box-shadow:0 0 0 3px rgba(7,111,164,.15);}
         .review-form-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
-        .btn-submit-review{background:linear-gradient(135deg,#4F46E5,#06B6D4);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s, box-shadow .15s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(79,70,229,.2);}
-        .btn-submit-review:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(79,70,229,.3);}
+        .btn-submit-review{background:linear-gradient(135deg,#076FA4,#093C62);color:#fff;border:none;padding:11px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s, box-shadow .15s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(7,111,164,.25);}
+        .btn-submit-review:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(7,111,164,.35);}
         .btn-delete-review{background:#FEE2E2;color:#991B1B;border:none;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;display:inline-flex;align-items:center;gap:6px;}
         .btn-delete-review:hover{background:#FECACA;}
 
@@ -84,12 +84,57 @@
         .review-item:hover{box-shadow:0 6px 20px rgba(0,0,0,.06);}
         .review-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
         .review-user-info{display:flex;align-items:center;gap:12px;}
-        .review-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #EEF2FF;background:#EEF2FF;}
-        .review-avatar-placeholder{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#4F46E5,#06B6D4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;}
-        .review-name{font-size:15px;font-weight:700;color:#0F172A;}
+        .review-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid #E2EEF5;background:#E2EEF5;}
+        .review-avatar-placeholder{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#076FA4,#093C62);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;}
+        .review-name{font-size:15px;font-weight:700;color:#093C62;}
         .review-date{font-size:12px;color:#94A3B8;font-weight:500;margin-top:2px;}
         .review-stars{color:#F59E0B;font-size:14px;display:flex;gap:3px;}
         .review-comment{font-size:14px;color:#334155;line-height:1.65;white-space:pre-wrap;word-break:break-word;margin:0;}
+
+        /* Dark Theme overrides for Course Detail */
+        body.dark-theme .hero-section { background: transparent !important; border: none !important; }
+        body.dark-theme .hero-info h1 { color: #FFFFFF !important; }
+        body.dark-theme .hero-info .desc { color: #9DB9CB !important; }
+        body.dark-theme .hero-meta span {
+            background: #182535 !important;
+            border: 1px solid #093C62 !important;
+            color: #FFFFFF !important;
+        }
+        body.dark-theme .hero-meta span.instructor-tag {
+            background: #182535 !important;
+            border: 1px solid #093C62 !important;
+            color: #FFFFFF !important;
+        }
+        body.dark-theme .hero-meta span i,
+        body.dark-theme .hero-meta span.instructor-tag i {
+            color: #38BDF8 !important;
+        }
+        body.dark-theme .hero-meta span.rating-tag {
+            background: rgba(245, 158, 11, 0.15) !important;
+            border: 1px solid rgba(245, 158, 11, 0.3) !important;
+            color: #F59E0B !important;
+        }
+        body.dark-theme .hero-meta span.rating-tag i {
+            color: #F59E0B !important;
+        }
+        body.dark-theme .hero-img { background: #182535 !important; border-color: #093C62 !important; }
+        body.dark-theme .curriculum-title { color: #FFFFFF !important; }
+        body.dark-theme .section-card { background: #182535 !important; border-color: #093C62 !important; }
+        body.dark-theme .section-header { background: #151F2E !important; border-bottom: 1px solid #093C62 !important; border-left: 4px solid #076FA4 !important; }
+        body.dark-theme .section-header h3 { color: #FFFFFF !important; }
+        body.dark-theme .lesson-item { border-top: 1px solid #093C62 !important; }
+        body.dark-theme .lesson-item:hover { background: rgba(9, 60, 98, 0.25) !important; }
+        body.dark-theme .lesson-name, body.dark-theme .lesson-name a { color: #FFFFFF !important; }
+        body.dark-theme .lesson-duration { color: #9DB9CB !important; }
+        body.dark-theme .empty-lessons, body.dark-theme .empty-state { background: #182535 !important; border-color: #093C62 !important; color: #9DB9CB !important; }
+        body.dark-theme .progress-box { background: #182535 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
+        body.dark-theme .progress-box div { color: #FFFFFF !important; }
+        body.dark-theme .progress-bar-bg { background: #111312 !important; }
+        body.dark-theme .reviews-summary, body.dark-theme .review-form-card, body.dark-theme .review-item { background: #182535 !important; border-color: #093C62 !important; }
+        body.dark-theme .reviews-summary-score { border-right-color: #093C62 !important; }
+        body.dark-theme .score-big, body.dark-theme .reviews-summary-info h4, body.dark-theme .review-form-card h4, body.dark-theme .review-name { color: #FFFFFF !important; }
+        body.dark-theme .score-count, body.dark-theme .reviews-summary-info p, body.dark-theme .review-date, body.dark-theme .review-comment { color: #9DB9CB !important; }
+        body.dark-theme .review-textarea { background: #111312 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
     </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
@@ -99,10 +144,22 @@
 %>
 <!-- NAVBAR -->
 <nav class="lms-navbar">
-    <a href="<%=request.getContextPath()%>/" class="lms-logo">
-        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img">
+    <div class="nav-left">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+        <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
         <span class="logo-tag">LMS</span>
     </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
+                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
@@ -134,7 +191,7 @@
         <div class="hero-info">
             <a href="${pageContext.request.contextPath}/courses" class="back-link"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách</a>
             <c:if test="${not empty course.categoryName}">
-                <span style="font-size:13px;color:#4F46E5;background:#EEF2FF;padding:4px 12px;border-radius:20px;font-weight:700;display:inline-block;margin-bottom:12px;">
+                <span style="font-size:13px;color:#076FA4;background:rgba(157, 185, 203, 0.25);padding:4px 12px;border-radius:20px;font-weight:700;display:inline-block;margin-bottom:12px;">
                     <i class="fa-solid fa-folder-open"></i> <c:out value="${course.categoryName}"/>
                 </span>
             </c:if>
@@ -239,10 +296,10 @@
                                                 <c:when test="${not empty enrollment}">
                                                     <%-- Đã đăng ký: tên bài là link dẫn vào xem nội dung --%>
                                                     <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
-                                                       style="color:#4F46E5;text-decoration:none;font-weight:600;"
+                                                       style="color:#076FA4;text-decoration:none;font-weight:600;"
                                                        onmouseover="this.style.textDecoration='underline'"
                                                        onmouseout="this.style.textDecoration='none'">
-                                                        <i class="fa-solid fa-circle-play" style="color:#4F46E5;"></i> <c:out value="${lesson.title}"/>
+                                                        <i class="fa-solid fa-circle-play" style="color:#076FA4;"></i> <c:out value="${lesson.title}"/>
                                                     </a>
                                                 </c:when>
                                                 <c:otherwise>
@@ -317,7 +374,7 @@
             <c:when test="${not empty enrollment}">
                 <div class="review-form-card">
                     <h4>
-                        <i class="fa-solid fa-pen-to-square" style="color:#4F46E5;"></i>
+                        <i class="fa-solid fa-pen-to-square" style="color:#076FA4;"></i>
                         <c:choose>
                             <c:when test="${not empty myReview}">
                                 Chỉnh sửa đánh giá của bạn
@@ -382,10 +439,10 @@
             <c:otherwise>
                 <%-- Chưa đăng ký khóa học --%>
                 <div style="padding:18px 24px; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:14px; font-size:14px; color:#64748B; margin-bottom:28px; display:flex; align-items:center; gap:12px;">
-                    <i class="fa-solid fa-circle-info" style="color:#4F46E5;font-size:18px;"></i>
+                    <i class="fa-solid fa-circle-info" style="color:#076FA4;font-size:18px;"></i>
                     <c:choose>
                         <c:when test="${empty currentUser}">
-                            <span>Vui lòng <a href="${pageContext.request.contextPath}/login" style="color:#4F46E5;font-weight:700;text-decoration:none;">Đăng nhập</a> và đăng ký khóa học để có thể gửi đánh giá.</span>
+                            <span>Vui lòng <a href="${pageContext.request.contextPath}/login" style="color:#076FA4;font-weight:700;text-decoration:none;">Đăng nhập</a> và đăng ký khóa học để có thể gửi đánh giá.</span>
                         </c:when>
                         <c:otherwise>
                             <span>Bạn cần đăng ký khóa học này trước khi có thể gửi nhận xét & đánh giá.</span>
@@ -462,6 +519,8 @@
     <span class="toggle-text">Chế độ Tối</span>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=22"></script>
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+
+    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>

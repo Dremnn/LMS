@@ -31,9 +31,23 @@
   100% { background-position: 0% 50%; }
 }
 .mesh-bg {
-  background: linear-gradient(-45deg, #EEF2FF, #E0E7FF, #CFFAFE, #FEF3C7);
+  background: linear-gradient(-45deg, #F0F6FA, #E2EEF5, #D4E5F0, #EBF3F8);
   background-size: 400% 400%;
   animation: meshGradient 15s ease infinite;
+}
+
+/* Dark Theme Background (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) */
+body.dark-theme.mesh-bg,
+body.dark-theme .mesh-bg,
+body.dark-theme {
+  background: #111312 !important;
+  background-color: #111312 !important;
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(9, 60, 98, 0.4) 0px, transparent 55%),
+    radial-gradient(at 85% 85%, rgba(24, 37, 53, 0.7) 0px, transparent 55%),
+    radial-gradient(at 50% 50%, rgba(17, 19, 18, 1) 0px, transparent 100%) !important;
+  background-size: 100% 100% !important;
+  animation: none !important;
 }
 
 /* Shimmer Loading */
