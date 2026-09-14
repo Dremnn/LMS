@@ -13,15 +13,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nạp tiền vào ví - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=30">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=26">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=32">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=32">
     <style>
         body { margin: 0; padding: 0; min-height: 100vh; }
-        .topup-container { max-width: 720px; margin: 24px auto 40px; padding: 0 24px; }
+        .topup-container { max-width: 1000px; margin: 24px auto 40px; padding: 0 24px; }
         .panel { background: var(--surface); border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(9,60,98,.06); border: 1px solid var(--border); }
         .panel h2 { margin-top: 0; color: var(--text); font-weight: 800; }
 
-        .topup-grid { display: grid; grid-template-columns: 240px 1fr; gap: 28px; }
+        .topup-grid { display: grid; grid-template-columns: 320px 1fr; gap: 40px; }
         @media (max-width: 640px) { .topup-grid { grid-template-columns: 1fr; } }
 
         .qr-box {
