@@ -188,6 +188,9 @@
                 <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
             <% } %>
             
+
+            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
+
             <div class="user-badge">
                 <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
                 <span><%=currentUser.getFullName()%></span>
