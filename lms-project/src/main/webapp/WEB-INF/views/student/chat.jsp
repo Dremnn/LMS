@@ -99,6 +99,15 @@
                 <h3>Tin nhắn <i class="fas fa-edit" style="color: #2563eb; cursor: pointer;" onclick="toggleAddContact()"></i></h3>
             </div>
             
+            <% String chatSuccess = (String) session.getAttribute("chatSuccess"); 
+               if (chatSuccess != null) { session.removeAttribute("chatSuccess"); %>
+                <div style="padding: 10px; margin: 10px; background: #d1fae5; color: #065f46; border-radius: 4px; font-size: 14px;"><%= chatSuccess %></div>
+            <% } %>
+            <% String chatError = (String) session.getAttribute("chatError"); 
+               if (chatError != null) { session.removeAttribute("chatError"); %>
+                <div style="padding: 10px; margin: 10px; background: #fee2e2; color: #991b1b; border-radius: 4px; font-size: 14px;"><%= chatError %></div>
+            <% } %>
+
             <!-- Thêm liên lạc mới -->
             <form class="add-contact-form" id="addContactForm" method="post" action="<%=request.getContextPath()%>/student/chat">
                 <input type="hidden" name="action" value="addContact">
@@ -149,7 +158,14 @@
                         </div>
                     </div>
                     <div class="chat-actions">
-                        <i class="fas fa-ellipsis-v" style="color: #9ca3af; cursor: pointer; padding: 10px;"></i>
+                        <form method="post" action="<%=request.getContextPath()%>/student/chat" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ cuộc hội thoại với <%=targetUser.getFullName()%> không?');">
+                            <input type="hidden" name="action" value="deleteConversation">
+                            <input type="hidden" name="targetId" value="<%=targetUser.getId()%>">
+                            <button type="submit" style="background: none; border: none; cursor: pointer; color: #ef4444;" title="Xóa toàn bộ cuộc hội thoại">
+                                <i class="fas fa-trash-alt" style="font-size: 18px;"></i>
+                            </button>
+                        </form>
+                        <i class="fas fa-ellipsis-v" style="color: #9ca3af; cursor: pointer; padding: 10px; margin-left: 10px;"></i>
                     </div>
                 </div>
 
@@ -158,8 +174,8 @@
                         for (Message msg : conversation) {
                             boolean isMine = msg.getSenderId() == currentUser.getId();
                     %>
-                        <div class="message <%= isMine ? "sent" : "received" %>">
-                            <div class="msg-bubble"><%= msg.getContent() %></div>
+                        <div class="message <%= isMine ? "sent" : "received" %>" title="Nhấp chuột trái để xóa tin nhắn này">
+                            <div class="msg-bubble" style="cursor: pointer;" onclick="deleteMessage(<%=msg.getId()%>, <%=targetUser.getId()%>)"><%= msg.getContent() %></div>
                             <div class="msg-time"><%= msg.getSentAt().format(timeFormatter) %></div>
                         </div>
                     <% } } else { %>
@@ -189,6 +205,13 @@
         </div>
     </div>
 
+    <!-- Hidden form to delete individual message -->
+    <form id="deleteMessageForm" method="post" action="<%=request.getContextPath()%>/student/chat" style="display: none;">
+        <input type="hidden" name="action" value="deleteMessage">
+        <input type="hidden" name="messageId" id="delMsgId">
+        <input type="hidden" name="targetId" id="delTargetId">
+    </form>
+
     <script>
         // Tự động cuộn xuống cuối đoạn chat khi load trang
         var chatBox = document.getElementById("chatMessagesBox");
@@ -199,6 +222,14 @@
         function toggleAddContact() {
             var form = document.getElementById("addContactForm");
             form.classList.toggle("show");
+        }
+
+        function deleteMessage(msgId, targetId) {
+            if (confirm("Bạn có chắc chắn muốn xóa tin nhắn này không?")) {
+                document.getElementById('delMsgId').value = msgId;
+                document.getElementById('delTargetId').value = targetId;
+                document.getElementById('deleteMessageForm').submit();
+            }
         }
     </script>
 </body>

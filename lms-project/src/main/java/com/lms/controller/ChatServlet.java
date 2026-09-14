@@ -88,15 +88,27 @@ public class ChatServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/student/chat?targetId=" + targetId);
                 return;
             } else if ("addContact".equals(action)) {
-                // Feature to add a contact by email or id
                 String targetEmail = request.getParameter("email");
                 User target = userDAO.findByEmail(targetEmail);
                 if (target != null && target.getId() != currentUser.getId()) {
-                    // Moodle allows sending messages directly or requesting contact.
-                    // For simplicity, we just auto-accept or add directly
                     messageService.sendContactRequest(currentUser.getId(), target.getId());
-                    messageService.acceptContactRequest(target.getId(), target.getId()); // auto accept for demo
+                    messageService.acceptContactRequest(currentUser.getId(), target.getId());
+                    request.getSession().setAttribute("chatSuccess", "Đã thêm " + target.getFullName() + " vào danh bạ!");
+                    response.sendRedirect(request.getContextPath() + "/student/chat?targetId=" + target.getId());
+                } else {
+                    request.getSession().setAttribute("chatError", "Không tìm thấy người dùng với email này!");
+                    response.sendRedirect(request.getContextPath() + "/student/chat");
                 }
+                return;
+            } else if ("deleteMessage".equals(action)) {
+                int messageId = Integer.parseInt(request.getParameter("messageId"));
+                int targetId = Integer.parseInt(request.getParameter("targetId"));
+                messageService.deleteMessage(messageId, currentUser.getId());
+                response.sendRedirect(request.getContextPath() + "/student/chat?targetId=" + targetId);
+                return;
+            } else if ("deleteConversation".equals(action)) {
+                int targetId = Integer.parseInt(request.getParameter("targetId"));
+                messageService.deleteConversation(currentUser.getId(), targetId);
                 response.sendRedirect(request.getContextPath() + "/student/chat");
                 return;
             }
