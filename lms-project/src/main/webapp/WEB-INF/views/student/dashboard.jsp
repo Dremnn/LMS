@@ -786,7 +786,7 @@
             document.getElementById('fRepeatEvent').checked = false;
             onRepeatChange();
             
-            if (tinymce.get('fDescription')) {
+            if (typeof tinymce !== 'undefined' && tinymce.get('fDescription')) {
                 tinymce.get('fDescription').setContent('');
             }
             document.getElementById('eventFormModal').classList.add('show');
@@ -889,7 +889,7 @@
             syncHiddenToPicker('fEventDate', 'picker_eventDate');
             
             document.getElementById('fDescription').value = ev.description || '';
-            if (tinymce.get('fDescription')) {
+            if (typeof tinymce !== 'undefined' && tinymce.get('fDescription')) {
                 tinymce.get('fDescription').setContent(ev.description || '');
             }
             document.getElementById('fAddress').value = ev.address || '';

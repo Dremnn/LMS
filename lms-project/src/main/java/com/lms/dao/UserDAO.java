@@ -94,7 +94,7 @@ public class UserDAO {
     // Họ tên và email KHÔNG cho sửa ở đây (email gắn với đăng ký/đăng nhập)
     // =========================================================================
     public boolean updateProfile(int userId,String fullName, String avatarUrl, String phone) {
-        String sql = "UPDATE users SET avatar_url = ?, phone = ? WHERE id = ?";
+        String sql = "UPDATE users SET full_name = ?, avatar_url = ?, phone = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)) {
