@@ -183,8 +183,8 @@
     </a>
         <% if (currentUser != null) { %>
         <div class="quick-actions">
-            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
-                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+                        <a href="<%=request.getContextPath()%>/student/chat" class="quick-action-btn" title="Tin nhắn">
+                <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
             </a>
             <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
                 <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
@@ -390,6 +390,5 @@
 <!-- App Scripts -->
 <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
 
-    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>

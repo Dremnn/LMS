@@ -204,11 +204,3 @@ document.addEventListener("DOMContentLoaded", () => {
             setLmsCookie('app_theme', isDark ? 'dark' : 'light', 365);
         });
     }
-
-// ---------- Ngăn kéo (Drawer) Toàn cục ----------
-function toggleDrawer() {
-    var drawer = document.getElementById('rightDrawer');
-    if (drawer) {
-        drawer.classList.toggle('open');
-    }
-}
