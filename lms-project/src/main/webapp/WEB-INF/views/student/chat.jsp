@@ -82,7 +82,7 @@
         <div class="nav-links">
             <a href="<%=request.getContextPath()%>/student/dashboard">Bảng điều khiển</a>
             <a href="<%=request.getContextPath()%>/courses">Khóa học của tôi</a>
-            <a href="<%=request.getContextPath()%>/student/chat" class="active">Tin nhắn</a>
+            <a href="<%=request.getContextPath()%>/chat" class="active">Tin nhắn</a>
         </div>
         <div class="user-menu">
             <a href="<%=request.getContextPath()%>/student/wallet" style="margin-right:15px; color:#1f2937; text-decoration:none;">
@@ -109,7 +109,7 @@
             <% } %>
 
             <!-- Thêm liên lạc mới -->
-            <form class="add-contact-form" id="addContactForm" method="post" action="<%=request.getContextPath()%>/student/chat">
+            <form class="add-contact-form" id="addContactForm" method="post" action="<%=request.getContextPath()%>/chat">
                 <input type="hidden" name="action" value="addContact">
                 <input type="email" name="email" placeholder="Email người dùng..." required>
                 <button type="submit"><i class="fas fa-plus"></i></button>
@@ -123,7 +123,7 @@
                                         ? contact.getAvatarUrl() 
                                         : "https://ui-avatars.com/api/?name=" + contact.getFullName().replace(" ", "+");
                 %>
-                    <a href="<%=request.getContextPath()%>/student/chat?targetId=<%=contact.getId()%>" class="contact-item <%= isActive ? "active" : "" %>">
+                    <a href="<%=request.getContextPath()%>/chat?targetId=<%=contact.getId()%>" class="contact-item <%= isActive ? "active" : "" %>">
                         <div class="contact-avatar">
                             <img src="<%=avatar%>" alt="<%=contact.getFullName()%>">
                         </div>
@@ -158,7 +158,7 @@
                         </div>
                     </div>
                     <div class="chat-actions">
-                        <form method="post" action="<%=request.getContextPath()%>/student/chat" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ cuộc hội thoại với <%=targetUser.getFullName()%> không?');">
+                        <form method="post" action="<%=request.getContextPath()%>/chat" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa toàn bộ cuộc hội thoại với <%=targetUser.getFullName()%> không?');">
                             <input type="hidden" name="action" value="deleteConversation">
                             <input type="hidden" name="targetId" value="<%=targetUser.getId()%>">
                             <button type="submit" style="background: none; border: none; cursor: pointer; color: #ef4444;" title="Xóa toàn bộ cuộc hội thoại">
@@ -186,7 +186,7 @@
                 </div>
 
                 <div class="chat-input-area">
-                    <form action="<%=request.getContextPath()%>/student/chat" method="post">
+                    <form action="<%=request.getContextPath()%>/chat" method="post">
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="targetId" value="<%=targetUser.getId()%>">
                         <i class="far fa-smile" style="font-size: 24px; color: #9ca3af; cursor: pointer;"></i>
@@ -206,7 +206,7 @@
     </div>
 
     <!-- Hidden form to delete individual message -->
-    <form id="deleteMessageForm" method="post" action="<%=request.getContextPath()%>/student/chat" style="display: none;">
+    <form id="deleteMessageForm" method="post" action="<%=request.getContextPath()%>/chat" style="display: none;">
         <input type="hidden" name="action" value="deleteMessage">
         <input type="hidden" name="messageId" id="delMsgId">
         <input type="hidden" name="targetId" id="delTargetId">
