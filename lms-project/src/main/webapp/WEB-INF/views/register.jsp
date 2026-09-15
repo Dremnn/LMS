@@ -166,7 +166,6 @@
 
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
 
-    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>
 
