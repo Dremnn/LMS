@@ -83,6 +83,15 @@ public class ChatServlet extends HttpServlet {
                 int targetId = Integer.parseInt(request.getParameter("targetId"));
                 String content = request.getParameter("content");
 
+                // Anti-spam protection at the backend level (1 request per second)
+                Long lastChatTime = (Long) request.getSession().getAttribute("lastChatTime");
+                long now = System.currentTimeMillis();
+                if (lastChatTime != null && (now - lastChatTime) < 1000) {
+                    response.sendRedirect(request.getContextPath() + "/chat?targetId=" + targetId);
+                    return;
+                }
+                request.getSession().setAttribute("lastChatTime", now);
+
                 if (content != null && !content.trim().isEmpty()) {
                     messageService.sendMessage(currentUser.getId(), targetId, content.trim());
                 }
@@ -121,3 +130,4 @@ public class ChatServlet extends HttpServlet {
         }
     }
 }
+
