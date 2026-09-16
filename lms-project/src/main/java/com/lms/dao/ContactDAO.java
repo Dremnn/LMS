@@ -11,7 +11,7 @@ import java.util.List;
 public class ContactDAO {
 
     public void addContactRequest(int senderId, int receiverId) throws SQLException {
-        String sql = "INSERT INTO contacts (user_id, contact_id, status, created_at) VALUES (?, ?, 'pending', CURRENT_TIMESTAMP) ON CONFLICT (user_id, contact_id) DO NOTHING";
+        String sql = "INSERT INTO contacts (user_id, contact_id, status, created_at) VALUES (?, ?, 'pending', CURRENT_TIMESTAMP)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, senderId);

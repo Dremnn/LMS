@@ -2,6 +2,7 @@
 <%@ page import="java.util.List, com.lms.model.User, com.lms.model.Message, java.time.format.DateTimeFormatter" %>
 <%
     User currentUser = (User) session.getAttribute("currentUser");
+    String role = currentUser != null ? currentUser.getRole() : "";
     List<User> contacts = (List<User>) request.getAttribute("contacts");
     User targetUser = (User) request.getAttribute("targetUser");
     List<Message> conversation = (List<Message>) request.getAttribute("conversation");
@@ -9,92 +10,126 @@
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 %>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhắn tin - LMS</title>
+    <title>Tin nhắn - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
-        body { margin: 0; padding: 0; background: #f5f6fa; font-family: 'Segoe UI', Roboto, Arial, sans-serif; overflow: hidden; }
-        .chat-container { display: flex; height: calc(100vh - 60px); max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; margin-top: 20px;}
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+        .chat-container { display: flex; height: calc(100vh - 100px); max-width: 1280px; margin: 16px auto 20px; background: #fff; border-radius: 16px; border: 1px solid var(--border, #E2E8F0); box-shadow: 0 4px 20px rgba(0,0,0,0.06); overflow: hidden; }
         
         /* Sidebar (Contacts) */
         .chat-sidebar { width: 320px; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; background: #fff; }
-        .chat-sidebar-header { padding: 20px; border-bottom: 1px solid #e5e7eb; }
-        .chat-sidebar-header h3 { margin: 0; font-size: 18px; color: #1f2937; display: flex; justify-content: space-between; align-items: center; }
+        .chat-sidebar-header { padding: 18px 20px; border-bottom: 1px solid #e5e7eb; background: #fff; }
+        .chat-sidebar-header h3 { margin: 0; font-size: 17px; color: #1f2937; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
         .contact-list { flex: 1; overflow-y: auto; }
-        .contact-item { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid #f3f4f6; text-decoration: none; color: inherit; transition: background 0.2s; cursor: pointer; }
-        .contact-item:hover, .contact-item.active { background: #f9fafb; }
-        .contact-avatar { width: 45px; height: 45px; border-radius: 50%; background: #e5e7eb; margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #6b7280; font-size: 16px; overflow: hidden; }
+        .contact-item { display: flex; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f3f4f6; text-decoration: none; color: inherit; transition: background 0.2s; cursor: pointer; }
+        .contact-item:hover, .contact-item.active { background: #f0f7ff; }
+        .contact-avatar { width: 44px; height: 44px; border-radius: 50%; background: #e5e7eb; margin-right: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #6b7280; font-size: 15px; overflow: hidden; flex-shrink: 0; }
         .contact-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .contact-info { flex: 1; }
-        .contact-name { font-weight: 600; font-size: 15px; margin-bottom: 3px; color: #111827; }
-        .contact-status { font-size: 13px; color: #10b981; }
+        .contact-info { flex: 1; min-width: 0; }
+        .contact-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .contact-status { font-size: 12px; color: #10b981; }
 
         /* Main Chat Area */
-        .chat-main { flex: 1; display: flex; flex-direction: column; background: #f9fafb; }
+        .chat-main { flex: 1; display: flex; flex-direction: column; background: #f9fafb; min-width: 0; }
         
         /* Header */
-        .chat-main-header { padding: 15px 25px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+        .chat-main-header { padding: 14px 22px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
         .chat-user-profile { display: flex; align-items: center; }
         .chat-user-profile .contact-avatar { width: 40px; height: 40px; margin-right: 12px; }
-        .chat-user-profile .name { font-size: 16px; font-weight: 600; color: #1f2937; }
-        .chat-user-profile .status { font-size: 13px; color: #6b7280; }
+        .chat-user-profile .name { font-size: 15px; font-weight: 600; color: #1f2937; }
+        .chat-user-profile .status { font-size: 12px; color: #6b7280; }
 
         /* Messages */
-        .chat-messages { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
         .message { max-width: 70%; display: flex; flex-direction: column; }
         .message.sent { align-self: flex-end; }
         .message.received { align-self: flex-start; }
-        .msg-bubble { padding: 12px 16px; border-radius: 12px; font-size: 15px; line-height: 1.4; position: relative; }
-        .message.received .msg-bubble { background: #fff; border: 1px solid #e5e7eb; color: #1f2937; border-bottom-left-radius: 4px; }
-        .message.sent .msg-bubble { background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
+        .msg-bubble { padding: 11px 16px; border-radius: 14px; font-size: 14px; line-height: 1.45; position: relative; word-break: break-word; }
+        .message.received .msg-bubble { background: #fff; border: 1px solid #e5e7eb; color: #1f2937; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .message.sent .msg-bubble { background: #076FA4; color: #fff; border-bottom-right-radius: 4px; }
         .msg-time { font-size: 11px; color: #9ca3af; margin-top: 4px; }
         .message.sent .msg-time { align-self: flex-end; }
         .message.received .msg-time { align-self: flex-start; }
 
         /* Input Area */
-        .chat-input-area { padding: 20px 25px; background: #fff; border-top: 1px solid #e5e7eb; display: flex; gap: 15px; align-items: center; }
+        .chat-input-area { padding: 16px 22px; background: #fff; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; align-items: center; }
         .chat-input-area form { width: 100%; display: flex; gap: 10px; align-items: center; }
-        .chat-input-area input[type="text"] { flex: 1; padding: 14px 20px; border: 1px solid #d1d5db; border-radius: 25px; font-size: 15px; outline: none; transition: border-color 0.2s; }
-        .chat-input-area input[type="text"]:focus { border-color: #2563eb; }
-        .send-btn { background: #2563eb; color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: background 0.2s; }
-        .send-btn:hover { background: #1d4ed8; }
+        .chat-input-area input[type="text"] { flex: 1; padding: 12px 18px; border: 1px solid #d1d5db; border-radius: 25px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .chat-input-area input[type="text"]:focus { border-color: #076FA4; }
+        .send-btn { background: #076FA4; color: #fff; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background 0.2s; flex-shrink: 0; }
+        .send-btn:hover { background: #093C62; }
 
-        .no-chat-selected { display: flex; flex: 1; align-items: center; justify-content: center; flex-direction: column; color: #6b7280; font-size: 16px; }
-        .no-chat-selected i { font-size: 48px; margin-bottom: 15px; color: #d1d5db; }
+        .no-chat-selected { display: flex; flex: 1; align-items: center; justify-content: center; flex-direction: column; color: #6b7280; font-size: 15px; }
+        .no-chat-selected i { font-size: 46px; margin-bottom: 14px; color: #d1d5db; }
         
         /* Add contact */
-        .add-contact-form { padding: 15px 20px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: none; }
+        .add-contact-form { padding: 12px 18px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: none; }
         .add-contact-form.show { display: flex; gap: 10px; }
-        .add-contact-form input { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; }
-        .add-contact-form button { padding: 8px 15px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .add-contact-form input { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+        .add-contact-form button { padding: 8px 14px; background: #076FA4; color: white; border: none; border-radius: 6px; cursor: pointer; }
+
+        /* Dark Theme Support (Chuẩn 5 Dải Màu UTEdu) */
+        body.dark-theme .chat-container { background: #182535 !important; border-color: #093C62 !important; box-shadow: 0 4px 20px rgba(0,0,0,0.45) !important; }
+        body.dark-theme .chat-sidebar { background: #111312 !important; border-right-color: #093C62 !important; }
+        body.dark-theme .chat-sidebar-header { border-bottom-color: #093C62 !important; background: #182535 !important; }
+        body.dark-theme .chat-sidebar-header h3 { color: #FFFFFF !important; }
+        body.dark-theme .contact-item { border-bottom-color: #182535 !important; color: #FFFFFF !important; }
+        body.dark-theme .contact-item:hover, body.dark-theme .contact-item.active { background: #182535 !important; }
+        body.dark-theme .contact-name { color: #FFFFFF !important; }
+        body.dark-theme .contact-status { color: #38BDF8 !important; }
+        body.dark-theme .contact-avatar { background: #182535 !important; color: #9DB9CB !important; border: 1px solid #093C62; }
+        body.dark-theme .chat-main { background: #111312 !important; }
+        body.dark-theme .chat-main-header { background: #182535 !important; border-bottom-color: #093C62 !important; }
+        body.dark-theme .chat-user-profile .name { color: #FFFFFF !important; }
+        body.dark-theme .chat-user-profile .status { color: #9DB9CB !important; }
+        body.dark-theme .message.received .msg-bubble { background: #182535 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
+        body.dark-theme .message.sent .msg-bubble { background: #076FA4 !important; color: #FFFFFF !important; }
+        body.dark-theme .msg-time { color: #9DB9CB !important; }
+        body.dark-theme .chat-input-area { background: #182535 !important; border-top-color: #093C62 !important; }
+        body.dark-theme .chat-input-area input[type="text"] { background: #111312 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
+        body.dark-theme .chat-input-area input[type="text"]:focus { border-color: #076FA4 !important; }
+        body.dark-theme .send-btn { background: #076FA4 !important; }
+        body.dark-theme .send-btn:hover { background: #093C62 !important; }
+        body.dark-theme .add-contact-form { background: #182535 !important; border-bottom-color: #093C62 !important; }
+        body.dark-theme .add-contact-form input { background: #111312 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
+        body.dark-theme .no-chat-selected { color: #9DB9CB !important; }
+        body.dark-theme .no-chat-selected i { color: #093C62 !important; }
     </style>
 </head>
-<body>
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
+    <!-- NAVBAR CHUẨN UTEDU LMS -->
     <nav class="lms-navbar">
-        <div class="logo">
-            <i class="fas fa-graduation-cap"></i>
-            <span>HUTECH LMS</span>
+        <div class="nav-left">
+            <a href="<%=request.getContextPath()%>/" class="lms-logo">
+                <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
+                <span class="logo-tag">LMS</span>
+            </a>
+            <% if (currentUser != null) { %>
+            <div class="quick-actions">
+                <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn active" title="Tin nhắn">
+                    <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
+                </a>
+                <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                    <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+                </a>
+            </div>
+            <% } %>
         </div>
         <div class="nav-links">
-<<<<<<< HEAD
             <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
                 <% if ("student".equals(role)) { %>
                     <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
-                    <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-                    <a href="<%=request.getContextPath()%>/student/chat" class="nav-link active">Tin nhắn</a>
+                    <a href="<%=request.getContextPath()%>/chat" class="nav-link active">Tin nhắn</a>
                 <% } %>
-                <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
                 <div class="user-badge">
-                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                    <% } else { %>
-                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                    <% } %>
+                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
                     <span><%=currentUser.getFullName()%></span>
                     <span class="role-tag"><%=role%></span>
                 </div>
@@ -102,6 +137,8 @@
                     <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
                 <% } else if ("admin".equals(role)) { %>
                     <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+                <% } else { %>
+                    <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
                 <% } %>
                 <a href="<%=request.getContextPath()%>/student/wallet" class="btn btn-outline" style="border-color:#076FA4; color:#076FA4;">
                     <i class="fa-solid fa-wallet"></i> <%= currentUser.getBalance() != null ? String.format("%,.0f đ", currentUser.getBalance()) : "0 đ" %>
@@ -111,17 +148,6 @@
                 <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
                 <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
             <% } %>
-=======
-            <a href="<%=request.getContextPath()%>/student/dashboard">Bảng điều khiển</a>
-            <a href="<%=request.getContextPath()%>/courses">Khóa học của tôi</a>
-            <a href="<%=request.getContextPath()%>/chat" class="active">Tin nhắn</a>
-        </div>
-        <div class="user-menu">
-            <a href="<%=request.getContextPath()%>/student/wallet" style="margin-right:15px; color:#1f2937; text-decoration:none;">
-                <i class="fas fa-wallet"></i> <%= currentUser != null && currentUser.getBalance() != null ? String.format("%,.0f đ", currentUser.getBalance()) : "0 đ" %>
-            </a>
-            <div class="avatar" style="background-image: url('<%= (currentUser != null && currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().isEmpty()) ? currentUser.getAvatarUrl() : "https://ui-avatars.com/api/?name=" + (currentUser != null ? currentUser.getFullName() : "U") %>')"></div>
->>>>>>> 566065278dfd8530471618c8962c52c3a20ed3b6
         </div>
     </nav>
 
@@ -129,7 +155,7 @@
         <!-- Sidebar -->
         <div class="chat-sidebar">
             <div class="chat-sidebar-header">
-                <h3>Tin nhắn <i class="fas fa-edit" style="color: #2563eb; cursor: pointer;" onclick="toggleAddContact()"></i></h3>
+                <h3>Tin nhắn <i class="fas fa-edit" style="color: #076FA4; cursor: pointer;" onclick="toggleAddContact()" title="Thêm liên lạc"></i></h3>
             </div>
             
             <% String chatSuccess = (String) session.getAttribute("chatSuccess"); 
@@ -265,5 +291,14 @@
             }
         }
     </script>
+
+    <!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
+    <div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
+        <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
+        <div class="toggle-icon moon-icon"><i class="fa-solid fa-moon"></i></div>
+        <span class="toggle-text">Chế độ Tối</span>
+    </div>
+
+    <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
 </body>
 </html>

@@ -133,7 +133,7 @@
     </a>
         <% if (currentUser != null) { %>
         <div class="quick-actions">
-                        <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
+                        <a href="<%=request.getContextPath()%>/student/chat" class="quick-action-btn" title="Tin nhắn">
                 <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
             </a>
             <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">

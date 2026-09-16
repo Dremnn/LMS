@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@WebServlet("/chat")
+@WebServlet("/student/chat")
 public class ChatServlet extends HttpServlet {
     private final MessageService messageService = new MessageService();
     private final UserDAO userDAO = new UserDAO();
@@ -85,7 +85,7 @@ public class ChatServlet extends HttpServlet {
                 }
                 
                 // Redirect back to conversation
-                response.sendRedirect(request.getContextPath() + "/chat?targetId=" + targetId);
+                response.sendRedirect(request.getContextPath() + "/student/chat?targetId=" + targetId);
                 return;
             } else if ("addContact".equals(action)) {
                 String targetEmail = request.getParameter("email");
@@ -94,22 +94,22 @@ public class ChatServlet extends HttpServlet {
                     messageService.sendContactRequest(currentUser.getId(), target.getId());
                     messageService.acceptContactRequest(currentUser.getId(), target.getId());
                     request.getSession().setAttribute("chatSuccess", "Đã thêm " + target.getFullName() + " vào danh bạ!");
-                    response.sendRedirect(request.getContextPath() + "/chat?targetId=" + target.getId());
+                    response.sendRedirect(request.getContextPath() + "/student/chat?targetId=" + target.getId());
                 } else {
-                    request.getSession().setAttribute("chatError", "Không tìm thấy người dùng hợp lệ với email này!");
-                    response.sendRedirect(request.getContextPath() + "/chat");
+                    request.getSession().setAttribute("chatError", "Không tìm thấy người dùng với email này!");
+                    response.sendRedirect(request.getContextPath() + "/student/chat");
                 }
                 return;
             } else if ("deleteMessage".equals(action)) {
                 int messageId = Integer.parseInt(request.getParameter("messageId"));
                 int targetId = Integer.parseInt(request.getParameter("targetId"));
                 messageService.deleteMessage(messageId, currentUser.getId());
-                response.sendRedirect(request.getContextPath() + "/chat?targetId=" + targetId);
+                response.sendRedirect(request.getContextPath() + "/student/chat?targetId=" + targetId);
                 return;
             } else if ("deleteConversation".equals(action)) {
                 int targetId = Integer.parseInt(request.getParameter("targetId"));
                 messageService.deleteConversation(currentUser.getId(), targetId);
-                response.sendRedirect(request.getContextPath() + "/chat");
+                response.sendRedirect(request.getContextPath() + "/student/chat");
                 return;
             }
         } catch (SQLException | NumberFormatException e) {
