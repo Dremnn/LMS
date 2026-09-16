@@ -362,20 +362,26 @@
             localStorage.setItem('lmsChatEnterToSend', this.checked);
         });
 
+        var isSubmitting = false;
         chatInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && enterToggle.checked) {
                 e.preventDefault();
+                if (isSubmitting) return;
+                isSubmitting = true;
                 this.closest('form').submit();
             }
-        });        // Prevent multiple submissions on rapid Enter presses
+        });
+
         var chatForm = document.getElementById('chatForm');
         if (chatForm) {
             chatForm.addEventListener('submit', function(e) {
-                if (this.dataset.submitted === 'true') {
+                if (isSubmitting && e.isTrusted) {
                     e.preventDefault();
-                } else {
-                    this.dataset.submitted = 'true';
+                    return;
                 }
+                isSubmitting = true;
+                var btn = this.querySelector('button[type="submit"]');
+                if (btn) btn.disabled = true;
             });
         }
     }
@@ -413,6 +419,7 @@
     </div>
 </body>
 </html>
+
 
 
 
