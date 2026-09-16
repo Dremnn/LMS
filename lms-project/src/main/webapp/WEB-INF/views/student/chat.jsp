@@ -101,6 +101,7 @@
         body.dark-theme .no-chat-selected { color: #9DB9CB !important; }
         body.dark-theme .no-chat-selected i { color: #093C62 !important; }
     </style>
+<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
     <!-- NAVBAR CHUẨN UTEDU LMS -->
@@ -258,18 +259,9 @@
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="targetId" value="<%=targetUser.getId()%>">
                                                   <div style="position:relative; display:flex; align-items:center;">
-                              <i class="far fa-smile" style="font-size: 24px; color: #9ca3af; cursor: pointer;" onclick="document.getElementById('emojiPicker').style.display = document.getElementById('emojiPicker').style.display === 'none' ? 'grid' : 'none'"></i>
-                              <div id="emojiPicker" style="display:none; position:absolute; bottom:40px; left:0; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:10px; grid-template-columns:repeat(5, 1fr); gap:8px; box-shadow:0 -2px 10px rgba(0,0,0,0.1); font-size:20px; z-index:100;">
-                                  <span style="cursor:pointer;" onclick="addEmoji('😀')">😀</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('😂')">😂</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('🥰')">🥰</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('😎')">😎</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('🤔')">🤔</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('👍')">👍</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('🙏')">🙏</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('🔥')">🔥</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('❤️')">❤️</span>
-                                  <span style="cursor:pointer;" onclick="addEmoji('🎉')">🎉</span>
+                              <i class="far fa-smile" style="font-size: 24px; color: #9ca3af; cursor: pointer;" id="emojiButton"></i>
+                              <div id="emojiPickerContainer" style="display:none; position:absolute; bottom:40px; left:0; z-index:100; box-shadow:0 -2px 10px rgba(0,0,0,0.1); border-radius:8px;">
+                                  <emoji-picker style="--num-columns: 8; --emoji-size: 1.5rem;"></emoji-picker>
                               </div>
                           </div>
                           <label style="cursor: pointer; margin-right: 5px; display:flex; align-items:center;" title="Đính kèm">
@@ -317,27 +309,29 @@
             }
         }
     
-    function addEmoji(emoji) {
-        var input = document.getElementById('chatInput');
-        if (input) {
-            input.value += emoji;
-            input.focus();
-        }
-        document.getElementById('emojiPicker').style.display = 'none';
-    }
+        const emojiButton = document.getElementById('emojiButton');
+    const emojiPickerContainer = document.getElementById('emojiPickerContainer');
+    const picker = document.querySelector('emoji-picker');
+    const chatInput = document.getElementById('chatInput');
 
-    // Hide emoji picker if clicking outside
-    document.addEventListener('click', function(e) {
-        var picker = document.getElementById('emojiPicker');
-        var smileIcon = document.querySelector('.fa-smile');
-        if (picker && picker.style.display !== 'none') {
-            if (!picker.contains(e.target) && e.target !== smileIcon) {
-                picker.style.display = 'none';
+    if (emojiButton && emojiPickerContainer && picker) {
+        emojiButton.addEventListener('click', function() {
+            emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
+        });
+
+        picker.addEventListener('emoji-click', function(event) {
+            chatInput.value += event.detail.unicode;
+            chatInput.focus();
+            emojiPickerContainer.style.display = 'none';
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!emojiPickerContainer.contains(e.target) && e.target !== emojiButton) {
+                emojiPickerContainer.style.display = 'none';
             }
-        }
-    });
-
-    // Enter to send toggle
+        });
+    }
+// Enter to send toggle
     var enterToggle = document.getElementById('enterToSend');
     var chatInput = document.getElementById('chatInput');
     if (enterToggle && chatInput) {
@@ -364,32 +358,35 @@
         <span class="toggle-text">Chế độ Tối</span>
     </div>
 
-    <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30">
-    function addEmoji(emoji) {
-        var input = document.getElementById('chatInput');
-        if (input) {
-            input.value += emoji;
-            input.focus();
-        }
-        document.getElementById('emojiPicker').style.display = 'none';
-    }
+    <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
+    <script>
+    const emojiButton = document.getElementById('emojiButton');
+    const emojiPickerContainer = document.getElementById('emojiPickerContainer');
+    const picker = document.querySelector('emoji-picker');
+    const chatInput = document.getElementById('chatInput');
 
-    // Hide emoji picker if clicking outside
-    document.addEventListener('click', function(e) {
-        var picker = document.getElementById('emojiPicker');
-        var smileIcon = document.querySelector('.fa-smile');
-        if (picker && picker.style.display !== 'none') {
-            if (!picker.contains(e.target) && e.target !== smileIcon) {
-                picker.style.display = 'none';
+    if (emojiButton && emojiPickerContainer && picker) {
+        emojiButton.addEventListener('click', function() {
+            emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
+        });
+
+        picker.addEventListener('emoji-click', function(event) {
+            chatInput.value += event.detail.unicode;
+            chatInput.focus();
+            emojiPickerContainer.style.display = 'none';
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!emojiPickerContainer.contains(e.target) && e.target !== emojiButton) {
+                emojiPickerContainer.style.display = 'none';
             }
-        }
-    });
+        });
+    }
 
     // Enter to send toggle
     var enterToggle = document.getElementById('enterToSend');
-    var chatInput = document.getElementById('chatInput');
     if (enterToggle && chatInput) {
-        var isEnterToSend = localStorage.getItem('lmsChatEnterToSend') !== 'false'; // default true
+        var isEnterToSend = localStorage.getItem('lmsChatEnterToSend') !== 'false';
         enterToggle.checked = isEnterToSend;
         
         enterToggle.addEventListener('change', function() {
@@ -403,7 +400,8 @@
             }
         });
     }
-</script>
+    </script>
+
     <!-- Chat Settings Modal -->
     <div id="chatSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
         <div style="background:#fff; width:350px; border-radius:8px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
@@ -436,36 +434,3 @@
     </div>
 </body>
 </html>
-    <!-- Chat Settings Modal -->
-    <div id="chatSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-        <div style="background:#fff; width:350px; border-radius:8px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
-            <div style="padding:15px 20px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center; background:#f9fafb;">
-                <h3 style="margin:0; font-size:16px; font-weight:600; color:#1f2937;">Cài đặt</h3>
-                <button onclick="document.getElementById('chatSettingsModal').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#6b7280;">&times;</button>
-            </div>
-            <div style="padding:20px;">
-                <div style="margin-bottom:20px;">
-                    <h4 style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#1f2937;">Quyền riêng tư</h4>
-                    <p style="margin:0 0 10px 0; font-size:13px; color:#6b7280;">Ai có thể nhắn tin cho bạn?</p>
-                    <div style="display:flex; align-items:center; margin-bottom:8px;">
-                        <input type="radio" id="priv1" name="chatPrivacy" checked style="margin-right:8px;">
-                        <label for="priv1" style="font-size:14px; color:#374151;">Chỉ trong Danh bạ của tôi</label>
-                    </div>
-                    <div style="display:flex; align-items:center;">
-                        <input type="radio" id="priv2" name="chatPrivacy" style="margin-right:8px;">
-                        <label for="priv2" style="font-size:14px; color:#374151;">Tất cả mọi người</label>
-                    </div>
-                </div>
-                <div style="margin-bottom:20px;">
-                    <h4 style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#1f2937;">Thông tin chung</h4>
-                    <div style="display:flex; align-items:center; justify-content:space-between;">
-                        <label for="enterToSend" style="font-size:14px; color:#374151;">Dùng phím Enter để gửi</label>
-                        <input type="checkbox" id="enterToSend" checked style="width:16px; height:16px;">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
