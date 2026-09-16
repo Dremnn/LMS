@@ -70,9 +70,15 @@
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
             <% } %>
+            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
             <div class="user-badge">
-                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                <% } else { %>
+                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <% } %>
                 <span><%=currentUser.getFullName()%></span>
                 <span class="role-tag"><%=role%></span>
             </div>
@@ -80,8 +86,6 @@
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
-            <% } else { %>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>

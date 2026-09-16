@@ -70,7 +70,7 @@ public class ProfileServlet extends HttpServlet {
             }
         }
 
-        List<WalletTransaction> history = "student".equals(freshUser.getRole())
+        List<WalletTransaction> history = ("student".equals(freshUser.getRole()) || "instructor".equals(freshUser.getRole()))
                 ? walletService.getHistory(freshUser.getId())
                 : Collections.emptyList();
 

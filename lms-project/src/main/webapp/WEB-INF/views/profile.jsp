@@ -82,12 +82,25 @@
         <div class="nav-links">
             <a href="${pageContext.request.contextPath}/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
+                <% if ("student".equals(role)) { %>
+                    <a href="${pageContext.request.contextPath}/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                    <a href="${pageContext.request.contextPath}/student/my-courses" class="nav-link">Khóa học của tôi</a>
+                <% } %>
+                <a href="${pageContext.request.contextPath}/profile" class="nav-link active">Hồ sơ</a>
                 <div class="user-badge">
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
                     <span><%=currentUser.getFullName()%></span>
                     <span class="role-tag"><%=role%></span>
                 </div>
-                <a href="${pageContext.request.contextPath}/profile" class="btn btn-outline active">Hồ sơ</a>
+                <% if ("instructor".equals(role)) { %>
+                    <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">Quản lý</a>
+                <% } else if ("admin".equals(role)) { %>
+                    <a href="${pageContext.request.contextPath}/admin" class="btn btn-outline">Quản trị</a>
+                <% } %>
                 <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
             <% } else { %>
                 <a href="${pageContext.request.contextPath}/login" class="btn btn-outline">Đăng nhập</a>
@@ -120,14 +133,38 @@
             </div>
 
             <c:if test="${profileUser.role == 'student'}">
-                <div class="balance-card">
-                    <div>
-                        <div class="label">Số dư ví hiện tại</div>
-                        <div class="amount"><fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ</div>
+            <!-- Panel 1: Thẻ hiển thị Số dư ví -->
+            <div class="balance-card" style="margin-bottom: 16px;">
+                <div>
+                    <div class="label">Số dư ví hiện tại</div>
+                    <div class="amount">
+                        <fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ
                     </div>
-                    <a href="${pageContext.request.contextPath}/wallet/topup" class="btn btn-primary"><i class="fa-solid fa-wallet"></i> Nạp tiền</a>
                 </div>
-            </c:if>
+            </div>
+            <!-- Panel 2: Thẻ Nạp tiền riêng biệt nằm ngay bên dưới -->
+            <div class="panel" style="text-align: center; padding: 20px;">
+                <h3 style="margin: 0 0 12px; font-size: 15px; color: var(--text); font-weight: 700;">
+                    <i class="fa-solid fa-wallet"></i> Nạp thêm tiền vào ví
+                </h3>
+                <a href="${pageContext.request.contextPath}/wallet/topup" 
+                class="btn btn-primary" 
+                style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 12px;">
+                    <i class="fa-solid fa-plus-circle"></i> Nạp tiền ngay
+                </a>
+            </div>
+        </c:if>
+        <c:if test="${profileUser.role == 'instructor'}">
+            <!-- Thẻ hiển thị Số dư đã nhận từ bán khóa học (không có nút nạp tiền - GV chỉ nhận, không nạp) -->
+            <div class="balance-card" style="margin-bottom: 16px;">
+                <div>
+                    <div class="label">Số dư đã nhận từ khóa học</div>
+                    <div class="amount">
+                        <fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ
+                    </div>
+                </div>
+            </div>
+        </c:if>
         </div>
 
         <!-- CỘT PHẢI: Chi tiết + form chỉnh sửa -->
@@ -137,10 +174,6 @@
                 <div class="info-row">
                     <span class="label"><i class="fa-solid fa-id-badge"></i> Họ và tên</span>
                     <span class="value">${profileUser.fullName}</span>
-                </div>
-                <div class="info-row">
-                    <span class="label"><i class="fa-solid fa-user"></i> Tên đăng nhập</span>
-                    <span class="value">${profileUser.email}</span>
                 </div>
                 <div class="info-row">
                     <span class="label"><i class="fa-solid fa-envelope"></i> Email</span>
@@ -155,7 +188,7 @@
                         </c:choose>
                     </span>
                 </div>
-                <c:if test="${profileUser.role == 'student'}">
+                <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor'}">
                     <div class="info-row">
                         <span class="label"><i class="fa-solid fa-wallet"></i> Số dư ví</span>
                         <span class="value"><fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ</span>
@@ -188,7 +221,7 @@
                 </form>
             </div>
 
-            <c:if test="${profileUser.role == 'student'}">
+            <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor'}">
                 <div class="panel">
                     <h2>Lịch sử giao dịch ví</h2>
                     <c:choose>
@@ -206,16 +239,41 @@
                                     List<WalletTransaction> historyList = (List<WalletTransaction>) request.getAttribute("walletHistory");
                                     if (historyList != null) {
                                         for (WalletTransaction tx : historyList) {
-                                            boolean isTopup = "topup".equals(tx.getType());
+                                            String txType = tx.getType();
+                                            // Các loại cộng tiền (+): nạp tiền, GV nhận tiền bán khóa học, SV được hoàn tiền
+                                            boolean isCredit = "topup".equals(txType) || "earning".equals(txType) || "refund".equals(txType);
+
+                                            String typeLabel;
+                                            String content;
+                                            switch (txType) {
+                                                case "topup":
+                                                    typeLabel = "Nạp tiền";
+                                                    content = "Mã GD: " + (tx.getReferenceCode() == null || tx.getReferenceCode().isEmpty() ? "—" : tx.getReferenceCode());
+                                                    break;
+                                                case "earning":
+                                                    typeLabel = "Nhận tiền khóa học";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
+                                                case "refund":
+                                                    typeLabel = "Hoàn tiền";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
+                                                case "refund_deduction":
+                                                    typeLabel = "Bị trừ do hoàn tiền";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
+                                                default: // "payment"
+                                                    typeLabel = "Thanh toán";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
+                                            }
                                 %>
                                     <tr>
                                         <td><%= tx.getCreatedAt() != null ? tx.getCreatedAt().format(dtf) : "" %></td>
-                                        <td><%= isTopup ? "Nạp tiền" : "Thanh toán" %></td>
-                                        <td><%= isTopup
-                                                ? "Mã GD: " + (tx.getReferenceCode() == null || tx.getReferenceCode().isEmpty() ? "—" : tx.getReferenceCode())
-                                                : "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "") %></td>
-                                        <td class="tx-amount <%= tx.getType() %>">
-                                            <%= isTopup ? "+" : "-" %><%= String.format("%,.0f", tx.getAmount()) %>đ
+                                        <td><%= typeLabel %></td>
+                                        <td><%= content %></td>
+                                        <td class="tx-amount <%= isCredit ? "topup" : "payment" %>">
+                                            <%= isCredit ? "+" : "-" %><%= String.format("%,.0f", tx.getAmount()) %>đ
                                         </td>
                                         <td><%= String.format("%,.0f", tx.getBalanceAfter()) %>đ</td>
                                     </tr>

@@ -10,9 +10,14 @@ import com.lms.model.LessonProgress;
 import com.lms.model.User;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class EnrollmentService {
+
+    // Thời hạn tối đa (phút) kể từ lúc đăng ký để Student còn được phép hủy + hoàn tiền
+    private static final long REFUND_WINDOW_MINUTES = 30;
 
     private final EnrollmentDAO enrollmentDAO;
     private final LessonProgressDAO lessonProgressDAO;
@@ -35,6 +40,15 @@ public class EnrollmentService {
     // =========================================================================
     public Enrollment enroll(int studentId, int courseId) {
 
+        User student = userDAO.findById(studentId);
+        if (student == null) {
+            throw new IllegalArgumentException("Tài khoản không tồn tại!");
+        }
+        // Chỉ role "student" mới được đăng ký khóa học - khóa chức năng này với instructor/admin
+        if (!"student".equals(student.getRole())) {
+            throw new IllegalStateException("Chỉ học viên (student) mới có thể đăng ký khóa học!");
+        }
+
         Course course = courseDAO.findById(courseId);
         if (course == null) {
             throw new IllegalArgumentException("Khóa học không tồn tại!");
@@ -52,13 +66,12 @@ public class EnrollmentService {
 
         // Kiểm tra trước để báo lỗi rõ ràng, thân thiện (kèm số dư hiện tại/còn thiếu)
         if (isPaidCourse) {
-            User student = userDAO.findById(studentId);
-            BigDecimal currentBalance = (student != null) ? student.getBalance() : BigDecimal.ZERO;
+            BigDecimal currentBalance = student.getBalance();
             if (currentBalance.compareTo(price) < 0) {
                 BigDecimal missing = price.subtract(currentBalance);
                 throw new IllegalStateException(String.format(
                         "Số dư trong ví không đủ để đăng ký khóa học này (cần %sđ, còn thiếu %sđ). " +
-                        "Vui lòng ăn cắp thêm để nạp tiền vào ví!",
+                        "Vui lòng nạp thêm tiền vào ví!",
                         price.toPlainString(), missing.toPlainString()));
             }
         }
@@ -69,11 +82,12 @@ public class EnrollmentService {
             throw new RuntimeException("Có lỗi xảy ra khi đăng ký khóa học. Vui lòng thử lại!");
         }
 
-        // Trừ tiền SAU KHI enrollment đã được tạo thành công. Nếu vì lý do nào đó
-        // (race-condition hiếm gặp) số dư không còn đủ nữa thì hoàn tác (xóa enrollment vừa tạo).
+        // Trừ tiền Student + cộng tiền Instructor SAU KHI enrollment đã được tạo thành công.
+        // Nếu vì lý do nào đó (race-condition hiếm gặp) số dư không còn đủ nữa thì hoàn tác
+        // (xóa enrollment vừa tạo).
         if (isPaidCourse) {
             try {
-                walletService.payForCourse(studentId, courseId, price);
+                walletService.payForCourse(studentId, course.getInstructorId(), courseId, price);
             } catch (IllegalStateException e) {
                 enrollmentDAO.delete(studentId, courseId);
                 throw e;
@@ -158,7 +172,8 @@ public class EnrollmentService {
     }
 
     // =========================================================================
-    // 6. Hủy đăng ký khóa học (Unenroll)
+    // 6. Hủy đăng ký khóa học (Unenroll) - KHÔNG hoàn tiền (dùng cho khóa học miễn phí,
+    // hoặc khóa học có phí nhưng đã quá thời hạn hoàn tiền)
     // =========================================================================
     public void unenroll(int studentId, int courseId) {
         if (!enrollmentDAO.isEnrolled(studentId, courseId)) {
@@ -168,6 +183,66 @@ public class EnrollmentService {
         boolean deleted = enrollmentDAO.delete(studentId, courseId);
         if (!deleted) {
             throw new RuntimeException("Có lỗi xảy ra khi hủy khóa học. Vui lòng thử lại!");
+        }
+    }
+
+    // =========================================================================
+    // 7. Kiểm tra 1 enrollment còn trong thời hạn được hoàn tiền hay không
+    // Điều kiện: khóa học CÓ PHÍ và thời gian đăng ký chưa quá REFUND_WINDOW_MINUTES
+    // =========================================================================
+    public boolean isRefundEligible(Enrollment enrollment, Course course) {
+        if (enrollment == null || enrollment.getEnrolledAt() == null || course == null) {
+            return false;
+        }
+        BigDecimal price = course.getPrice();
+        boolean isPaidCourse = price != null && price.compareTo(BigDecimal.ZERO) > 0;
+        if (!isPaidCourse) {
+            return false;
+        }
+        long minutesSinceEnroll = Duration.between(enrollment.getEnrolledAt(), LocalDateTime.now()).toMinutes();
+        return minutesSinceEnroll < REFUND_WINDOW_MINUTES;
+    }
+
+    // =========================================================================
+    // 8. HỦY ĐĂNG KÝ + HOÀN TIỀN (Refund)
+    // Điều kiện: khóa học có phí VÀ đăng ký chưa quá 30 phút.
+    // Hoàn tiền cho Student, đồng thời trừ lại đúng số tiền đó khỏi Instructor.
+    // Nếu khóa học miễn phí -> chỉ hủy đăng ký bình thường (không có gì để hoàn).
+    // =========================================================================
+    public void refundEnrollment(int studentId, int courseId) {
+        Enrollment enrollment = enrollmentDAO.findByStudentAndCourse(studentId, courseId);
+        if (enrollment == null) {
+            throw new IllegalStateException("Bạn chưa đăng ký khóa học này!");
+        }
+
+        Course course = courseDAO.findById(courseId);
+        if (course == null) {
+            throw new IllegalArgumentException("Khóa học không tồn tại!");
+        }
+
+        BigDecimal price = course.getPrice();
+        boolean isPaidCourse = price != null && price.compareTo(BigDecimal.ZERO) > 0;
+
+        if (!isPaidCourse) {
+            // Khóa học miễn phí - không có tiền để hoàn, chỉ cần hủy đăng ký bình thường
+            unenroll(studentId, courseId);
+            return;
+        }
+
+        long minutesSinceEnroll = Duration.between(enrollment.getEnrolledAt(), LocalDateTime.now()).toMinutes();
+        if (minutesSinceEnroll >= REFUND_WINDOW_MINUTES) {
+            throw new IllegalStateException(
+                    "Đã quá 30 phút kể từ lúc đăng ký nên khóa học có phí này không còn được hoàn tiền. " +
+                    "Bạn vẫn có thể hủy đăng ký (không hoàn tiền) bằng nút \"Hsủy khóa học\".");
+        }
+
+        // Hoàn tiền cho Student + trừ lại tiền đã cộng cho Instructor (cùng 1 transaction)
+        walletService.refundCourse(studentId, course.getInstructorId(), courseId, price);
+
+        boolean deleted = enrollmentDAO.delete(studentId, courseId);
+        if (!deleted) {
+            throw new RuntimeException(
+                    "Đã hoàn tiền thành công nhưng có lỗi khi xóa đăng ký. Vui lòng liên hệ quản trị viên!");
         }
     }
 }

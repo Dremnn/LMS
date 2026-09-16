@@ -1,8 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi">    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -141,6 +142,18 @@
 <%
     User currentUser = (User) session.getAttribute("currentUser");
     String role = currentUser != null ? currentUser.getRole() : "";
+
+    com.lms.model.Enrollment enrollmentObj = (com.lms.model.Enrollment) request.getAttribute("enrollment");
+    com.lms.model.Course courseObj = (com.lms.model.Course) request.getAttribute("course");
+    boolean isPaidCourseFlag = courseObj != null && courseObj.getPrice() != null
+            && courseObj.getPrice().compareTo(java.math.BigDecimal.ZERO) > 0;
+    boolean canRefund = false;
+    long minutesLeftForRefund = 0;
+    if (enrollmentObj != null && enrollmentObj.getEnrolledAt() != null && isPaidCourseFlag) {
+        long minutesSinceEnroll = java.time.Duration.between(enrollmentObj.getEnrolledAt(), java.time.LocalDateTime.now()).toMinutes();
+        canRefund = minutesSinceEnroll < 30;
+        minutesLeftForRefund = 30 - minutesSinceEnroll;
+    }
 %>
 <!-- NAVBAR -->
 <nav class="lms-navbar">
@@ -165,9 +178,15 @@
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
             <% } %>
+            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
             <div class="user-badge">
-                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                <% } else { %>
+                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <% } %>
                 <span><%=currentUser.getFullName()%></span>
                 <span class="role-tag"><%=role%></span>
             </div>
@@ -175,8 +194,6 @@
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
-            <% } else { %>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
@@ -244,21 +261,45 @@
                         <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${course.sectionsCache[0].lessons[0].id}" class="btn-enroll">
                             <i class="fa-solid fa-play"></i> Tiếp tục học
                         </a>
-                        <form action="${pageContext.request.contextPath}/enrollments/cancel" method="post" style="display:inline;"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn hủy khóa học này không? Mọi tiến độ học tập sẽ bị xóa.')">
-                            <input type="hidden" name="courseId" value="${course.id}" />
-                            <button type="submit" class="btn" style="background:#FEE2E2;color:#991B1B;padding:12px 20px;border-radius:12px;font-weight:600;border:none;cursor:pointer;">
-                                <i class="fa-solid fa-xmark"></i> Hủy khóa học
-                            </button>
-                        </form>
+                        <% if (canRefund) { %>
+                            <form action="<%=request.getContextPath()%>/enrollments/refund" method="post" style="display:inline;"
+                                  onsubmit="return confirm('Hủy đăng ký và hoàn lại tiền vào ví của bạn? Số tiền sẽ được hoàn ngay lập tức, mọi tiến độ học tập sẽ bị xóa.')">
+                                <input type="hidden" name="courseId" value="${course.id}" />
+                                <button type="submit" class="btn" style="background:#DCFCE7;color:#166534;padding:12px 20px;border-radius:12px;font-weight:600;border:none;cursor:pointer;">
+                                    <i class="fa-solid fa-rotate-left"></i> Hủy & hoàn tiền
+                                </button>
+                            </form>
+                            <span style="font-size:12px;color:#64748B;">
+                                <i class="fa-solid fa-clock"></i> Còn <%=minutesLeftForRefund%> phút để được hoàn tiền
+                            </span>
+                        <% } else { %>
+                            <form action="<%=request.getContextPath()%>/enrollments/cancel" method="post" style="display:inline;"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn hủy khóa học này không? <%=isPaidCourseFlag ? "Khóa học này ĐÃ QUÁ HẠN HOÀN TIỀN nên sẽ KHÔNG được hoàn lại tiền. " : ""%>Mọi tiến độ học tập sẽ bị xóa.')">
+                                <input type="hidden" name="courseId" value="${course.id}" />
+                                <button type="submit" class="btn" style="background:#FEE2E2;color:#991B1B;padding:12px 20px;border-radius:12px;font-weight:600;border:none;cursor:pointer;">
+                                    <i class="fa-solid fa-xmark"></i> Hủy khóa học
+                                </button>
+                            </form>
+                            <% if (isPaidCourseFlag) { %>
+                                <span style="font-size:12px;color:#94A3B8;">Đã quá hạn hoàn tiền (30 phút kể từ lúc đăng ký)</span>
+                            <% } %>
+                        <% } %>
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <%-- Chưa đăng ký: hiện form đăng ký --%>
-                    <form action="${pageContext.request.contextPath}/enrollments/new" method="post" style="display:inline;">
-                        <input type="hidden" name="courseId" value="${course.id}" />
-                        <button type="submit" class="btn-enroll"><i class="fa-solid fa-rocket"></i> Đăng ký học ngay</button>
-                    </form>
+                    <% if ("instructor".equals(role) || "admin".equals(role)) { %>
+                        <%-- Instructor/Admin không được đăng ký khóa học --%>
+                        <div style="background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;">
+                            <i class="fa-solid fa-lock"></i>
+                            <%= "instructor".equals(role) ? "Tài khoản giảng viên không thể đăng ký khóa học." : "Tài khoản quản trị viên không thể đăng ký khóa học." %>
+                        </div>
+                    <% } else { %>
+                        <%-- Chưa đăng ký: hiện form đăng ký --%>
+                        <form action="${pageContext.request.contextPath}/enrollments/new" method="post" style="display:inline;">
+                            <input type="hidden" name="courseId" value="${course.id}" />
+                            <button type="submit" class="btn-enroll"><i class="fa-solid fa-rocket"></i> Đăng ký học ngay</button>
+                        </form>
+                    <% } %>
                 </c:otherwise>
             </c:choose>
         </div>
@@ -462,7 +503,15 @@
                                 <div class="review-user-info">
                                     <c:choose>
                                         <c:when test="${not empty review.studentAvatar}">
-                                            <img src="${pageContext.request.contextPath}${review.studentAvatar}"
+                                            <c:choose>
+                                                <c:when test="${fn:startsWith(review.studentAvatar, 'http')}">
+                                                    <c:set var="reviewAvatarSrc" value="${review.studentAvatar}"/>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <c:set var="reviewAvatarSrc" value="${pageContext.request.contextPath}${review.studentAvatar}"/>
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <img src="${reviewAvatarSrc}"
                                                  alt="<c:out value='${review.studentName}'/>"
                                                  class="review-avatar"
                                                  onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
