@@ -2,7 +2,7 @@
 <%@ page import="java.util.List, com.lms.model.User, com.lms.model.Message, java.time.format.DateTimeFormatter" %>
 <%
     User currentUser = (User) session.getAttribute("currentUser");
-    String role = currentUser != null ? currentUser.getRole() : ";
+    String role = currentUser != null ? currentUser.getRole() : "";
     List<User> contacts = (List<User>) request.getAttribute("contacts");
     User targetUser = (User) request.getAttribute("targetUser");
     List<Message> conversation = (List<Message>) request.getAttribute("conversation");
@@ -182,7 +182,7 @@
                                         ? contact.getAvatarUrl() 
                                         : "https://ui-avatars.com/api/?name=" + contact.getFullName().replace(" ", "+");
                 %>
-                    <a href="<%=request.getContextPath()%>/chat?targetId=<%=contact.getId()%>" class="contact-item <%= isActive ? "active" : " %>">
+                    <a href="<%=request.getContextPath()%>/chat?targetId=<%=contact.getId()%>" class="contact-item <%= isActive ? "active" : "" %>">
                         <div class="contact-avatar">
                             <img src="<%=avatar%>" alt="<%=contact.getFullName()%>">
                         </div>
