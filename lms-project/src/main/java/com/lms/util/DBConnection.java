@@ -33,7 +33,7 @@ public class DBConnection {
             config.setDriverClassName("org.postgresql.Driver");
 
             // Giữ sẵn tối đa 10 connection đã kết nối tới cloud DB, tái sử dụng liên tục
-            config.setMaximumPoolSize(10);
+            config.setMaximumPoolSize(30);
             config.setMinimumIdle(2);
             config.setConnectionTimeout(30000);   // Chờ tối đa 30s nếu pool đang bận hết
             config.setIdleTimeout(600000);         // Connection rảnh quá 10 phút thì đóng bớt

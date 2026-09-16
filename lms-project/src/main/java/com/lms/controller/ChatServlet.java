@@ -104,7 +104,7 @@ public class ChatServlet extends HttpServlet {
                 User target = userDAO.findByEmail(targetEmail);
                 if (target != null && target.getId() != currentUser.getId()) {
                     messageService.sendContactRequest(currentUser.getId(), target.getId());
-                    messageService.acceptContactRequest(currentUser.getId(), target.getId());
+                    messageService.acceptContactRequest(target.getId(), currentUser.getId());
                     request.getSession().setAttribute("chatSuccess", "Đã thêm " + target.getFullName() + " vào danh bạ!");
                     response.sendRedirect(request.getContextPath() + "/chat?targetId=" + target.getId());
                 } else {
@@ -130,4 +130,5 @@ public class ChatServlet extends HttpServlet {
         }
     }
 }
+
 
