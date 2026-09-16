@@ -144,7 +144,7 @@
             <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
                 <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
             </a>
-            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+            <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
                 <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
             </a>
         </div>
@@ -153,7 +153,7 @@
             <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
                 <% if ("student".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link active">Bảng điều khiển</a>
+                    <a href="<%=request.getContextPath()%>/dashboard" class="nav-link active">Bảng điều khiển</a>
                     <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
                 <% } %>
                 <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
@@ -187,7 +187,7 @@
     <!-- ================= PANEL 1: MỐC THỜI GIAN ================= -->
     <div class="panel">
         <h2>Mốc thời gian</h2>
-        <form method="get" action="${pageContext.request.contextPath}/student/dashboard" class="filter-row">
+        <form method="get" action="${pageContext.request.contextPath}/dashboard" class="filter-row">
             <input type="hidden" name="year" value="<%= year %>">
             <input type="hidden" name="month" value="<%= month %>">
 
@@ -223,7 +223,7 @@
     <!-- ================= PANEL 2: TIMETABLE ================= -->
     <div class="panel">
         <div class="filter-row" style="justify-content: space-between;">
-            <form method="get" action="${pageContext.request.contextPath}/student/dashboard">
+            <form method="get" action="${pageContext.request.contextPath}/dashboard">
                 <input type="hidden" name="year" value="<%= year %>">
                 <input type="hidden" name="month" value="<%= month %>">
                 <select name="courseId" onchange="this.form.submit()">
@@ -239,9 +239,9 @@
         </div>
 
         <div class="calendar-header">
-            <a href="${pageContext.request.contextPath}/student/dashboard?year=<%= prevYear %>&month=<%= prevMonth %>">&laquo; Tháng trước</a>
+            <a href="${pageContext.request.contextPath}/dashboard?year=<%= prevYear %>&month=<%= prevMonth %>">&laquo; Tháng trước</a>
             <h2>Tháng <%= month %> / <%= year %></h2>
-            <a href="${pageContext.request.contextPath}/student/dashboard?year=<%= nextYear %>&month=<%= nextMonth %>">Tháng sau &raquo;</a>
+            <a href="${pageContext.request.contextPath}/dashboard?year=<%= nextYear %>&month=<%= nextMonth %>">Tháng sau &raquo;</a>
         </div>
 
         <div class="calendar-grid">
@@ -296,7 +296,7 @@
     <div class="modal-overlay" id="eventModal">
         <div class="modal-box" style="width: 480px;">
             <h3 id="eventFormTitle">Sự kiện mới</h3>
-            <form method="post" id="eventForm" action="${pageContext.request.contextPath}/student/dashboard/events/new">
+            <form method="post" id="eventForm" action="${pageContext.request.contextPath}/dashboard/events/new">
                 <input type="hidden" name="eventId" id="fEventId">
 
                 <label>Tiêu đề sự kiện *</label>
@@ -380,7 +380,7 @@
             <p style="font-size: 14px; margin-bottom: 20px;">Bạn có chắc chắn muốn xoá sự kiện này khỏi lịch?</p>
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeDeleteConfirm()">Huỷ bỏ</button>
-                <form method="post" id="deleteForm" action="${pageContext.request.contextPath}/student/dashboard/events/delete" style="display:inline;">
+                <form method="post" id="deleteForm" action="${pageContext.request.contextPath}/dashboard/events/delete" style="display:inline;">
                     <input type="hidden" name="eventId" id="dEventId">
                     <input type="hidden" name="year" value="<%= year %>">
                     <input type="hidden" name="month" value="<%= month %>">
@@ -414,7 +414,7 @@
         var currentViewEvent = null;
 
         function openCreateModal(prefillDate) {
-            document.getElementById('eventForm').action = '${pageContext.request.contextPath}/student/dashboard/events/new';
+            document.getElementById('eventForm').action = '${pageContext.request.contextPath}/dashboard/events/new';
             document.getElementById('eventFormTitle').innerText = 'Sự kiện mới';
             document.getElementById('fEventId').value = '';
             document.getElementById('fTitle').value = '';
@@ -533,7 +533,7 @@
             var ev = currentViewEvent;
             closeViewModal();
 
-            document.getElementById('eventForm').action = '${pageContext.request.contextPath}/student/dashboard/events/edit';
+            document.getElementById('eventForm').action = '${pageContext.request.contextPath}/dashboard/events/edit';
             document.getElementById('eventFormTitle').innerText = 'Chỉnh sửa sự kiện';
             document.getElementById('fEventId').value = ev.id;
             document.getElementById('fTitle').value = ev.title;

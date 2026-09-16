@@ -136,7 +136,7 @@
                         <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
                 <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
             </a>
-            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+            <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
                 <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
             </a>
         </div>
@@ -146,7 +146,7 @@
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
                 <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
@@ -184,7 +184,7 @@
         <div class="notif-sidebar">
             <div class="sidebar-header">
                 <h2><i class="fa-solid fa-inbox"></i> Tất cả thông báo</h2>
-                <a href="<%= request.getContextPath() %>/student/notifications/mark-all-read"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc</a>
+                <a href="<%= request.getContextPath() %>/notifications/mark-all-read"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc</a>
             </div>
             <div class="notif-list">
                 <% if (notifications == null || notifications.isEmpty()) { %>
@@ -197,7 +197,7 @@
                         boolean isActive = selected != null && selected.getId() == n.getId();
                         String itemClass = "n-item" + (isActive ? " active" : "") + (!n.isRead() ? " unread" : "");
                 %>
-                    <div class="<%= itemClass %>" onclick="location.href='<%= request.getContextPath() %>/student/notifications?id=<%= n.getId() %>'">
+                    <div class="<%= itemClass %>" onclick="location.href='<%= request.getContextPath() %>/notifications?id=<%= n.getId() %>'">
                         <div class="n-title">
                             <% if (!n.isRead()) { %>
                                 <i class="fa-solid fa-circle" style="color: var(--primary); font-size: 8px; margin-top: 6px;"></i>

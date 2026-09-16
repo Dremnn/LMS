@@ -19,10 +19,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @WebServlet(urlPatterns = {
-    "/student/dashboard",
-    "/student/dashboard/events/new",
-    "/student/dashboard/events/edit",
-    "/student/dashboard/events/delete"
+    "/dashboard",
+    "/dashboard/events/new",
+    "/dashboard/events/edit",
+    "/dashboard/events/delete"
 })
 public class DashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -129,13 +129,13 @@ public class DashboardServlet extends HttpServlet {
         User currentUser = getCurrentUser(request);
 
         try {
-            if ("/student/dashboard/events/new".equals(path)) {
+            if ("/dashboard/events/new".equals(path)) {
                 handleCreateEvent(request, response, currentUser);
 
-            } else if ("/student/dashboard/events/edit".equals(path)) {
+            } else if ("/dashboard/events/edit".equals(path)) {
                 handleEditEvent(request, response, currentUser);
 
-            } else if ("/student/dashboard/events/delete".equals(path)) {
+            } else if ("/dashboard/events/delete".equals(path)) {
                 handleDeleteEvent(request, response, currentUser);
 
             } else {
@@ -145,7 +145,7 @@ public class DashboardServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             HttpSession session = request.getSession();
             session.setAttribute("flashError", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/student/dashboard");
+            response.sendRedirect(request.getContextPath() + "/dashboard");
 
         } catch (SecurityException e) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
@@ -154,7 +154,7 @@ public class DashboardServlet extends HttpServlet {
             e.printStackTrace();
             HttpSession session = request.getSession();
             session.setAttribute("flashError", "Đã xảy ra lỗi hệ thống!");
-            response.sendRedirect(request.getContextPath() + "/student/dashboard");
+            response.sendRedirect(request.getContextPath() + "/dashboard");
         }
     }
 
@@ -164,7 +164,7 @@ public class DashboardServlet extends HttpServlet {
         eventService.createEvent(currentUser.getId(), data.courseId, data.title, data.eventDate,
                 data.description, data.address, data.durationType, data.durationEnd, data.durationMinutes);
 
-        response.sendRedirect(request.getContextPath() + "/student/dashboard?year="
+        response.sendRedirect(request.getContextPath() + "/dashboard?year="
                 + data.eventDate.getYear() + "&month=" + data.eventDate.getMonthValue());
     }
 
@@ -176,7 +176,7 @@ public class DashboardServlet extends HttpServlet {
         eventService.updateEvent(eventId, currentUser.getId(), data.courseId, data.title, data.eventDate,
                 data.description, data.address, data.durationType, data.durationEnd, data.durationMinutes);
 
-        response.sendRedirect(request.getContextPath() + "/student/dashboard?year="
+        response.sendRedirect(request.getContextPath() + "/dashboard?year="
                 + data.eventDate.getYear() + "&month=" + data.eventDate.getMonthValue());
     }
 
@@ -188,7 +188,7 @@ public class DashboardServlet extends HttpServlet {
 
         eventService.deleteEvent(eventId, currentUser.getId());
 
-        response.sendRedirect(request.getContextPath() + "/student/dashboard?year=" + year + "&month=" + month);
+        response.sendRedirect(request.getContextPath() + "/dashboard?year=" + year + "&month=" + month);
     }
 
     // Gom việc đọc form vào 1 chỗ, dùng chung cho create/edit

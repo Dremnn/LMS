@@ -115,7 +115,7 @@
                 <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn active" title="Tin nhắn">
                     <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
                 </a>
-                <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+                <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
                     <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
                 </a>
             </div>
@@ -125,7 +125,7 @@
             <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
                 <% if ("student".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                    <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
                     <a href="<%=request.getContextPath()%>/chat" class="nav-link active">Tin nhắn</a>
                 <% } %>
                 <div class="user-badge">

@@ -73,7 +73,7 @@
                         <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
                 <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
             </a>
-            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+            <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
                 <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
             </a>
         </div>
@@ -83,7 +83,7 @@
             <a href="${pageContext.request.contextPath}/courses" class="nav-link">Khóa học</a>
             <% if (currentUser != null) { %>
                 <% if ("student".equals(role)) { %>
-                    <a href="${pageContext.request.contextPath}/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                    <a href="${pageContext.request.contextPath}/dashboard" class="nav-link">Bảng điều khiển</a>
                     <a href="${pageContext.request.contextPath}/student/my-courses" class="nav-link">Khóa học của tôi</a>
                 <% } %>
                 <a href="${pageContext.request.contextPath}/profile" class="nav-link active">Hồ sơ</a>

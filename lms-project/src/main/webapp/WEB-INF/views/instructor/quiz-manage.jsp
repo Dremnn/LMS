@@ -97,7 +97,7 @@
                         <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
                 <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
             </a>
-            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+            <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
                 <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
             </a>
         </div>
@@ -108,7 +108,7 @@
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
             <% } %>
             <div class="user-badge">
                 <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
