@@ -2,7 +2,7 @@
 <%@ page import="java.util.List, com.lms.model.User, com.lms.model.Message, java.time.format.DateTimeFormatter" %>
 <%
     User currentUser = (User) session.getAttribute("currentUser");
-    String role = currentUser != null ? currentUser.getRole() : "";
+    String role = currentUser != null ? currentUser.getRole() : ";
     List<User> contacts = (List<User>) request.getAttribute("contacts");
     User targetUser = (User) request.getAttribute("targetUser");
     List<Message> conversation = (List<Message>) request.getAttribute("conversation");
@@ -182,12 +182,21 @@
                                         ? contact.getAvatarUrl() 
                                         : "https://ui-avatars.com/api/?name=" + contact.getFullName().replace(" ", "+");
                 %>
-                    <a href="<%=request.getContextPath()%>/chat?targetId=<%=contact.getId()%>" class="contact-item <%= isActive ? "active" : "" %>">
+                    <a href="<%=request.getContextPath()%>/chat?targetId=<%=contact.getId()%>" class="contact-item <%= isActive ? "active" : " %>">
                         <div class="contact-avatar">
                             <img src="<%=avatar%>" alt="<%=contact.getFullName()%>">
                         </div>
                         <div class="contact-info">
-                            <div class="contact-name"><%= contact.getFullName() %></div>
+                                                          <div class="contact-name" style="display:flex; justify-content:space-between; align-items:center;">
+                                  <span><%= contact.getFullName() %></span>
+                                  <% 
+                                      java.util.Map<Integer, Integer> unreadCounts = (java.util.Map<Integer, Integer>) request.getAttribute("unreadCounts");
+                                      Integer unread = (unreadCounts != null) ? unreadCounts.get(contact.getId()) : null;
+                                      if (unread != null && unread > 0) { 
+                                  %>
+                                      <span style="background:#3b82f6; color:white; border-radius:50%; font-size:11px; font-weight:bold; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;"><%= unread %></span>
+                                  <% } %>
+                              </div>
                             <div class="contact-status"><i class="fas fa-circle" style="font-size: 8px; margin-right: 4px;"></i> Hoạt động</div>
                         </div>
                     </a>
@@ -248,9 +257,26 @@
                     <form action="<%=request.getContextPath()%>/chat" method="post">
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="targetId" value="<%=targetUser.getId()%>">
-                        <i class="far fa-smile" style="font-size: 24px; color: #9ca3af; cursor: pointer;"></i>
-                        <i class="fas fa-paperclip" style="font-size: 22px; color: #9ca3af; cursor: pointer; margin-right: 5px;"></i>
-                        <input type="text" name="content" placeholder="Nhập tin nhắn của bạn..." required autocomplete="off">
+                                                  <div style="position:relative; display:flex; align-items:center;">
+                              <i class="far fa-smile" style="font-size: 24px; color: #9ca3af; cursor: pointer;" onclick="document.getElementById('emojiPicker').style.display = document.getElementById('emojiPicker').style.display === 'none' ? 'grid' : 'none'"></i>
+                              <div id="emojiPicker" style="display:none; position:absolute; bottom:40px; left:0; background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:10px; grid-template-columns:repeat(5, 1fr); gap:8px; box-shadow:0 -2px 10px rgba(0,0,0,0.1); font-size:20px; z-index:100;">
+                                  <span style="cursor:pointer;" onclick="addEmoji('😀')">😀</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('😂')">😂</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('🥰')">🥰</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('😎')">😎</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('🤔')">🤔</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('👍')">👍</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('🙏')">🙏</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('🔥')">🔥</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('❤️')">❤️</span>
+                                  <span style="cursor:pointer;" onclick="addEmoji('🎉')">🎉</span>
+                              </div>
+                          </div>
+                          <label style="cursor: pointer; margin-right: 5px; display:flex; align-items:center;" title="Đính kèm">
+                              <i class="fas fa-paperclip" style="font-size: 22px; color: #9ca3af;"></i>
+                              <input type="file" id="chatFile" style="display:none;" onchange="if(this.value) { document.querySelector('.chat-input-area input[type=text]').value += ' [Đính kèm: ' + this.files[0].name + ']'; document.getElementById('chatInput').focus(); }">
+                          </label>
+                        <input type="text" id="chatInput" name="content" placeholder="Nhập tin nhắn của bạn..." required autocomplete="off">
                         <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 </div>
@@ -290,7 +316,46 @@
                 document.getElementById('deleteMessageForm').submit();
             }
         }
-    </script>
+    
+    function addEmoji(emoji) {
+        var input = document.getElementById('chatInput');
+        if (input) {
+            input.value += emoji;
+            input.focus();
+        }
+        document.getElementById('emojiPicker').style.display = 'none';
+    }
+
+    // Hide emoji picker if clicking outside
+    document.addEventListener('click', function(e) {
+        var picker = document.getElementById('emojiPicker');
+        var smileIcon = document.querySelector('.fa-smile');
+        if (picker && picker.style.display !== 'none') {
+            if (!picker.contains(e.target) && e.target !== smileIcon) {
+                picker.style.display = 'none';
+            }
+        }
+    });
+
+    // Enter to send toggle
+    var enterToggle = document.getElementById('enterToSend');
+    var chatInput = document.getElementById('chatInput');
+    if (enterToggle && chatInput) {
+        var isEnterToSend = localStorage.getItem('lmsChatEnterToSend') !== 'false'; // default true
+        enterToggle.checked = isEnterToSend;
+        
+        enterToggle.addEventListener('change', function() {
+            localStorage.setItem('lmsChatEnterToSend', this.checked);
+        });
+
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && enterToggle.checked) {
+                e.preventDefault();
+                this.closest('form').submit();
+            }
+        });
+    }
+</script>
 
     <!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
     <div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
@@ -299,6 +364,108 @@
         <span class="toggle-text">Chế độ Tối</span>
     </div>
 
-    <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
+    <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30">
+    function addEmoji(emoji) {
+        var input = document.getElementById('chatInput');
+        if (input) {
+            input.value += emoji;
+            input.focus();
+        }
+        document.getElementById('emojiPicker').style.display = 'none';
+    }
+
+    // Hide emoji picker if clicking outside
+    document.addEventListener('click', function(e) {
+        var picker = document.getElementById('emojiPicker');
+        var smileIcon = document.querySelector('.fa-smile');
+        if (picker && picker.style.display !== 'none') {
+            if (!picker.contains(e.target) && e.target !== smileIcon) {
+                picker.style.display = 'none';
+            }
+        }
+    });
+
+    // Enter to send toggle
+    var enterToggle = document.getElementById('enterToSend');
+    var chatInput = document.getElementById('chatInput');
+    if (enterToggle && chatInput) {
+        var isEnterToSend = localStorage.getItem('lmsChatEnterToSend') !== 'false'; // default true
+        enterToggle.checked = isEnterToSend;
+        
+        enterToggle.addEventListener('change', function() {
+            localStorage.setItem('lmsChatEnterToSend', this.checked);
+        });
+
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && enterToggle.checked) {
+                e.preventDefault();
+                this.closest('form').submit();
+            }
+        });
+    }
+</script>
+    <!-- Chat Settings Modal -->
+    <div id="chatSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#fff; width:350px; border-radius:8px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+            <div style="padding:15px 20px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center; background:#f9fafb;">
+                <h3 style="margin:0; font-size:16px; font-weight:600; color:#1f2937;">Cài đặt</h3>
+                <button onclick="document.getElementById('chatSettingsModal').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#6b7280;">&times;</button>
+            </div>
+            <div style="padding:20px;">
+                <div style="margin-bottom:20px;">
+                    <h4 style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#1f2937;">Quyền riêng tư</h4>
+                    <p style="margin:0 0 10px 0; font-size:13px; color:#6b7280;">Ai có thể nhắn tin cho bạn?</p>
+                    <div style="display:flex; align-items:center; margin-bottom:8px;">
+                        <input type="radio" id="priv1" name="chatPrivacy" checked style="margin-right:8px;">
+                        <label for="priv1" style="font-size:14px; color:#374151;">Chỉ trong Danh bạ của tôi</label>
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        <input type="radio" id="priv2" name="chatPrivacy" style="margin-right:8px;">
+                        <label for="priv2" style="font-size:14px; color:#374151;">Tất cả mọi người</label>
+                    </div>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <h4 style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#1f2937;">Thông tin chung</h4>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <label for="enterToSend" style="font-size:14px; color:#374151;">Dùng phím Enter để gửi</label>
+                        <input type="checkbox" id="enterToSend" checked style="width:16px; height:16px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
+    <!-- Chat Settings Modal -->
+    <div id="chatSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:#fff; width:350px; border-radius:8px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+            <div style="padding:15px 20px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center; background:#f9fafb;">
+                <h3 style="margin:0; font-size:16px; font-weight:600; color:#1f2937;">Cài đặt</h3>
+                <button onclick="document.getElementById('chatSettingsModal').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer; color:#6b7280;">&times;</button>
+            </div>
+            <div style="padding:20px;">
+                <div style="margin-bottom:20px;">
+                    <h4 style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#1f2937;">Quyền riêng tư</h4>
+                    <p style="margin:0 0 10px 0; font-size:13px; color:#6b7280;">Ai có thể nhắn tin cho bạn?</p>
+                    <div style="display:flex; align-items:center; margin-bottom:8px;">
+                        <input type="radio" id="priv1" name="chatPrivacy" checked style="margin-right:8px;">
+                        <label for="priv1" style="font-size:14px; color:#374151;">Chỉ trong Danh bạ của tôi</label>
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        <input type="radio" id="priv2" name="chatPrivacy" style="margin-right:8px;">
+                        <label for="priv2" style="font-size:14px; color:#374151;">Tất cả mọi người</label>
+                    </div>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <h4 style="margin:0 0 10px 0; font-size:14px; font-weight:600; color:#1f2937;">Thông tin chung</h4>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                        <label for="enterToSend" style="font-size:14px; color:#374151;">Dùng phím Enter để gửi</label>
+                        <input type="checkbox" id="enterToSend" checked style="width:16px; height:16px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+

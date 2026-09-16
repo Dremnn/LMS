@@ -6,6 +6,8 @@ import com.lms.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MessageDAO {
 
@@ -79,6 +81,21 @@ public class MessageDAO {
             }
         }
         return 0;
+    }
+
+    public Map<Integer, Integer> getUnreadCountsPerContact(int receiverId) throws SQLException {
+        Map<Integer, Integer> counts = new HashMap<>();
+        String sql = "SELECT sender_id, COUNT(*) as unread_count FROM messages WHERE receiver_id = ? AND is_read = false GROUP BY sender_id";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, receiverId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    counts.put(rs.getInt("sender_id"), rs.getInt("unread_count"));
+                }
+            }
+        }
+        return counts;
     }
 
     public void deleteMessage(int messageId, int userId) throws SQLException {

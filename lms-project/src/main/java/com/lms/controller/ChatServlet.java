@@ -43,6 +43,9 @@ public class ChatServlet extends HttpServlet {
             }
             request.setAttribute("contacts", contacts);
 
+            java.util.Map<Integer, Integer> unreadCounts = messageService.getUnreadCountsPerContact(currentUserId);
+            request.setAttribute("unreadCounts", unreadCounts);
+
             // Check if specific conversation is opened
             String targetIdParam = request.getParameter("targetId");
             if (targetIdParam != null && !targetIdParam.isEmpty()) {
