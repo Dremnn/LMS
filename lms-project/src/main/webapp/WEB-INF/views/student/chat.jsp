@@ -255,7 +255,7 @@
                 </div>
 
                 <div class="chat-input-area">
-                    <form action="<%=request.getContextPath()%>/chat" method="post">
+                    <form action="<%=request.getContextPath()%>/chat" method="post" id="chatForm">
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="targetId" value="<%=targetUser.getId()%>">
                                                   <div style="position:relative; display:flex; align-items:center;">
@@ -268,7 +268,7 @@
                               <i class="fas fa-paperclip" style="font-size: 22px; color: #9ca3af;"></i>
                               <input type="file" id="chatFile" style="display:none;" onchange="if(this.value) { document.querySelector('.chat-input-area input[type=text]').value += ' [Đính kèm: ' + this.files[0].name + ']'; document.getElementById('chatInput').focus(); }">
                           </label>
-                        <input type="text" id="chatInput" name="content" placeholder="Nhập tin nhắn của bạn..." required autocomplete="off">
+                        <input type="text" id="chatInput" name="content" placeholder="Nhập tin nhắn của bạn..." required autocomplete="off" autofocus>
                         <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 </div>
@@ -306,8 +306,18 @@
                 document.getElementById('delMsgId').value = msgId;
                 document.getElementById('delTargetId').value = targetId;
                 document.getElementById('deleteMessageForm').submit();
-            }
+            }        // Prevent multiple submissions on rapid Enter presses
+        var chatForm = document.getElementById('chatForm');
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(e) {
+                if (this.dataset.submitted === 'true') {
+                    e.preventDefault();
+                } else {
+                    this.dataset.submitted = 'true';
+                }
+            });
         }
+    }
     </script>
 
     <!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
@@ -357,7 +367,17 @@
                 e.preventDefault();
                 this.closest('form').submit();
             }
-        });
+        });        // Prevent multiple submissions on rapid Enter presses
+        var chatForm = document.getElementById('chatForm');
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(e) {
+                if (this.dataset.submitted === 'true') {
+                    e.preventDefault();
+                } else {
+                    this.dataset.submitted = 'true';
+                }
+            });
+        }
     }
     </script>
 
@@ -393,4 +413,6 @@
     </div>
 </body>
 </html>
+
+
 
