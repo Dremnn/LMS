@@ -244,7 +244,7 @@
                             boolean isMine = msg.getSenderId() == currentUser.getId();
                     %>
                         <div class="message <%= isMine ? "sent" : "received" %>" title="Nhấp chuột trái để xóa tin nhắn này">
-                            <div class="msg-bubble" style="cursor: pointer;" onclick="deleteMessage(<%=msg.getId()%>, <%=targetUser.getId()%>)"><%= msg.getContent() %></div>
+                            <div class="msg-bubble" style="cursor: pointer;" data-msg-id="<%=msg.getId()%>" data-target-id="<%=targetUser.getId()%>" onclick="deleteMessage(this.dataset.msgId, this.dataset.targetId)"><%= msg.getContent() %></div>
                             <div class="msg-time"><%= msg.getSentAt().format(timeFormatter) %></div>
                         </div>
                     <% } } else { %>
@@ -393,3 +393,4 @@
     </div>
 </body>
 </html>
+
