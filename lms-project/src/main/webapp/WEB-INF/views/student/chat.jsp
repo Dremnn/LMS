@@ -308,48 +308,7 @@
                 document.getElementById('deleteMessageForm').submit();
             }
         }
-    
-        const emojiButton = document.getElementById('emojiButton');
-    const emojiPickerContainer = document.getElementById('emojiPickerContainer');
-    const picker = document.querySelector('emoji-picker');
-    const chatInput = document.getElementById('chatInput');
-
-    if (emojiButton && emojiPickerContainer && picker) {
-        emojiButton.addEventListener('click', function() {
-            emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
-        });
-
-        picker.addEventListener('emoji-click', function(event) {
-            chatInput.value += event.detail.unicode;
-            chatInput.focus();
-            emojiPickerContainer.style.display = 'none';
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!emojiPickerContainer.contains(e.target) && e.target !== emojiButton) {
-                emojiPickerContainer.style.display = 'none';
-            }
-        });
-    }
-// Enter to send toggle
-    var enterToggle = document.getElementById('enterToSend');
-    var chatInput = document.getElementById('chatInput');
-    if (enterToggle && chatInput) {
-        var isEnterToSend = localStorage.getItem('lmsChatEnterToSend') !== 'false'; // default true
-        enterToggle.checked = isEnterToSend;
-        
-        enterToggle.addEventListener('change', function() {
-            localStorage.setItem('lmsChatEnterToSend', this.checked);
-        });
-
-        chatInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && enterToggle.checked) {
-                e.preventDefault();
-                this.closest('form').submit();
-            }
-        });
-    }
-</script>
+    </script>
 
     <!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
     <div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
@@ -434,3 +393,5 @@
     </div>
 </body>
 </html>
+
+
