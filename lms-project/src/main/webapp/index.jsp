@@ -183,10 +183,10 @@
     </a>
         <% if (currentUser != null) { %>
         <div class="quick-actions">
-            <a href="javascript:void(0)" onclick="toggleDrawer()" class="quick-action-btn" title="Gần đây">
-                <i class="fa-solid fa-clock-rotate-left"></i><span class="quick-action-text">Gần đây</span>
+                        <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
+                <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
             </a>
-            <a href="<%=request.getContextPath()%>/student/notifications" class="quick-action-btn" title="Thông báo">
+            <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
                 <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
             </a>
         </div>
@@ -197,14 +197,18 @@
         
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
+                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
+                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
             <% } %>
-            
 
             <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
 
             <div class="user-badge">
-                <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                <% } else { %>
+                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                <% } %>
                 <span><%=currentUser.getFullName()%></span>
                 <span class="role-tag"><%=role%></span>
             </div>
@@ -212,8 +216,6 @@
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
-            <% } else { %>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
@@ -316,7 +318,7 @@
             <p>Khóa học chất lượng</p>
         </div>
         <div class="stat-card">
-            <h2><span class="counter-val" data-target="4">0</span>.8★</h2>
+            <h2><span class="counter-val" data-target="3">0</span>.6★</h2>
             <p>Đánh giá trung bình</p>
         </div>
     </div>
@@ -390,6 +392,5 @@
 <!-- App Scripts -->
 <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
 
-    <jsp:include page="/WEB-INF/views/components/drawer.jsp" />
 </body>
 </html>

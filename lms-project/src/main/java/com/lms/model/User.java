@@ -3,19 +3,43 @@ package com.lms.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "users")
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "full_name", nullable = false)
     private String fullName;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
+
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
+
+    @Column(name = "role", nullable = false)
     private String role;        // "student", "instructor", "admin"
+
+    @Column(name = "avatar_url")
     private String avatarUrl;
+
+    @Column(name = "phone")
     private String phone;
+
+    @Column(name = "balance")
     private BigDecimal balance; // Số dư ví - chỉ có ý nghĩa sử dụng với role "student"
+
+    @Column(name = "status", nullable = false)
     private String status;      // "active", "locked", "pending"
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     // 1. Constructor mặc định (Bắt buộc phải có để tuân thủ chuẩn JavaBean)

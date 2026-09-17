@@ -2,18 +2,43 @@ package com.lms.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "notifications")
 public class Notification implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "user_id", nullable = false)
     private int userId;
+
+    @Column(name = "type", nullable = false)
     private String type;        // "quiz_deadline" | "enrollment" | "event_reminder"
+
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "message", columnDefinition = "TEXT")
     private String message;
+
+    @Column(name = "related_url")
     private String relatedUrl;
+
+    @Column(name = "is_read", nullable = false)
     private boolean read;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // Quan hệ ORM
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
 
     public Notification() {}
 
@@ -48,4 +73,7 @@ public class Notification implements Serializable {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }

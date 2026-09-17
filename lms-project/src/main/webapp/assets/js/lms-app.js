@@ -205,10 +205,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-// ---------- Ngăn kéo (Drawer) Toàn cục ----------
-function toggleDrawer() {
-    var drawer = document.getElementById('rightDrawer');
-    if (drawer) {
-        drawer.classList.toggle('open');
+    // ---------- Unread Chat Badge ----------
+    const chatBtn = document.querySelector('.quick-action-btn[title=""Tin nhắn""]');
+    if (chatBtn) {
+        fetch(window.location.origin + window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1)) + '/api/chat/unread')
+            .then(res => res.json())
+            .then(data => {
+                if (data.unread > 0) {
+                    let badge = document.createElement('span');
+                    badge.style.position = 'absolute';
+                    badge.style.top = '4px';
+                    badge.style.right = '4px';
+                    badge.style.background = '#ef4444';
+                    badge.style.color = 'white';
+                    badge.style.fontSize = '10px';
+                    badge.style.fontWeight = 'bold';
+                    badge.style.padding = '2px 6px';
+                    badge.style.borderRadius = '10px';
+                    badge.innerText = data.unread;
+                    chatBtn.style.position = 'relative';
+                    chatBtn.appendChild(badge);
+                }
+            })
+            .catch(e => console.error('Error fetching unread chat count', e));
     }
-}

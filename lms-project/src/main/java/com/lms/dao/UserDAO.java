@@ -2,6 +2,10 @@ package com.lms.dao;
 
 import com.lms.model.User;
 import com.lms.util.DBConnection;
+import com.lms.util.DBUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -9,19 +13,34 @@ import java.time.LocalDateTime;
 
 public class UserDAO {
 
-    // Danh sách cột dùng chung cho các câu SELECT User (đỡ lặp code)
     private static final String SELECT_COLUMNS =
             "id, full_name, email, password_hash, role, avatar_url, phone, balance, status, created_at ";
 
-    // 1. Tìm User theo Email (Dùng khi Đăng nhập)
+    // 1. Tìm User theo Email (Dùng khi Đăng nhập) - Ưu tiên JPA Chapter 13, tự động Fallback JDBC nếu cần
     public User findByEmail(String email) {
-        String sql = "SELECT " + SELECT_COLUMNS + "FROM users WHERE email = ?";
+        if (DBUtil.getEmFactory() != null) {
+            EntityManager em = null;
+            try {
+                em = DBUtil.getEmFactory().createEntityManager();
+                return em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
+                         .setParameter("email", email)
+                         .getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            } catch (Exception e) {
+                // Nếu JPA gặp sự cố mapping thì dùng fallback JDBC
+            } finally {
+                if (em != null && em.isOpen()) em.close();
+            }
+        }
+        return findByEmailJdbc(email);
+    }
 
+    private User findByEmailJdbc(String email) {
+        String sql = "SELECT " + SELECT_COLUMNS + "FROM users WHERE email = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setString(1, email);
-
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return mapResultSetToUser(rs);
@@ -30,53 +49,60 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null; // Không tìm thấy user
+        return null;
     }
 
     // 2. Kiểm tra Email đã tồn tại trong Database chưa (Dùng khi Đăng ký)
     public boolean existsByEmail(String email) {
-        String sql = "SELECT 1 FROM users WHERE email = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, email);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next(); // Trả về true nếu có kết quả, false nếu chưa có
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+        return findByEmail(email) != null;
     }
 
-    // 3. Thêm User mới vào Database (Dùng khi Đăng ký)
+    // 3. Thêm User mới vào Database (Dùng khi Đăng ký) - Chuẩn JPA Chapter 13
     public boolean save(User user) {
-        String sql = "INSERT INTO users (full_name, email, password_hash, role, status, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?)";
+        if (user.getCreatedAt() == null) {
+            user.setCreatedAt(LocalDateTime.now());
+        }
+        if (user.getRole() == null) {
+            user.setRole("student");
+        }
+        if (user.getStatus() == null) {
+            user.setStatus("active");
+        }
+        if (DBUtil.getEmFactory() != null) {
+            EntityManager em = null;
+            EntityTransaction trans = null;
+            try {
+                em = DBUtil.getEmFactory().createEntityManager();
+                trans = em.getTransaction();
+                trans.begin();
+                em.persist(user);
+                trans.commit();
+                return true;
+            } catch (Exception e) {
+                if (trans != null && trans.isActive()) trans.rollback();
+            } finally {
+                if (em != null && em.isOpen()) em.close();
+            }
+        }
+        return saveJdbc(user);
+    }
 
+    private boolean saveJdbc(User user) {
+        String sql = "INSERT INTO users (full_name, email, password_hash, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
             stmt.setString(1, user.getFullName());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getPasswordHash());
             stmt.setString(4, user.getRole() != null ? user.getRole() : "student");
             stmt.setString(5, user.getStatus() != null ? user.getStatus() : "active");
-            
-            // Xử lý thời gian hiện tại
-            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime now = user.getCreatedAt() != null ? user.getCreatedAt() : LocalDateTime.now();
             stmt.setTimestamp(6, Timestamp.valueOf(now));
-
             int affectedRows = stmt.executeUpdate();
-
             if (affectedRows > 0) {
-                // Lấy ID tự tăng mà SQL Server vừa sinh ra gán ngược lại cho đối tượng user
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         user.setId(generatedKeys.getInt(1));
-                        user.setCreatedAt(now);
                     }
                 }
                 return true;
@@ -87,15 +113,27 @@ public class UserDAO {
         return false;
     }
 
-    // 4. Tìm User theo ID
+    // 4. Tìm User theo ID - Ưu tiên JPA Chapter 13, tự động Fallback JDBC nếu cần
     public User findById(int id) {
-        String sql = "SELECT " + SELECT_COLUMNS + "FROM users WHERE id = ?";
+        if (DBUtil.getEmFactory() != null) {
+            EntityManager em = null;
+            try {
+                em = DBUtil.getEmFactory().createEntityManager();
+                return em.find(User.class, id);
+            } catch (Exception e) {
+                // Fallback JDBC
+            } finally {
+                if (em != null && em.isOpen()) em.close();
+            }
+        }
+        return findByIdJdbc(id);
+    }
 
+    private User findByIdJdbc(int id) {
+        String sql = "SELECT " + SELECT_COLUMNS + "FROM users WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, id);
-
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return mapResultSetToUser(rs);
@@ -132,7 +170,7 @@ public class UserDAO {
     // Họ tên và email KHÔNG cho sửa ở đây (email gắn với đăng ký/đăng nhập)
     // =========================================================================
     public boolean updateProfile(int userId,String fullName, String avatarUrl, String phone) {
-        String sql = "UPDATE users SET avatar_url = ?, phone = ? WHERE id = ?";
+        String sql = "UPDATE users SET full_name = ?, avatar_url = ?, phone = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)) {

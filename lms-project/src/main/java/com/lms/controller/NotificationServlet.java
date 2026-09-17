@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet(urlPatterns = {
-    "/student/notifications",
-    "/student/notifications/mark-all-read",
-    "/student/notifications/settings"
+    "/notifications",
+    "/notifications/mark-all-read",
+    "/notifications/settings"
 })
 public class NotificationServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -42,7 +42,7 @@ public class NotificationServlet extends HttpServlet {
         String path = request.getServletPath();
         User currentUser = getCurrentUser(request);
 
-        if ("/student/notifications".equals(path)) {
+        if ("/notifications".equals(path)) {
             List<Notification> notifications = notificationService.getRecentNotifications(currentUser.getId(), 50);
 
             Notification selected = null;
@@ -60,12 +60,12 @@ public class NotificationServlet extends HttpServlet {
             request.setAttribute("selected", selected);
             request.getRequestDispatcher("/WEB-INF/views/student/notifications.jsp").forward(request, response);
 
-        } else if ("/student/notifications/settings".equals(path)) {
+        } else if ("/notifications/settings".equals(path)) {
             NotificationSettings settings = notificationService.getSettings(currentUser.getId());
             request.setAttribute("settings", settings);
             request.getRequestDispatcher("/WEB-INF/views/student/notification-settings.jsp").forward(request, response);
 
-        }else if ("/student/notifications/mark-all-read".equals(path)) {
+        }else if ("/notifications/mark-all-read".equals(path)) {
             notificationService.markAllRead(currentUser.getId());
             response.setContentType("application/json");
             response.getWriter().write("{\"success\":true}");
@@ -82,18 +82,18 @@ public class NotificationServlet extends HttpServlet {
         String path = request.getServletPath();
         User currentUser = getCurrentUser(request);
 
-        if ("/student/notifications/mark-all-read".equals(path)) {
+        if ("/notifications/mark-all-read".equals(path)) {
             notificationService.markAllRead(currentUser.getId());
             response.setContentType("application/json");
             response.getWriter().write("{\"success\":true}");
 
-        } else if ("/student/notifications/settings".equals(path)) {
+        } else if ("/notifications/settings".equals(path)) {
             boolean quizDeadline = "on".equals(request.getParameter("quizDeadlineEnabled"));
             boolean enrollment = "on".equals(request.getParameter("enrollmentEnabled"));
             boolean eventReminder = "on".equals(request.getParameter("eventReminderEnabled"));
 
             notificationService.saveSettings(currentUser.getId(), quizDeadline, enrollment, eventReminder);
-            response.sendRedirect(request.getContextPath() + "/student/notifications/settings");
+            response.sendRedirect(request.getContextPath() + "/notifications/settings");
 
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);

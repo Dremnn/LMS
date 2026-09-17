@@ -3,23 +3,53 @@ package com.lms.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
 /**
  * Lịch sử giao dịch ví: nạp tiền ("topup") hoặc thanh toán khóa học ("payment").
  */
+@Entity
+@Table(name = "wallet_transactions")
 public class WalletTransaction implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "user_id", nullable = false)
     private int userId;
+
+    @Column(name = "type", nullable = false)
     private String type;           // "topup", "payment"
+
+    @Column(name = "amount", nullable = false)
     private BigDecimal amount;
+
+    @Column(name = "reference_code")
     private String referenceCode;  // Mã giao dịch chuyển khoản (chỉ có ở "topup")
+
+    @Column(name = "course_id")
     private Integer courseId;      // Khóa học liên quan (chỉ có ở "payment")
+
+    @Column(name = "balance_after")
     private BigDecimal balanceAfter;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    // Quan hệ ORM
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", insertable = false, updatable = false)
+    private Course course;
+
     // Các trường bổ sung từ JOIN (không map trực tiếp với cột DB)
+    @Transient
     private String courseName;
 
     public WalletTransaction() {
@@ -103,5 +133,21 @@ public class WalletTransaction implements Serializable {
 
     public void setCourseName(String courseName) {
         this.courseName = courseName;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
     }
 }

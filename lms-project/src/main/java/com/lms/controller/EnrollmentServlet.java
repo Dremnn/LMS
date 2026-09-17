@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/enrollments/new", "/enrollments/cancel", "/student/my-courses"})
+@WebServlet(urlPatterns = {"/enrollments/new", "/enrollments/cancel", "/enrollments/refund", "/student/my-courses"})
 public class EnrollmentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -35,6 +35,18 @@ public class EnrollmentServlet extends HttpServlet {
         // Chỉ có 1 route GET: trang "Khóa học của tôi"
         User currentUser = getCurrentUser(request);
 
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            if (session.getAttribute("flashError") != null) {
+                request.setAttribute("error", session.getAttribute("flashError"));
+                session.removeAttribute("flashError");
+            }
+            if (session.getAttribute("flashSuccess") != null) {
+                request.setAttribute("success", session.getAttribute("flashSuccess"));
+                session.removeAttribute("flashSuccess");
+            }
+        }
+
         request.setAttribute("enrollments", enrollmentService.getMyEnrollments(currentUser.getId()));
         request.getRequestDispatcher("/WEB-INF/views/student/my-courses.jsp")
                 .forward(request, response);
@@ -52,6 +64,11 @@ public class EnrollmentServlet extends HttpServlet {
 
             if ("/enrollments/cancel".equals(path)) {
                 enrollmentService.unenroll(currentUser.getId(), courseId);
+                response.sendRedirect(request.getContextPath() + "/student/my-courses");
+            } else if ("/enrollments/refund".equals(path)) {
+                enrollmentService.refundEnrollment(currentUser.getId(), courseId);
+                HttpSession session = request.getSession();
+                session.setAttribute("flashSuccess", "Đã hủy đăng ký và hoàn tiền thành công!");
                 response.sendRedirect(request.getContextPath() + "/student/my-courses");
             } else {
                 enrollmentService.enroll(currentUser.getId(), courseId);

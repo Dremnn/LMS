@@ -39,6 +39,18 @@ public class MessageService {
         return messageDAO.getUnreadCount(userId);
     }
 
+    public java.util.Map<Integer, Integer> getUnreadCountsPerContact(int userId) throws SQLException {
+        return messageDAO.getUnreadCountsPerContact(userId);
+    }
+
+    public void deleteMessage(int messageId, int userId) throws SQLException {
+        messageDAO.deleteMessage(messageId, userId);
+    }
+
+    public void deleteConversation(int user1, int user2) throws SQLException {
+        messageDAO.deleteConversation(user1, user2);
+    }
+
     // ---------------- CONTACTS ----------------
 
     public void sendContactRequest(int senderId, int receiverId) throws SQLException {
