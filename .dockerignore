@@ -1,0 +1,5 @@
+lms-project/target/
+.git
+.gitignore
+*.md
+.vscode/
