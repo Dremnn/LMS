@@ -3,6 +3,7 @@ package com.lms.service;
 import com.lms.dao.ContactDAO;
 import com.lms.dao.MessageDAO;
 import com.lms.model.Message;
+import com.lms.model.User;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -71,6 +72,10 @@ public class MessageService {
 
     public List<Integer> getMyContacts(int userId) throws SQLException {
         return contactDAO.getAcceptedContacts(userId);
+    }
+
+    public List<User> getAcceptedContactUsers(int userId) throws SQLException {
+        return contactDAO.getAcceptedContactUsers(userId);
     }
 
     public List<Integer> getPendingContactRequests(int userId) throws SQLException {
