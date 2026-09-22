@@ -179,13 +179,17 @@
                 <% if (contacts != null && !contacts.isEmpty()) { 
                     for (User contact : contacts) { 
                         boolean isActive = targetUser != null && targetUser.getId() == contact.getId();
-                        String avatar = (contact.getAvatarUrl() != null && !contact.getAvatarUrl().isEmpty()) 
-                                        ? contact.getAvatarUrl() 
-                                        : "https://ui-avatars.com/api/?name=" + contact.getFullName().replace(" ", "+");
+                        String initial = (contact.getFullName() != null && !contact.getFullName().trim().isEmpty()) 
+                                         ? contact.getFullName().trim().substring(0, 1).toUpperCase() : "U";
                 %>
                     <a href="<%=request.getContextPath()%>/chat?targetId=<%=contact.getId()%>" class="contact-item <%= isActive ? "active" : "" %>">
                         <div class="contact-avatar">
-                            <img src="<%=avatar%>" alt="<%=contact.getFullName()%>">
+                            <% if (contact.getAvatarUrl() != null && !contact.getAvatarUrl().trim().isEmpty()) { %>
+                                <img src="<%=contact.getAvatarUrl()%>" alt="<%=contact.getFullName()%>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <span style="display:none;"><%=initial%></span>
+                            <% } else { %>
+                                <span><%=initial%></span>
+                            <% } %>
                         </div>
                         <div class="contact-info">
                                                           <div class="contact-name" style="display:flex; justify-content:space-between; align-items:center;">
@@ -212,14 +216,18 @@
         <!-- Main Chat Area -->
         <div class="chat-main">
             <% if (targetUser != null) { 
-                String avatar = (targetUser.getAvatarUrl() != null && !targetUser.getAvatarUrl().isEmpty()) 
-                                ? targetUser.getAvatarUrl() 
-                                : "https://ui-avatars.com/api/?name=" + targetUser.getFullName().replace(" ", "+");
+                String targetInitial = (targetUser.getFullName() != null && !targetUser.getFullName().trim().isEmpty()) 
+                                       ? targetUser.getFullName().trim().substring(0, 1).toUpperCase() : "U";
             %>
                 <div class="chat-main-header">
                     <div class="chat-user-profile">
                         <div class="contact-avatar">
-                            <img src="<%=avatar%>" alt="<%=targetUser.getFullName()%>">
+                            <% if (targetUser.getAvatarUrl() != null && !targetUser.getAvatarUrl().trim().isEmpty()) { %>
+                                <img src="<%=targetUser.getAvatarUrl()%>" alt="<%=targetUser.getFullName()%>" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <span style="display:none;"><%=targetInitial%></span>
+                            <% } else { %>
+                                <span><%=targetInitial%></span>
+                            <% } %>
                         </div>
                         <div>
                             <div class="name"><%= targetUser.getFullName() %></div>
@@ -298,7 +306,7 @@
 
         function toggleAddContact() {
             var form = document.getElementById("addContactForm");
-            form.classList.toggle("show");
+            if (form) form.classList.toggle("show");
         }
 
         function deleteMessage(msgId, targetId) {
@@ -306,18 +314,86 @@
                 document.getElementById('delMsgId').value = msgId;
                 document.getElementById('delTargetId').value = targetId;
                 document.getElementById('deleteMessageForm').submit();
-            }        // Prevent multiple submissions on rapid Enter presses
+            }
+        }
+
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function sendChatMessage() {
+            var input = document.getElementById('chatInput');
+            if (!input) return;
+            var text = input.value.trim();
+            if (!text) return;
+
+            var box = document.getElementById('chatMessagesBox');
+            var now = new Date();
+            var timeStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+            // Optimistic UI: Hiển thị ngay lập tức bong bóng chat
+            if (box) {
+                var msgDiv = document.createElement('div');
+                msgDiv.className = 'message sent';
+                msgDiv.innerHTML = '<div class="msg-bubble">' + escapeHtml(text) + '</div><div class="msg-time">' + timeStr + '</div>';
+                box.appendChild(msgDiv);
+                box.scrollTop = box.scrollHeight;
+            }
+
+            // Xóa nội dung ô input ngay lập tức
+            input.value = '';
+            input.focus();
+
+            // Gửi ngầm qua AJAX fetch - Không tải lại trang
+            var targetId = '<%= targetUser != null ? targetUser.getId() : 0 %>';
+            var params = new URLSearchParams();
+            params.append('action', 'send');
+            params.append('targetId', targetId);
+            params.append('content', text);
+
+            fetch('<%=request.getContextPath()%>/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            }).then(function(res) {
+                if (!res.ok) {
+                    return res.json().then(function(err) {
+                        alert(err.message || 'Lỗi gửi tin nhắn');
+                    });
+                }
+            }).catch(function(err) {
+                console.error('Lỗi khi gửi tin nhắn:', err);
+            });
+        }
+
         var chatForm = document.getElementById('chatForm');
+        var chatInput = document.getElementById('chatInput');
+
         if (chatForm) {
             chatForm.addEventListener('submit', function(e) {
-                if (this.dataset.submitted === 'true') {
+                e.preventDefault();
+                sendChatMessage();
+            });
+        }
+
+        if (chatInput) {
+            chatInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                } else {
-                    this.dataset.submitted = 'true';
+                    sendChatMessage();
                 }
             });
         }
-    }
     </script>
 
     <!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
@@ -332,9 +408,8 @@
     const emojiButton = document.getElementById('emojiButton');
     const emojiPickerContainer = document.getElementById('emojiPickerContainer');
     const picker = document.querySelector('emoji-picker');
-    const chatInput = document.getElementById('chatInput');
 
-    if (emojiButton && emojiPickerContainer && picker) {
+    if (emojiButton && emojiPickerContainer && picker && chatInput) {
         emojiButton.addEventListener('click', function() {
             emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
         });
@@ -350,40 +425,6 @@
                 emojiPickerContainer.style.display = 'none';
             }
         });
-    }
-
-    // Enter to send toggle
-    var enterToggle = document.getElementById('enterToSend');
-    if (enterToggle && chatInput) {
-        var isEnterToSend = localStorage.getItem('lmsChatEnterToSend') !== 'false';
-        enterToggle.checked = isEnterToSend;
-        
-        enterToggle.addEventListener('change', function() {
-            localStorage.setItem('lmsChatEnterToSend', this.checked);
-        });
-
-        var isSubmitting = false;
-        chatInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && enterToggle.checked) {
-                e.preventDefault();
-                if (isSubmitting) return;
-                isSubmitting = true;
-                this.closest('form').submit();
-            }
-        });
-
-        var chatForm = document.getElementById('chatForm');
-        if (chatForm) {
-            chatForm.addEventListener('submit', function(e) {
-                if (isSubmitting && e.isTrusted) {
-                    e.preventDefault();
-                    return;
-                }
-                isSubmitting = true;
-                var btn = this.querySelector('button[type="submit"]');
-                if (btn) btn.disabled = true;
-            });
-        }
     }
     </script>
 

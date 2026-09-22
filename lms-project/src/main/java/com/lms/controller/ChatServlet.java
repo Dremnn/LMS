@@ -32,15 +32,8 @@ public class ChatServlet extends HttpServlet {
         try {
             int currentUserId = currentUser.getId();
 
-            // Load contact list
-            List<Integer> contactIds = messageService.getMyContacts(currentUserId);
-            List<User> contacts = new ArrayList<>();
-            for (Integer cid : contactIds) {
-                User contact = userDAO.findById(cid);
-                if (contact != null) {
-                    contacts.add(contact);
-                }
-            }
+            // Load contact list (single SQL JOIN - no N+1 query problem)
+            List<User> contacts = messageService.getAcceptedContactUsers(currentUserId);
             request.setAttribute("contacts", contacts);
 
             java.util.Map<Integer, Integer> unreadCounts = messageService.getUnreadCountsPerContact(currentUserId);
@@ -82,11 +75,18 @@ public class ChatServlet extends HttpServlet {
             if ("send".equals(action)) {
                 int targetId = Integer.parseInt(request.getParameter("targetId"));
                 String content = request.getParameter("content");
+                String isAjax = request.getHeader("X-Requested-With");
 
-                // Anti-spam protection at the backend level (1 request per second)
+                // Anti-spam protection at the backend level (500ms)
                 Long lastChatTime = (Long) request.getSession().getAttribute("lastChatTime");
                 long now = System.currentTimeMillis();
-                if (lastChatTime != null && (now - lastChatTime) < 1000) {
+                if (lastChatTime != null && (now - lastChatTime) < 500) {
+                    if ("XMLHttpRequest".equalsIgnoreCase(isAjax)) {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write("{\"status\":\"error\",\"message\":\"Vui lòng không gửi tin nhắn quá nhanh\"}");
+                        return;
+                    }
                     response.sendRedirect(request.getContextPath() + "/chat?targetId=" + targetId);
                     return;
                 }
@@ -96,7 +96,13 @@ public class ChatServlet extends HttpServlet {
                     messageService.sendMessage(currentUser.getId(), targetId, content.trim());
                 }
                 
-                // Redirect back to conversation
+                if ("XMLHttpRequest".equalsIgnoreCase(isAjax)) {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"status\":\"success\"}");
+                    return;
+                }
+
+                // Redirect back to conversation (for non-AJAX fallback)
                 response.sendRedirect(request.getContextPath() + "/chat?targetId=" + targetId);
                 return;
             } else if ("addContact".equals(action)) {
