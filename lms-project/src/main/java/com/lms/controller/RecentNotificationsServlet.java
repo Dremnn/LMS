@@ -38,7 +38,7 @@ public class RecentNotificationsServlet extends HttpServlet {
             String title = n.getTitle() != null ? n.getTitle().replace("\"", "\\\"").replace("\n", " ") : "";
             String message = n.getMessage() != null ? n.getMessage().replace("\"", "\\\"").replace("\n", " ") : "";
             String url = n.getRelatedUrl() != null ? n.getRelatedUrl().replace("\"", "\\\"") : "";
-            String time = n.getCreatedAt() != null ? n.getCreatedAt().toString() : "";
+            String time = n.getCreatedAt() != null ? (n.getCreatedAt().toString() + "Z") : "";
             
             json.append("{")
                 .append("\"id\":").append(n.getId()).append(",")
@@ -59,3 +59,4 @@ public class RecentNotificationsServlet extends HttpServlet {
         out.write(json.toString());
     }
 }
+

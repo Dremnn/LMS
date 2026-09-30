@@ -228,7 +228,7 @@
                         <%= selected.getTitle() %>
                     </h2>
                     <div class="detail-meta">
-                        <span><i class="fa-solid fa-calendar-day"></i> <%= selected.getCreatedAt().toString().replace("T", " ") %></span>
+                        <span><i class="fa-solid fa-calendar-day"></i> <%= selected.getCreatedAt().atZone(java.time.ZoneId.of("UTC")).withZoneSameInstant(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy")) %></span>
                         <span><i class="fa-regular fa-clock"></i> <%= timeAgo(selected.getCreatedAt()) %></span>
                     </div>
                 </div>
@@ -250,7 +250,7 @@
     </div>
 </div>
 
-<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=32"></script>
+<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=33"></script>
 
 </body>
 </html>
@@ -258,7 +258,7 @@
 <%!
     public String timeAgo(java.time.LocalDateTime dateTime) {
         if (dateTime == null) return "";
-        long minutes = java.time.temporal.ChronoUnit.MINUTES.between(dateTime, java.time.LocalDateTime.now());
+        long minutes = java.time.temporal.ChronoUnit.MINUTES.between(dateTime, java.time.LocalDateTime.now(java.time.ZoneId.of("UTC")));
         if (minutes < 1) return "Vừa xong";
         if (minutes < 60) return minutes + " phút trước";
         long hours = minutes / 60;
@@ -267,5 +267,8 @@
         return days + " ngày trước";
     }
 %>
+
+
+
 
 

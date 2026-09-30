@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-            // ---------- Unread Chat Badge & Notification Dropdown ----------
+                // ---------- Unread Chat Badge & Notification Dropdown ----------
     const chatBtn = document.querySelector('a.quick-action-btn[href$="/chat"]');
     const notifBtn = document.querySelector('a.quick-action-btn[href$="/notifications"]');
     let basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
@@ -296,18 +296,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         data.forEach(n => {
                             let dot = n.isRead ? '<div style="width:8px;height:8px;margin-right:8px;"></div>' : '<i class="fa-solid fa-circle" style="color: ' + primaryColor + '; font-size: 8px; margin-right: 8px;"></i>';
                             let url = n.relatedUrl ? (basePath + n.relatedUrl) : (basePath + '/notifications?id=' + n.id);
-                            html += <a href=" + url + " style="display: block; padding: 12px 15px; border-bottom: 1px solid  + borderColor + ; text-decoration: none; color:  + textColor + ; transition: background 0.2s;" onmouseover="this.style.background=' + hoverBg + '" onmouseout="this.style.background='transparent'">
-                                        <div style="font-size: 13px; font-weight:  + (n.isRead ? 'normal' : 'bold') + ; display: flex; align-items: baseline;">
-                                             + dot + 
-                                            <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"> + n.title + </span>
-                                        </div>
-                                        <div style="font-size: 11px; color:  + mutedColor + ; margin-top: 4px; padding-left: 16px;"> + new Date(n.createdAt).toLocaleString('vi-VN') + </div>
-                                    </a>;
+                            html += '<a href="' + url + '" style="display: block; padding: 12px 15px; border-bottom: 1px solid ' + borderColor + '; text-decoration: none; color: ' + textColor + '; transition: background 0.2s;" onmouseover="this.style.background=' + "'" + hoverBg + "'" + '" onmouseout="this.style.background=' + "'transparent'" + '">';
+                            html += '<div style="font-size: 13px; font-weight: ' + (n.isRead ? 'normal' : 'bold') + '; display: flex; align-items: baseline;">';
+                            html += dot;
+                            html += '<span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + n.title + '</span>';
+                            html += '</div>';
+                            html += '<div style="font-size: 11px; color: ' + mutedColor + '; margin-top: 4px; padding-left: 16px;">' + new Date(n.createdAt).toLocaleString('vi-VN') + '</div>';
+                            html += '</a>';
                         });
                         html += '</div>';
-                        html += <a href=" + basePath + /notifications" style="display: block; padding: 12px; text-align: center; background:  + hoverBg + ; color:  + primaryColor + ; font-size: 13px; font-weight: bold; text-decoration: none; border-top: 1px solid  + borderColor + ;">
-                                    Xem tất cả thông báo <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
-                                </a>;
+                        html += '<a href="' + basePath + '/notifications" style="display: block; padding: 12px; text-align: center; background: ' + hoverBg + '; color: ' + primaryColor + '; font-size: 13px; font-weight: bold; text-decoration: none; border-top: 1px solid ' + borderColor + ';">';
+                        html += 'Xem tất cả thông báo <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>';
+                        html += '</a>';
                         dropdown.innerHTML = html;
                     }
                 })
@@ -326,6 +326,3 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 0);
         });
     }
-
-
-
