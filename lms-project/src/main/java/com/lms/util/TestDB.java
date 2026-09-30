@@ -3,9 +3,9 @@ import java.sql.*;
 public class TestDB {
     public static void main(String[] args) {
         try (Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement("UPDATE contacts SET status = 'accepted' WHERE status = 'pending'");
-            int rows = ps.executeUpdate();
-            System.out.println("Updated " + rows + " pending contacts.");
+            PreparedStatement ps = conn.prepareStatement("SELECT notified_deadline FROM quizzes LIMIT 1");
+            ResultSet rs = ps.executeQuery();
+            System.out.println("Column exists!");
         } catch (Exception e) {
             e.printStackTrace();
         }
