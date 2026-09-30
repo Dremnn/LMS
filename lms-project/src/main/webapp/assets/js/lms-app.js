@@ -205,13 +205,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-        // ---------- Unread Chat Badge ----------
+            // ---------- Unread Chat Badge & Notification Dropdown ----------
     const chatBtn = document.querySelector('.quick-action-btn[title="Tin nhắn"]');
     const notifBtn = document.querySelector('.quick-action-btn[title="Thông báo"]');
+    let basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
+    if (basePath === "" || basePath === "/") basePath = "/LMS"; // Default context
+
     if (chatBtn || notifBtn) {
-        let basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
-        if (basePath === "" || basePath === "/") basePath = "/LMS"; // Default context
-        
         fetch(window.location.origin + basePath + '/api/chat/unread')
             .then(res => res.json())
             .then(data => {
@@ -248,3 +248,83 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .catch(e => console.error('Error fetching unread counts', e));
     }
+
+    // Handle Notification Dropdown
+    if (notifBtn) {
+        notifBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Check if dropdown already exists
+            let dropdown = document.getElementById('notif-dropdown');
+            if (dropdown) {
+                dropdown.remove();
+                return;
+            }
+            
+            dropdown = document.createElement('div');
+            dropdown.id = 'notif-dropdown';
+            dropdown.style.position = 'absolute';
+            dropdown.style.top = '120%';
+            dropdown.style.right = '-20px';
+            dropdown.style.width = '320px';
+            dropdown.style.background = document.body.classList.contains('dark-theme') ? '#182535' : '#ffffff';
+            dropdown.style.border = document.body.classList.contains('dark-theme') ? '1px solid #093C62' : '1px solid #e2e8f0';
+            dropdown.style.borderRadius = '12px';
+            dropdown.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+            dropdown.style.zIndex = '1000';
+            dropdown.style.overflow = 'hidden';
+            dropdown.style.textAlign = 'left';
+            
+            notifBtn.style.position = 'relative';
+            notifBtn.appendChild(dropdown);
+            
+            dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #718096;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</div>';
+            
+            fetch(window.location.origin + basePath + '/api/notifications/recent')
+                .then(res => res.json())
+                .then(data => {
+                    const textColor = document.body.classList.contains('dark-theme') ? '#F4F8FA' : '#2d3748';
+                    const mutedColor = document.body.classList.contains('dark-theme') ? '#9DB9CB' : '#718096';
+                    const borderColor = document.body.classList.contains('dark-theme') ? '#093C62' : '#edf2f7';
+                    const hoverBg = document.body.classList.contains('dark-theme') ? '#111312' : '#f7fafc';
+                    const primaryColor = '#3182ce';
+
+                    if (data.length === 0) {
+                        dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: ' + mutedColor + '; font-size: 13px;">Chưa có thông báo nào.</div>';
+                    } else {
+                        let html = '<div style="max-height: 350px; overflow-y: auto;">';
+                        data.forEach(n => {
+                            let dot = n.isRead ? '<div style="width:8px;height:8px;margin-right:8px;"></div>' : '<i class="fa-solid fa-circle" style="color: ' + primaryColor + '; font-size: 8px; margin-right: 8px;"></i>';
+                            let url = n.relatedUrl ? (basePath + n.relatedUrl) : (basePath + '/notifications?id=' + n.id);
+                            html += <a href=" + url + " style="display: block; padding: 12px 15px; border-bottom: 1px solid  + borderColor + ; text-decoration: none; color:  + textColor + ; transition: background 0.2s;" onmouseover="this.style.background=' + hoverBg + '" onmouseout="this.style.background='transparent'">
+                                        <div style="font-size: 13px; font-weight:  + (n.isRead ? 'normal' : 'bold') + ; display: flex; align-items: baseline;">
+                                             + dot + 
+                                            <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"> + n.title + </span>
+                                        </div>
+                                        <div style="font-size: 11px; color:  + mutedColor + ; margin-top: 4px; padding-left: 16px;"> + new Date(n.createdAt).toLocaleString('vi-VN') + </div>
+                                    </a>;
+                        });
+                        html += '</div>';
+                        html += <a href=" + basePath + /notifications" style="display: block; padding: 12px; text-align: center; background:  + hoverBg + ; color:  + primaryColor + ; font-size: 13px; font-weight: bold; text-decoration: none; border-top: 1px solid  + borderColor + ;">
+                                    Xem tất cả thông báo <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
+                                </a>;
+                        dropdown.innerHTML = html;
+                    }
+                })
+                .catch(err => {
+                    dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #e53e3e; font-size: 13px;">Lỗi tải thông báo.</div>';
+                });
+                
+            // Close dropdown when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', function closeDropdown(e) {
+                    if (!notifBtn.contains(e.target)) {
+                        dropdown.remove();
+                        document.removeEventListener('click', closeDropdown);
+                    }
+                });
+            }, 0);
+        });
+    }
+
+
