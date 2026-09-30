@@ -216,7 +216,13 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (chatBtn && data.unread > 0) {
-                    chatBtn.style.overflow = 'visible';
+                    let wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.alignItems = 'center';
+                    chatBtn.parentNode.insertBefore(wrapper, chatBtn);
+                    wrapper.appendChild(chatBtn);
+
                     let badge = document.createElement('span');
                     badge.style.position = 'absolute';
                     badge.style.top = '-6px';
@@ -227,12 +233,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     badge.style.fontWeight = 'bold';
                     badge.style.padding = '2px 6px';
                     badge.style.borderRadius = '10px';
+                    badge.style.zIndex = '10';
                     badge.innerText = data.unread;
-                    chatBtn.style.position = 'relative';
-                    chatBtn.appendChild(badge);
+                    wrapper.appendChild(badge);
                 }
                 if (notifBtn && data.unreadNotif > 0) {
-                    notifBtn.style.overflow = 'visible';
+                    let wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.alignItems = 'center';
+                    notifBtn.parentNode.insertBefore(wrapper, notifBtn);
+                    wrapper.appendChild(notifBtn);
+
                     let badge = document.createElement('span');
                     badge.style.position = 'absolute';
                     badge.style.top = '-6px';
@@ -243,9 +255,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     badge.style.fontWeight = 'bold';
                     badge.style.padding = '2px 6px';
                     badge.style.borderRadius = '10px';
+                    badge.style.zIndex = '10';
                     badge.innerText = data.unreadNotif;
-                    notifBtn.style.position = 'relative';
-                    notifBtn.appendChild(badge);
+                    wrapper.appendChild(badge);
                 }
             })
             .catch(e => console.error('Error fetching unread counts', e));
@@ -270,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Lấy tọa độ của nút chuông
             const rect = notifBtn.getBoundingClientRect();
             dropdown.style.top = (rect.bottom + window.scrollY + 10) + 'px';
-            dropdown.style.left = (rect.right - 320) + 'px'; // Căn mép phải dropdown bằng mép phải button
+            dropdown.style.left = rect.left + 'px'; // Căn mép trái dropdown bằng mép trái button
             
             dropdown.style.width = '320px';
             dropdown.style.background = document.body.classList.contains('dark-theme') ? '#182535' : '#ffffff';
@@ -331,6 +343,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 0);
         });
     }
+
+
 
 
 

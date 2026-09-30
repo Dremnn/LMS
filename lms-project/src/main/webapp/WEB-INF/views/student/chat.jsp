@@ -403,7 +403,7 @@
         <span class="toggle-text">Chế độ Tối</span>
     </div>
 
-    <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=37"></script>
+    <script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=38"></script>
     <script>
     const emojiButton = document.getElementById('emojiButton');
     const emojiPickerContainer = document.getElementById('emojiPickerContainer');
@@ -460,6 +460,7 @@
     </div>
 </body>
 </html>
+
 
 
 
