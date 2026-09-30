@@ -252,10 +252,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle Notification Dropdown
     if (notifBtn) {
         notifBtn.addEventListener('click', function(e) {
+            let dropdown = document.getElementById('notif-dropdown');
+            
+            // Allow clicks inside the dropdown to work normally (so links can be clicked)
+            if (dropdown && dropdown.contains(e.target)) {
+                return;
+            }
+            
             e.preventDefault();
             
-            // Check if dropdown already exists
-            let dropdown = document.getElementById('notif-dropdown');
             if (dropdown) {
                 dropdown.remove();
                 return;
@@ -326,3 +331,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 0);
         });
     }
+
