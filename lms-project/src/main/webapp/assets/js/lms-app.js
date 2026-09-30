@@ -205,13 +205,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ---------- Unread Chat Badge ----------
-    const chatBtn = document.querySelector('.quick-action-btn[title=""Tin nhắn""]');
-    if (chatBtn) {
-        fetch(window.location.origin + window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1)) + '/api/chat/unread')
+        // ---------- Unread Chat Badge ----------
+    const chatBtn = document.querySelector('.quick-action-btn[title="Tin nhắn"]');
+    const notifBtn = document.querySelector('.quick-action-btn[title="Thông báo"]');
+    if (chatBtn || notifBtn) {
+        let basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
+        if (basePath === "" || basePath === "/") basePath = "/LMS"; // Default context
+        
+        fetch(window.location.origin + basePath + '/api/chat/unread')
             .then(res => res.json())
             .then(data => {
-                if (data.unread > 0) {
+                if (chatBtn && data.unread > 0) {
                     let badge = document.createElement('span');
                     badge.style.position = 'absolute';
                     badge.style.top = '4px';
@@ -226,6 +230,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     chatBtn.style.position = 'relative';
                     chatBtn.appendChild(badge);
                 }
+                if (notifBtn && data.unreadNotif > 0) {
+                    let badge = document.createElement('span');
+                    badge.style.position = 'absolute';
+                    badge.style.top = '4px';
+                    badge.style.right = '4px';
+                    badge.style.background = '#ef4444';
+                    badge.style.color = 'white';
+                    badge.style.fontSize = '10px';
+                    badge.style.fontWeight = 'bold';
+                    badge.style.padding = '2px 6px';
+                    badge.style.borderRadius = '10px';
+                    badge.innerText = data.unreadNotif;
+                    notifBtn.style.position = 'relative';
+                    notifBtn.appendChild(badge);
+                }
             })
-            .catch(e => console.error('Error fetching unread chat count', e));
+            .catch(e => console.error('Error fetching unread counts', e));
     }
