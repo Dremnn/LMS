@@ -206,8 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
             // ---------- Unread Chat Badge & Notification Dropdown ----------
-    const chatBtn = document.querySelector('.quick-action-btn[title="Tin nhắn"]');
-    const notifBtn = document.querySelector('.quick-action-btn[title="Thông báo"]');
+    const chatBtn = document.querySelector('a.quick-action-btn[href$="/chat"]');
+    const notifBtn = document.querySelector('a.quick-action-btn[href$="/notifications"]');
     let basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
     if (basePath === "" || basePath === "/") basePath = "/LMS"; // Default context
 
@@ -326,5 +326,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 0);
         });
     }
+
 
 

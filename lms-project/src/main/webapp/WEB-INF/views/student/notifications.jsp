@@ -250,7 +250,7 @@
     </div>
 </div>
 
-<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
+<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=32"></script>
 
 </body>
 </html>
@@ -267,3 +267,5 @@
         return days + " ngày trước";
     }
 %>
+
+
