@@ -252,15 +252,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle Notification Dropdown
     if (notifBtn) {
         notifBtn.addEventListener('click', function(e) {
-            let dropdown = document.getElementById('notif-dropdown');
-            
-            // Allow clicks inside the dropdown to work normally (so links can be clicked)
-            if (dropdown && dropdown.contains(e.target)) {
-                return;
-            }
-            
             e.preventDefault();
-            
+            e.stopPropagation();
+
+            let dropdown = document.getElementById('notif-dropdown');
             if (dropdown) {
                 dropdown.remove();
                 return;
@@ -269,19 +264,23 @@ document.addEventListener("DOMContentLoaded", () => {
             dropdown = document.createElement('div');
             dropdown.id = 'notif-dropdown';
             dropdown.style.position = 'absolute';
-            dropdown.style.top = '120%';
-            dropdown.style.right = '-20px';
+            
+            // Lấy tọa độ của nút chuông
+            const rect = notifBtn.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+            dropdown.style.right = (window.innerWidth - rect.right - 20) + 'px'; // Căn lề phải
+            
             dropdown.style.width = '320px';
             dropdown.style.background = document.body.classList.contains('dark-theme') ? '#182535' : '#ffffff';
             dropdown.style.border = document.body.classList.contains('dark-theme') ? '1px solid #093C62' : '1px solid #e2e8f0';
             dropdown.style.borderRadius = '12px';
             dropdown.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
-            dropdown.style.zIndex = '1000';
+            dropdown.style.zIndex = '9999';
             dropdown.style.overflow = 'hidden';
             dropdown.style.textAlign = 'left';
             
-            notifBtn.style.position = 'relative';
-            notifBtn.appendChild(dropdown);
+            // Append to body, NOT inside the <a> tag!
+            document.body.appendChild(dropdown);
             
             dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #718096;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</div>';
             
@@ -319,11 +318,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 .catch(err => {
                     dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #e53e3e; font-size: 13px;">Lỗi tải thông báo.</div>';
                 });
-                
-            // Close dropdown when clicking outside
+                // Close dropdown when clicking outside
             setTimeout(() => {
                 document.addEventListener('click', function closeDropdown(e) {
-                    if (!notifBtn.contains(e.target)) {
+                    if (!notifBtn.contains(e.target) && !dropdown.contains(e.target)) {
                         dropdown.remove();
                         document.removeEventListener('click', closeDropdown);
                     }
@@ -331,4 +329,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 0);
         });
     }
+
+
 
