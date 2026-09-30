@@ -184,7 +184,10 @@
         <div class="notif-sidebar">
             <div class="sidebar-header">
                 <h2><i class="fa-solid fa-inbox"></i> Tất cả thông báo</h2>
-                <a href="<%= request.getContextPath() %>/notifications/mark-all-read"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc</a>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="<%= request.getContextPath() %>/notifications/mark-all-read"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc</a>
+                    <a href="<%= request.getContextPath() %>/notifications/settings" title="Cài đặt thông báo" style="font-size: 16px; color: var(--text-muted);"><i class="fa-solid fa-gear"></i></a>
+                </div>
             </div>
             <div class="notif-list">
                 <% if (notifications == null || notifications.isEmpty()) { %>
@@ -267,6 +270,7 @@
         return days + " ngày trước";
     }
 %>
+
 
 
 
