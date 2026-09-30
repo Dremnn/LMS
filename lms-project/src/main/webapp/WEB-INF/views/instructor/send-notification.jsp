@@ -134,9 +134,10 @@
     </div>
 </div>
 
-<script src="\/assets/js/lms-app.js?v=35"></script>
+<script src="\/assets/js/lms-app.js?v=36"></script>
 </body>
 </html>
+
 
 
 

@@ -218,8 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (chatBtn && data.unread > 0) {
                     let badge = document.createElement('span');
                     badge.style.position = 'absolute';
-                    badge.style.top = '4px';
-                    badge.style.right = '4px';
+                    badge.style.top = '-6px';
+                    badge.style.right = '-8px';
                     badge.style.background = '#ef4444';
                     badge.style.color = 'white';
                     badge.style.fontSize = '10px';
@@ -233,8 +233,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (notifBtn && data.unreadNotif > 0) {
                     let badge = document.createElement('span');
                     badge.style.position = 'absolute';
-                    badge.style.top = '4px';
-                    badge.style.right = '4px';
+                    badge.style.top = '-6px';
+                    badge.style.right = '-8px';
                     badge.style.background = '#ef4444';
                     badge.style.color = 'white';
                     badge.style.fontSize = '10px';
@@ -268,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Lấy tọa độ của nút chuông
             const rect = notifBtn.getBoundingClientRect();
             dropdown.style.top = (rect.bottom + window.scrollY + 10) + 'px';
-            dropdown.style.right = (window.innerWidth - rect.right - 20) + 'px'; // Căn lề phải
+            dropdown.style.right = (window.innerWidth - rect.right) + 'px'; // Căn lề phải
             
             dropdown.style.width = '320px';
             dropdown.style.background = document.body.classList.contains('dark-theme') ? '#182535' : '#ffffff';
@@ -329,6 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 0);
         });
     }
+
 
 
 
