@@ -2,6 +2,7 @@ package com.lms.controller;
 
 import com.lms.model.User;
 import com.lms.service.MessageService;
+import com.lms.dao.NotificationDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 @WebServlet("/api/chat/unread")
 public class UnreadCountServlet extends HttpServlet {
     private final MessageService messageService = new MessageService();
+    private final NotificationDAO notificationDAO = new NotificationDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -26,9 +28,10 @@ public class UnreadCountServlet extends HttpServlet {
 
         try {
             int unreadCount = messageService.getUnreadMessageCount(currentUser.getId());
+            int unreadNotif = notificationDAO.countUnread(currentUser.getId());
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"unread\": " + unreadCount + "}");
+            response.getWriter().write("{\"unread\": " + unreadCount + ", \"unreadNotif\": " + unreadNotif + "}");
         } catch (SQLException e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

@@ -184,7 +184,10 @@
         <div class="notif-sidebar">
             <div class="sidebar-header">
                 <h2><i class="fa-solid fa-inbox"></i> Tất cả thông báo</h2>
-                <a href="<%= request.getContextPath() %>/notifications/mark-all-read"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc</a>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="<%= request.getContextPath() %>/notifications/mark-all-read"><i class="fa-solid fa-check-double"></i> Đánh dấu đã đọc</a>
+                    <a href="<%= request.getContextPath() %>/notifications/settings" title="Cài đặt thông báo" style="font-size: 16px; color: var(--text-muted);"><i class="fa-solid fa-gear"></i></a>
+                </div>
             </div>
             <div class="notif-list">
                 <% if (notifications == null || notifications.isEmpty()) { %>
@@ -228,7 +231,7 @@
                         <%= selected.getTitle() %>
                     </h2>
                     <div class="detail-meta">
-                        <span><i class="fa-solid fa-calendar-day"></i> <%= selected.getCreatedAt().toString().replace("T", " ") %></span>
+                        <span><i class="fa-solid fa-calendar-day"></i> <%= selected.getCreatedAt().atZone(java.time.ZoneId.of("UTC")).withZoneSameInstant(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy")) %></span>
                         <span><i class="fa-regular fa-clock"></i> <%= timeAgo(selected.getCreatedAt()) %></span>
                     </div>
                 </div>
@@ -250,7 +253,7 @@
     </div>
 </div>
 
-<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=30"></script>
+<script src="<%=request.getContextPath()%>/assets/js/lms-app.js?v=38"></script>
 
 </body>
 </html>
@@ -258,7 +261,7 @@
 <%!
     public String timeAgo(java.time.LocalDateTime dateTime) {
         if (dateTime == null) return "";
-        long minutes = java.time.temporal.ChronoUnit.MINUTES.between(dateTime, java.time.LocalDateTime.now());
+        long minutes = java.time.temporal.ChronoUnit.MINUTES.between(dateTime, java.time.LocalDateTime.now(java.time.ZoneId.of("UTC")));
         if (minutes < 1) return "Vừa xong";
         if (minutes < 60) return minutes + " phút trước";
         long hours = minutes / 60;
@@ -267,3 +270,14 @@
         return days + " ngày trước";
     }
 %>
+
+
+
+
+
+
+
+
+
+
+

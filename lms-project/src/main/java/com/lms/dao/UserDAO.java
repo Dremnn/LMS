@@ -228,4 +228,18 @@ public class UserDAO {
         }
         return null; // Không đủ số dư
     }
+    public java.util.List<Integer> getAllStudentIds() {
+        java.util.List<Integer> list = new java.util.ArrayList<>();
+        String sql = "SELECT id FROM users WHERE role = 'student'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getInt("id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

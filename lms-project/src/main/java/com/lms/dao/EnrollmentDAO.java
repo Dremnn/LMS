@@ -198,4 +198,22 @@ public class EnrollmentDAO {
         }
         return false;
     }
+    public List<Integer> findStudentIdsByInstructor(int instructorId) {
+        List<Integer> studentIds = new ArrayList<>();
+        String sql = "SELECT DISTINCT e.student_id FROM enrollments e " +
+                     "INNER JOIN courses c ON e.course_id = c.id " +
+                     "WHERE c.instructor_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, instructorId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    studentIds.add(rs.getInt("student_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return studentIds;
+    }
 }

@@ -377,7 +377,15 @@
     <span class="toggle-text">Chế độ Tối</span>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+

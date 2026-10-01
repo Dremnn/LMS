@@ -103,8 +103,11 @@
 
 <div class="page-header">
     <div class="page-header-inner">
-        <h1>📋 Khóa học của tôi</h1>
-        <a href="${pageContext.request.contextPath}/instructor/courses/new" class="btn btn-primary">➕ Tạo khóa học mới</a>
+                <h1>📋 Khóa học của tôi</h1>
+        <div>
+            <a href="${pageContext.request.contextPath}/instructor/notifications/send" class="btn" style="background:#4a5568;color:#fff;margin-right:10px;">Gửi thông báo</a>
+            <a href="${pageContext.request.contextPath}/instructor/courses/new" class="btn btn-primary">➕ Tạo khóa học mới</a>
+        </div>
     </div>
 </div>
 
@@ -238,7 +241,16 @@
     <span class="toggle-text">Chế độ Tối</span>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=30"></script>
+<script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+

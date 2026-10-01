@@ -67,9 +67,7 @@ public class NotificationServlet extends HttpServlet {
 
         }else if ("/notifications/mark-all-read".equals(path)) {
             notificationService.markAllRead(currentUser.getId());
-            response.setContentType("application/json");
-            response.getWriter().write("{\"success\":true}");
-            
+            response.sendRedirect(request.getContextPath() + "/notifications");
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -100,3 +98,4 @@ public class NotificationServlet extends HttpServlet {
         }
     }
 }
+

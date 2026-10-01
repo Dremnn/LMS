@@ -205,27 +205,149 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ---------- Unread Chat Badge ----------
-    const chatBtn = document.querySelector('.quick-action-btn[title=""Tin nhắn""]');
-    if (chatBtn) {
-        fetch(window.location.origin + window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1)) + '/api/chat/unread')
+                // ---------- Unread Chat Badge & Notification Dropdown ----------
+    const chatBtn = document.querySelector('a.quick-action-btn[href$="/chat"]');
+    const notifBtn = document.querySelector('a.quick-action-btn[href$="/notifications"]');
+    let basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
+    if (basePath === "" || basePath === "/") basePath = "/LMS"; // Default context
+
+    if (chatBtn || notifBtn) {
+        fetch(window.location.origin + basePath + '/api/chat/unread')
             .then(res => res.json())
             .then(data => {
-                if (data.unread > 0) {
+                if (chatBtn && data.unread > 0) {
+                    let wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.alignItems = 'center';
+                    chatBtn.parentNode.insertBefore(wrapper, chatBtn);
+                    wrapper.appendChild(chatBtn);
+
                     let badge = document.createElement('span');
                     badge.style.position = 'absolute';
-                    badge.style.top = '4px';
-                    badge.style.right = '4px';
+                    badge.style.top = '-6px';
+                    badge.style.right = '-6px';
                     badge.style.background = '#ef4444';
                     badge.style.color = 'white';
                     badge.style.fontSize = '10px';
                     badge.style.fontWeight = 'bold';
                     badge.style.padding = '2px 6px';
                     badge.style.borderRadius = '10px';
+                    badge.style.zIndex = '10';
                     badge.innerText = data.unread;
-                    chatBtn.style.position = 'relative';
-                    chatBtn.appendChild(badge);
+                    wrapper.appendChild(badge);
+                }
+                if (notifBtn && data.unreadNotif > 0) {
+                    let wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.alignItems = 'center';
+                    notifBtn.parentNode.insertBefore(wrapper, notifBtn);
+                    wrapper.appendChild(notifBtn);
+
+                    let badge = document.createElement('span');
+                    badge.style.position = 'absolute';
+                    badge.style.top = '-6px';
+                    badge.style.right = '-6px';
+                    badge.style.background = '#ef4444';
+                    badge.style.color = 'white';
+                    badge.style.fontSize = '10px';
+                    badge.style.fontWeight = 'bold';
+                    badge.style.padding = '2px 6px';
+                    badge.style.borderRadius = '10px';
+                    badge.style.zIndex = '10';
+                    badge.innerText = data.unreadNotif;
+                    wrapper.appendChild(badge);
                 }
             })
-            .catch(e => console.error('Error fetching unread chat count', e));
+            .catch(e => console.error('Error fetching unread counts', e));
     }
+
+    // Handle Notification Dropdown
+    if (notifBtn) {
+        notifBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let dropdown = document.getElementById('notif-dropdown');
+            if (dropdown) {
+                dropdown.remove();
+                return;
+            }
+            
+            dropdown = document.createElement('div');
+            dropdown.id = 'notif-dropdown';
+            dropdown.style.position = 'absolute';
+            
+            // Lấy tọa độ của nút chuông
+            const rect = notifBtn.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+            dropdown.style.left = rect.left + 'px'; // Căn mép trái dropdown bằng mép trái button
+            
+            dropdown.style.width = '320px';
+            dropdown.style.background = document.body.classList.contains('dark-theme') ? '#182535' : '#ffffff';
+            dropdown.style.border = document.body.classList.contains('dark-theme') ? '1px solid #093C62' : '1px solid #e2e8f0';
+            dropdown.style.borderRadius = '12px';
+            dropdown.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+            dropdown.style.zIndex = '9999';
+            dropdown.style.overflow = 'hidden';
+            dropdown.style.textAlign = 'left';
+            
+            // Append to body, NOT inside the <a> tag!
+            document.body.appendChild(dropdown);
+            
+            dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #718096;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</div>';
+            
+            fetch(window.location.origin + basePath + '/api/notifications/recent')
+                .then(res => res.json())
+                .then(data => {
+                    const textColor = document.body.classList.contains('dark-theme') ? '#F4F8FA' : '#2d3748';
+                    const mutedColor = document.body.classList.contains('dark-theme') ? '#9DB9CB' : '#718096';
+                    const borderColor = document.body.classList.contains('dark-theme') ? '#093C62' : '#edf2f7';
+                    const hoverBg = document.body.classList.contains('dark-theme') ? '#111312' : '#f7fafc';
+                    const primaryColor = '#3182ce';
+
+                    if (data.length === 0) {
+                        dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: ' + mutedColor + '; font-size: 13px;">Chưa có thông báo nào.</div>';
+                    } else {
+                        let html = '<div style="max-height: 350px; overflow-y: auto;">';
+                        data.forEach(n => {
+                            let dot = n.isRead ? '<div style="width:8px;height:8px;margin-right:8px;"></div>' : '<i class="fa-solid fa-circle" style="color: ' + primaryColor + '; font-size: 8px; margin-right: 8px;"></i>';
+                            let url = n.relatedUrl ? (basePath + n.relatedUrl) : (basePath + '/notifications?id=' + n.id);
+                            html += '<a href="' + url + '" style="display: block; padding: 12px 15px; border-bottom: 1px solid ' + borderColor + '; text-decoration: none; color: ' + textColor + '; transition: background 0.2s;" onmouseover="this.style.background=' + "'" + hoverBg + "'" + '" onmouseout="this.style.background=' + "'transparent'" + '">';
+                            html += '<div style="font-size: 13px; font-weight: ' + (n.isRead ? 'normal' : 'bold') + '; display: flex; align-items: baseline;">';
+                            html += dot;
+                            html += '<span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + n.title + '</span>';
+                            html += '</div>';
+                            html += '<div style="font-size: 11px; color: ' + mutedColor + '; margin-top: 4px; padding-left: 16px;">' + new Date(n.createdAt).toLocaleString('vi-VN') + '</div>';
+                            html += '</a>';
+                        });
+                        html += '</div>';
+                        html += '<a href="' + basePath + '/notifications" style="display: block; padding: 12px; text-align: center; background: ' + hoverBg + '; color: ' + primaryColor + '; font-size: 13px; font-weight: bold; text-decoration: none; border-top: 1px solid ' + borderColor + ';">';
+                        html += 'Xem tất cả thông báo <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>';
+                        html += '</a>';
+                        dropdown.innerHTML = html;
+                    }
+                })
+                .catch(err => {
+                    dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #e53e3e; font-size: 13px;">Lỗi tải thông báo.</div>';
+                });
+                // Close dropdown when clicking outside
+            setTimeout(() => {
+                document.addEventListener('click', function closeDropdown(e) {
+                    if (!notifBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.remove();
+                        document.removeEventListener('click', closeDropdown);
+                    }
+                });
+            }, 0);
+        });
+    }
+
+
+
+
+
+
+
+

@@ -84,6 +84,21 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("currentUser", user);
             session.setMaxInactiveInterval(60 * 60); // Session hết hạn sau 60 phút không hoạt động
 
+            // === TÍNH NĂNG MỚI: Thông báo khi người dùng đăng nhập (phiên mới) ===
+            try {
+                com.lms.dao.NotificationDAO notifDao = new com.lms.dao.NotificationDAO();
+                com.lms.model.Notification loginNotif = new com.lms.model.Notification(
+                    user.getId(), 
+                    "login_alert", 
+                    "Đăng nhập thành công", 
+                    "Bạn đã đăng nhập vào hệ thống lúc " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy")), 
+                    null
+                );
+                notifDao.save(loginNotif);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
             // 3. XỬ LÝ COOKIE "GHI NHỚ ĐĂNG NHẬP" (Remember Me)
             if ("true".equalsIgnoreCase(rememberMe) || "on".equalsIgnoreCase(rememberMe)) {
                 // Lưu email trong 30 ngày (để lần sau tự điền form)
