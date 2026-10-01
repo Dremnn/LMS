@@ -334,10 +334,10 @@
                 </a>
                 <p class="footer-desc">Nền tảng học trực tuyến. Nâng tầm tri thức, kiến tạo tương lai thế hệ trẻ.</p>
                 <div class="social-links">
-                    <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fa-brands fa-youtube"></i></a>
-                    <a href="#" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
-                    <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="YouTube" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="TikTok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="LinkedIn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
                 </div>
             </div>
 
