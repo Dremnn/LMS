@@ -17,11 +17,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ sơ cá nhân - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=30">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=26">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=26">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=32">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=32">
     <style>
         body { margin: 0; padding: 0; min-height: 100vh; }
-        .profile-container { max-width: 960px; margin: 24px auto 40px; padding: 0 24px; display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+        .profile-container { max-width: 1200px; margin: 24px auto 40px; padding: 0 24px; display: grid; grid-template-columns: 360px 1fr; gap: 32px; }
         @media (max-width: 800px) { .profile-container { grid-template-columns: 1fr; } }
 
         .panel { background: var(--surface); border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(9,60,98,.06); border: 1px solid var(--border); }
