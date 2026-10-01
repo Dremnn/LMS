@@ -11,20 +11,20 @@ import java.util.Properties;
 
 public class DBConnection {
 
-    private static HikariDataSource dataSource;
+    private static volatile HikariDataSource dataSource;
 
-    // Static block: chạy 1 lần duy nhất khi class được load,
-    // khởi tạo sẵn 1 "hồ chứa" connection thay vì tạo mới mỗi lần gọi
-    static {
+    private static synchronized void initDataSource() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            return;
+        }
         try {
             Properties props = new Properties();
-            InputStream input = DBConnection.class.getClassLoader()
-                    .getResourceAsStream("db.properties");
-
-            if (input == null) {
-                throw new RuntimeException("Khong tim thay file db.properties");
+            try (InputStream input = DBConnection.class.getClassLoader().getResourceAsStream("db.properties")) {
+                if (input == null) {
+                    throw new RuntimeException("Khong tim thay file db.properties");
+                }
+                props.load(input);
             }
-            props.load(input);
 
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(props.getProperty("db.url"));
@@ -32,24 +32,28 @@ public class DBConnection {
             config.setPassword(props.getProperty("db.password"));
             config.setDriverClassName("org.postgresql.Driver");
 
-            // Giữ sẵn tối đa 10 connection đã kết nối tới cloud DB, tái sử dụng liên tục
-            config.setMaximumPoolSize(30);
-            config.setMinimumIdle(2);
-            config.setConnectionTimeout(30000);   // Chờ tối đa 30s nếu pool đang bận hết
-            config.setIdleTimeout(600000);         // Connection rảnh quá 10 phút thì đóng bớt
-            config.setMaxLifetime(1800000);        // Connection sống tối đa 30 phút rồi tự làm mới
+            // Phù hợp Supabase Pooler (tránh quá tải connection limit)
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(1);
+            config.setConnectionTimeout(30000);   // Chờ tối đa 30s
+            config.setIdleTimeout(600000);
+            config.setMaxLifetime(1800000);
+            config.setInitializationFailTimeout(0); // Không crash ứng dụng nếu gặp trục trặc mạng tức thời
 
             dataSource = new HikariDataSource(config);
-
             System.out.println("===> HikariCP Connection Pool da khoi tao thanh cong! <===");
-
-        } catch (IOException e) {
-            throw new RuntimeException("Loi doc file db.properties", e);
+        } catch (Exception e) {
+            System.err.println("===> Loi khoi tao HikariCP: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Loi khoi tao Connection Pool", e);
         }
     }
 
-    // Mượn 1 Connection có sẵn từ pool - KHÔNG tạo kết nối TCP mới mỗi lần gọi
+    // Mượn 1 Connection có sẵn từ pool - tự động khởi tạo lại an toàn nếu pool chưa sẵn sàng
     public static Connection getConnection() throws SQLException {
+        if (dataSource == null || dataSource.isClosed()) {
+            initDataSource();
+        }
         return dataSource.getConnection();
     }
 
