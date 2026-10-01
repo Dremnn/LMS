@@ -183,10 +183,19 @@
                 <p class="footer-desc">Nền tảng học trực tuyến hàng đầu Việt Nam.</p>
             </div>
             <div class="footer-col">
+                <h4 class="footer-title">Khám phá</h4>
+                <ul class="footer-links">
+                    <li><a href="<%=request.getContextPath()%>/courses?sortBy=popular">Khoá học nổi bật</a></li>
+                    <li><a href="<%=request.getContextPath()%>/instructors">Giảng viên tiêu biểu</a></li>
+                    <li><a href="<%=request.getContextPath()%>/learning-paths">Lộ trình học tập</a></li>
+                    <li><a href="<%=request.getContextPath()%>/resources">Thư viện tài liệu</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
                 <h4 class="footer-title">Liên kết</h4>
                 <ul class="footer-links">
-                    <li><a href="<%=request.getContextPath()%>/courses">Khóa học</a></li>
-                    <li><a href="<%=request.getContextPath()%>/register">Đăng ký</a></li>
+                    <li><a href="<%=request.getContextPath()%>/courses">Tất cả khóa học</a></li>
+                    <li><a href="<%=request.getContextPath()%>/register">Đăng ký thành viên</a></li>
                 </ul>
             </div>
             <div class="footer-col">

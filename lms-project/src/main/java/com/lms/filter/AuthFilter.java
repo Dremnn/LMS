@@ -91,7 +91,10 @@ public class AuthFilter implements Filter {
                                path.equals("/logout") || 
                                path.equals("/test-db") ||
                                path.equals("/courses") ||           
-                               path.equals("/courses/detail"); 
+                               path.equals("/courses/detail") ||
+                               path.equals("/instructors") ||
+                               path.equals("/learning-paths") ||
+                               path.equals("/resources"); 
 
         if (isPublicPage) {
             // Cho phép đi tiếp không cần kiểm tra phân quyền
