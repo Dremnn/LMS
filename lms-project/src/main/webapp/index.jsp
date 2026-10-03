@@ -202,6 +202,9 @@
             <% } %>
 
             <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
+                <% if (!"admin".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
+                <% } %>
 
             <div class="user-badge">
                 <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
@@ -216,6 +219,7 @@
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+                <a href="<%=request.getContextPath()%>/admin/issues" class="btn btn-outline" style="border-color:#076FA4;background:rgba(7,111,164,.1);"><i class="fa-solid fa-triangle-exclamation"></i> Xử lý sự cố</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
