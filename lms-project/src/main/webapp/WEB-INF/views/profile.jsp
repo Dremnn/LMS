@@ -91,7 +91,7 @@
                 <% } %>
                 <a href="${pageContext.request.contextPath}/profile" class="nav-link active">Hồ sơ</a>
                 <% if (!"admin".equals(role)) { %>
-                    <a href="${pageContext.request.contextPath}/report-issue.html" class="nav-link">Báo cáo</a>
+                    <a href="${pageContext.request.contextPath}/report-issue.jsp" class="nav-link">Báo cáo</a>
                 <% } %>
                 <div class="user-badge">
                     <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>

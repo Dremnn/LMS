@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.time.LocalDate, java.time.LocalDateTime, java.util.*, com.lms.model.Quiz, com.lms.model.Event, com.lms.model.Course, com.lms.model.User" %>
 <%
     int year = (Integer) request.getAttribute("year");
@@ -161,7 +161,7 @@
                 <% } %>
                 <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
                 <% if (!"admin".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
+                    <a href="<%=request.getContextPath()%>/report-issue.jsp" class="nav-link">Báo cáo</a>
                 <% } %>
                 <div class="user-badge">
                     <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>

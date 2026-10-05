@@ -31,8 +31,8 @@ public class ReportIssueServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Forward directly to report-issue.html
-        request.getRequestDispatcher("/report-issue.html").forward(request, response);
+        // Forward directly to report-issue.jsp
+        request.getRequestDispatcher("/report-issue.jsp").forward(request, response);
     }
 
     @Override
