@@ -105,6 +105,10 @@ public class LessonServlet extends HttpServlet {
                 }
             }
 
+            // Danh sách bài tập của khóa học (chỉ học viên mới có trạng thái nộp của riêng mình)
+            List<com.lms.model.Assignment> assignments = new com.lms.dao.AssignmentDAO()
+                    .findByCourseForStudent(courseId, currentUser.getId());
+
             String youtubeEmbedUrl = VideoUtil.getYouTubeEmbedUrl(lesson.getVideoUrl());
 
             request.setAttribute("course", course);
@@ -113,6 +117,7 @@ public class LessonServlet extends HttpServlet {
             request.setAttribute("completedLessonIds", completedLessonIds);
             request.setAttribute("youtubeEmbedUrl", youtubeEmbedUrl); // null nếu không phải YouTube
             request.setAttribute("quizzes", quizzes); // Truyền xuống JSP
+            request.setAttribute("assignments", assignments);
 
             request.getRequestDispatcher("/WEB-INF/views/student/lesson-view.jsp")
                     .forward(request, response);

@@ -19,7 +19,8 @@ import java.util.List;
 /**
  * Trang "Hồ sơ cá nhân" - dùng chung cho cả 3 role (student / instructor / admin).
  * Hiển thị: họ tên, tên đăng nhập (email), avatar, email, số điện thoại.
- * Riêng student còn hiển thị thêm: số dư ví + lịch sử giao dịch.
+ * Student / instructor / admin đều hiển thị số dư ví + lịch sử giao dịch
+ * (admin nhận 3% hoa hồng từ mỗi lượt đăng ký khóa học có phí).
  */
 @WebServlet("/profile")
 public class ProfileServlet extends HttpServlet {
@@ -70,7 +71,9 @@ public class ProfileServlet extends HttpServlet {
             }
         }
 
-        List<WalletTransaction> history = ("student".equals(freshUser.getRole()) || "instructor".equals(freshUser.getRole()))
+        List<WalletTransaction> history = ("student".equals(freshUser.getRole())
+                || "instructor".equals(freshUser.getRole())
+                || "admin".equals(freshUser.getRole()))
                 ? walletService.getHistory(freshUser.getId())
                 : Collections.emptyList();
 

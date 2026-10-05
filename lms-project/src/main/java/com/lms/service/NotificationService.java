@@ -113,6 +113,45 @@ public class NotificationService {
     }
 
     // =========================================================================
+    // Nhắc hạn nộp bài tập - dùng cho Scheduler chạy định kỳ (cùng nhịp với quiz)
+    // Khi bài tập còn <= 24h tới hạn: gửi thông báo cho các học viên đã đăng ký khóa học
+    // mà CHƯA nộp bài. Chỉ gửi 1 lần cho mỗi bài tập (assignments.notified_deadline = true).
+    // =========================================================================
+    public void checkAndNotifyAssignmentDeadlines() {
+        AssignmentDAO assignmentDAO = new AssignmentDAO();
+        AssignmentSubmissionDAO submissionDAO = new AssignmentSubmissionDAO();
+        EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+        CourseDAO courseDAO = new CourseDAO();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threshold = now.plusHours(24);
+        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("HH:mm 'ngày' dd/MM/yyyy");
+
+        List<Assignment> upcoming = assignmentDAO.findDueSoonNotNotified(now, threshold);
+
+        for (Assignment assignment : upcoming) {
+            Course course = courseDAO.findById(assignment.getCourseId());
+            String courseTitle = course != null ? course.getTitle() : "";
+
+            List<Integer> enrolledStudentIds = enrollmentDAO.findStudentIdsByCourseOrSection(assignment.getCourseId());
+
+            for (Integer studentId : enrolledStudentIds) {
+                // Đã nộp rồi thì không cần nhắc
+                if (submissionDAO.findByAssignmentAndStudent(assignment.getId(), studentId) != null) continue;
+
+                Notification n = new Notification(studentId, "assignment_deadline",
+                        "Bài tập sắp đến hạn: " + assignment.getTitle(),
+                        "Bài tập '" + assignment.getTitle() + "' (khóa học '" + courseTitle + "') sẽ hết hạn nộp lúc "
+                                + assignment.getDueAt().format(fmt) + ". Còn chưa đến 24 giờ - hãy nộp bài sớm!",
+                        "/student/assignments/view?id=" + assignment.getId());
+                notificationDAO.save(n);
+            }
+
+            assignmentDAO.markDeadlineNotified(assignment.getId());
+        }
+    }
+
+    // =========================================================================
     // Tạo thông báo nhắc sự kiện tự tạo (gọi khi tạo Event nếu muốn nhắc ngay)
     // =========================================================================
     public void notifyEventReminder(int userId, String eventTitle, String eventUrl) {

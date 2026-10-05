@@ -212,6 +212,30 @@
                     </c:forEach>
                 </div>
             </c:if>
+
+            <%-- Bài tập của khóa học (chỉ hiển thị cho học viên đã đăng ký) --%>
+            <c:if test="${not empty enrollment && not empty assignments}">
+                <div class="section-group" style="border-bottom:none;">
+                    <div class="section-title" style="background:#E6FFFA; color:#234E52; border-bottom:1px solid #B2F5EA;"><i class="fa-solid fa-paperclip" style="color:#319795;"></i> Bài tập</div>
+                    <c:forEach var="asg" items="${assignments}">
+                        <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="lesson-link">
+                            <span class="dot" style="border-color:#319795; ${asg.submittedByMe ? 'background:#319795;' : ''} border-radius:3px;"></span>
+                            <span>
+                                <c:out value="${asg.title}"/>
+                                <c:if test="${not empty asg.dueAt}">
+                                    <span style="display:block;font-size:11px;font-weight:400;opacity:.75;">
+                                        <c:choose>
+                                            <c:when test="${asg.submittedByMe}">Đã nộp</c:when>
+                                            <c:when test="${asg.overdue}">Quá hạn</c:when>
+                                            <c:otherwise>Hạn: ${asg.dueAtDisplay}</c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </c:if>
+                            </span>
+                        </a>
+                    </c:forEach>
+                </div>
+            </c:if>
         </div>
     </aside>
 

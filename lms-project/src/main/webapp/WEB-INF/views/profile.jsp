@@ -165,7 +165,18 @@
             <!-- Thẻ hiển thị Số dư đã nhận từ bán khóa học (không có nút nạp tiền - GV chỉ nhận, không nạp) -->
             <div class="balance-card" style="margin-bottom: 16px;">
                 <div>
-                    <div class="label">Số dư đã nhận từ khóa học</div>
+                    <div class="label">Số dư đã nhận từ khóa học (sau trừ 3% hoa hồng)</div>
+                    <div class="amount">
+                        <fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ
+                    </div>
+                </div>
+            </div>
+        </c:if>
+        <c:if test="${profileUser.role == 'admin'}">
+            <!-- Thẻ hiển thị Số dư hoa hồng admin nhận được (3% mỗi lượt đăng ký khóa học có phí) -->
+            <div class="balance-card" style="margin-bottom: 16px;">
+                <div>
+                    <div class="label">Hoa hồng nền tảng đã nhận (3% mỗi khóa học có phí)</div>
                     <div class="amount">
                         <fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ
                     </div>
@@ -195,7 +206,7 @@
                         </c:choose>
                     </span>
                 </div>
-                <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor'}">
+                <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor' || profileUser.role == 'admin'}">
                     <div class="info-row">
                         <span class="label"><i class="fa-solid fa-wallet"></i> Số dư ví</span>
                         <span class="value"><fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ</span>
@@ -228,7 +239,7 @@
                 </form>
             </div>
 
-            <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor'}">
+            <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor' || profileUser.role == 'admin'}">
                 <div class="panel">
                     <h2>Lịch sử giao dịch ví</h2>
                     <c:choose>
@@ -248,7 +259,8 @@
                                         for (WalletTransaction tx : historyList) {
                                             String txType = tx.getType();
                                             // Các loại cộng tiền (+): nạp tiền, GV nhận tiền bán khóa học, SV được hoàn tiền
-                                            boolean isCredit = "topup".equals(txType) || "earning".equals(txType) || "refund".equals(txType);
+                                            boolean isCredit = "topup".equals(txType) || "earning".equals(txType) || "refund".equals(txType)
+                                                    || "commission".equals(txType);
 
                                             String typeLabel;
                                             String content;
@@ -257,8 +269,16 @@
                                                     typeLabel = "Nạp tiền";
                                                     content = "Mã GD: " + (tx.getReferenceCode() == null || tx.getReferenceCode().isEmpty() ? "—" : tx.getReferenceCode());
                                                     break;
+                                                case "commission":
+                                                    typeLabel = "Hoa hồng nền tảng (3%)";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
+                                                case "commission_refund":
+                                                    typeLabel = "Thu hồi hoa hồng (hoàn tiền)";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
                                                 case "earning":
-                                                    typeLabel = "Nhận tiền khóa học";
+                                                    typeLabel = "Nhận tiền khóa học (97%)";
                                                     content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
                                                     break;
                                                 case "refund":

@@ -395,6 +395,55 @@
             </c:otherwise>
         </c:choose>
     </div>
+
+    <%-- ===== PHẦN BÀI TẬP ===== --%>
+    <div class="quiz-section-block" style="margin-top:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <h3>📎 Bài tập khóa học</h3>
+            <a href="${pageContext.request.contextPath}/instructor/assignments/new?courseId=${course.id}"
+               class="btn btn-primary btn-sm">➕ Tạo bài tập mới</a>
+        </div>
+        <p class="quiz-section-desc">Giao bài tập để học viên nộp file (doc, docx, txt, pdf, ...). Có thể đặt hạn nộp; học viên sẽ được nhắc trước hạn 24 giờ.</p>
+
+        <c:choose>
+            <c:when test="${not empty assignments}">
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <c:forEach var="asg" items="${assignments}">
+                        <div class="quiz-item-card">
+                            <div>
+                                <div class="quiz-item-title"><c:out value="${asg.title}"/></div>
+                                <div class="quiz-item-meta">
+                                    <c:choose>
+                                        <c:when test="${not empty asg.dueAt}">Hạn nộp: ${asg.dueAtDisplay}<c:if test="${asg.overdue}"> (đã hết hạn)</c:if></c:when>
+                                        <c:otherwise>Không đặt hạn nộp</c:otherwise>
+                                    </c:choose>
+                                    · Đã nộp: ${asg.submissionCount}/${asg.enrolledCount}
+                                    <c:if test="${asg.hasAttachment}"> · 📎 <c:out value="${asg.attachName}"/></c:if>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <a href="${pageContext.request.contextPath}/instructor/assignments/submissions?id=${asg.id}" class="btn btn-sm quiz-item-btn">
+                                    <i class="fa-solid fa-inbox"></i> Bài nộp (${asg.submissionCount})
+                                </a>
+                                <a href="${pageContext.request.contextPath}/instructor/assignments/edit?id=${asg.id}" class="btn btn-sm quiz-item-btn">
+                                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                </a>
+                                <form action="${pageContext.request.contextPath}/instructor/assignments/delete" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa bài tập này? Toàn bộ bài nộp của học viên cũng sẽ bị xóa!');">
+                                    <input type="hidden" name="courseId" value="${course.id}">
+                                    <input type="hidden" name="assignmentId" value="${asg.id}">
+                                    <button type="submit" class="btn-danger-sm"><i class="fa-solid fa-trash"></i> Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="quiz-empty-card">Chưa có bài tập nào được tạo.</div>
+            </c:otherwise>
+        </c:choose>
+    </div>
 </div>
 
 <%-- MODAL SỬA TÊN CHƯƠNG --%>

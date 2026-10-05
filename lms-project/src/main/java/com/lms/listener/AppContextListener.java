@@ -26,6 +26,11 @@ public class AppContextListener implements ServletContextListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            try {
+                notificationService.checkAndNotifyAssignmentDeadlines();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }, 15, 60, TimeUnit.SECONDS);
     }
 

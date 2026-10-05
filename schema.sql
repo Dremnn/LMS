@@ -516,3 +516,23 @@ BEGIN
 END;
 $$;
 
+-- ============================================================
+-- 10. BÁO CÁO SỰ CỐ / LỖI TỪ GIẢNG VIÊN & SINH VIÊN (ISSUE REPORTS)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS issue_reports (
+    id SERIAL PRIMARY KEY,
+    reference_code VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    role VARCHAR(50) NOT NULL,          -- 'student' | 'instructor'
+    issue_type VARCHAR(50) NOT NULL,    -- 'notification', 'quiz', 'lesson', 'payment', 'account', 'course', 'ui', 'other'
+    description TEXT NOT NULL,
+    page_url VARCHAR(500),
+    screenshots TEXT,                   -- JSON array / URLs / Base64 images
+    status VARCHAR(30) NOT NULL DEFAULT 'pending', -- 'pending' (Chờ xử lý), 'resolved' (Đã xử lý), 'rejected' (Từ chối)
+    admin_note TEXT,
+    resolved_by INT REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+

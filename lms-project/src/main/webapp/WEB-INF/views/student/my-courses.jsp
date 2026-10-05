@@ -287,10 +287,16 @@
                             <span class="enrolled-date">
                                 <i class="fa-regular fa-calendar-check"></i> Đăng ký: ${enrollment.formattedEnrolledAt}
                             </span>
-                            <a href="${pageContext.request.contextPath}/courses/detail?id=${enrollment.courseId}"
-                               class="btn btn-primary" style="padding:10px 22px;border-radius:10px;font-weight:700;">
-                                <i class="fa-solid fa-play"></i> Vào học
-                            </a>
+                            <span style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <a href="${pageContext.request.contextPath}/student/assignments?courseId=${enrollment.courseId}"
+                                   class="btn btn-outline" style="padding:10px 18px;border-radius:10px;font-weight:700;">
+                                    <i class="fa-solid fa-paperclip"></i> Bài tập
+                                </a>
+                                <a href="${pageContext.request.contextPath}/courses/detail?id=${enrollment.courseId}"
+                                   class="btn btn-primary" style="padding:10px 22px;border-radius:10px;font-weight:700;">
+                                    <i class="fa-solid fa-play"></i> Vào học
+                                </a>
+                            </span>
                         </div>
                     </div>
                 </div>
