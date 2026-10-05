@@ -202,6 +202,9 @@
             <% } %>
 
             <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
+                <% if (!"admin".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
+                <% } %>
 
             <div class="user-badge">
                 <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
@@ -216,6 +219,7 @@
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
             <% } else if ("admin".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+                <a href="<%=request.getContextPath()%>/admin/issues" class="btn btn-outline" style="border-color:#076FA4;background:rgba(7,111,164,.1);"><i class="fa-solid fa-triangle-exclamation"></i> Xử lý sự cố</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
@@ -334,20 +338,20 @@
                 </a>
                 <p class="footer-desc">Nền tảng học trực tuyến. Nâng tầm tri thức, kiến tạo tương lai thế hệ trẻ.</p>
                 <div class="social-links">
-                    <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="social-icon"><i class="fa-brands fa-youtube"></i></a>
-                    <a href="#" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
-                    <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="YouTube" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="TikTok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="https://www.youtube.com/@MixiGaming3con" target="_blank" rel="noopener noreferrer" class="social-icon" title="LinkedIn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
                 </div>
             </div>
 
             <div class="footer-col">
                 <h4 class="footer-title">Khám phá</h4>
                 <ul class="footer-links">
-                    <li><a href="<%=request.getContextPath()%>/courses">Khoá học nổi bật</a></li>
-                    <li><a href="#">Giảng viên tiêu biểu</a></li>
-                    <li><a href="#">Lộ trình học tập</a></li>
-                    <li><a href="#">Thư viện tài liệu</a></li>
+                    <li><a href="<%=request.getContextPath()%>/courses?sortBy=popular">Khoá học nổi bật</a></li>
+                    <li><a href="<%=request.getContextPath()%>/instructors">Giảng viên tiêu biểu</a></li>
+                    <li><a href="<%=request.getContextPath()%>/learning-paths">Lộ trình học tập</a></li>
+                    <li><a href="<%=request.getContextPath()%>/resources">Thư viện tài liệu</a></li>
                 </ul>
             </div>
 

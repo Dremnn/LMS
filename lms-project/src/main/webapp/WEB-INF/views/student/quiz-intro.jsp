@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -73,6 +73,9 @@
                 <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
+                <% if (!"admin".equals(role)) { %>
+                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
+                <% } %>
             <div class="user-badge">
                 <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
                     <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">

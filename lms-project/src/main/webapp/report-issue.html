@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo lỗi — UTEdu LMS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:#076FA4; --primary-dark:#093C62; --primary-light:#9DB9CB;
+      --success:#10B981; --danger:#EF4444; --warning:#F59E0B;
+      --bg:#F4F8FA; --surface:#FFFFFF; --text:#093C62;
+      --text-muted:#5C7688; --border:#C6D8E3;
+      --radius-sm:8px; --radius:14px; --radius-lg:24px;
+      --shadow-sm:0 2px 8px rgba(9,60,98,.08);
+      --shadow-md:0 8px 28px rgba(7,111,164,.14);
+      --shadow-lg:0 20px 60px rgba(9,60,98,.18);
+      --t-fast:.15s ease; --t-smooth:.3s cubic-bezier(0.22,1,0.36,1);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Be Vietnam Pro','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+    .page-wrapper{min-height:100vh;}
+
+    
+
+    /* Form area */
+    .form-area{flex:1;display:flex;flex-direction:column;overflow-y:auto;}
+    .mini-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(198,216,227,.5);position:sticky;top:0;z-index:100;}
+    .mini-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .mini-logo-img{height:36px;width:auto;max-height:36px;object-fit:contain;}
+    .logo-text{background:linear-gradient(135deg,var(--primary),var(--primary-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .logo-tag{font-size:10px;background:var(--primary-dark);color:#fff;padding:2px 6px;border-radius:5px;font-weight:700;-webkit-text-fill-color:#fff;}
+    .nav-back{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--text-muted);text-decoration:none;transition:color var(--t-fast);}
+    .nav-back:hover{color:var(--primary);}
+
+    .form-container{max-width:760px;width:100%;margin:0 auto;padding:48px 40px 64px;flex:1;}
+    .form-header{margin-bottom:36px;}
+    .form-header h1{font-size:38px;font-weight:800;color:var(--text);margin-bottom:8px;}
+    .form-header p{color:var(--text-muted);font-size:15px;}
+
+    .form-group{margin-bottom:22px;}
+    .form-label{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-weight:600;color:var(--text);font-size:14px;}
+    .form-label .required{color:var(--danger);}
+    .form-label i{color:var(--primary);font-size:13px;}
+    .optional-tag{color:var(--text-muted);font-weight:500;font-size:12px;}
+
+    .form-control{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-family:inherit;transition:border-color var(--t-fast),box-shadow var(--t-fast);background:var(--surface);color:var(--text);}
+    .form-control:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px rgba(7,111,164,.15);}
+    .form-control.error{border-color:var(--danger);box-shadow:0 0 0 3px rgba(239,68,68,.12);}
+    .form-control::placeholder{color:#A0B4C0;}
+    select.form-control{cursor:pointer;}
+    textarea.form-control{resize:vertical;min-height:140px;line-height:1.65;}
+
+    /* Role cards */
+    .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .role-option{display:none;}
+    .role-label{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--t-smooth);text-align:center;background:var(--surface);}
+    .role-label:hover{border-color:var(--primary-light);background:rgba(157,185,203,.1);}
+    .role-option:checked+.role-label{border-color:var(--primary);background:rgba(7,111,164,.07);box-shadow:0 0 0 3px rgba(7,111,164,.12);}
+    .role-emoji{font-size:28px;}
+    .role-name{font-size:14px;font-weight:700;color:var(--text);}
+    .role-hint{font-size:12px;color:var(--text-muted);}
+
+    /* Type chips */
+    .type-grid{display:flex;flex-wrap:wrap;gap:10px;}
+    .type-option{display:none;}
+    .type-chip{display:flex;align-items:center;gap:7px;padding:9px 16px;border:1.5px solid var(--border);border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-muted);transition:all var(--t-smooth);background:var(--surface);white-space:nowrap;}
+    .type-chip:hover{border-color:var(--primary-light);color:var(--primary);}
+    .type-option:checked+.type-chip{border-color:var(--primary);background:var(--primary);color:white;}
+    .type-chip i{font-size:12px;}
+
+    /* Upload */
+    .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:pointer;transition:all var(--t-smooth);background:var(--bg);position:relative;}
+    .upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:rgba(7,111,164,.04);}
+    .upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+    .upload-icon{font-size:36px;color:var(--primary-light);margin-bottom:12px;display:block;}
+    .upload-title{font-weight:700;color:var(--text);margin-bottom:4px;}
+    .upload-hint{font-size:13px;color:var(--text-muted);}
+    .upload-hint span{color:var(--primary);font-weight:600;}
+
+    #preview-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+    .preview-item{position:relative;width:90px;height:90px;border-radius:var(--radius-sm);overflow:hidden;border:2px solid var(--border);animation:fadeIn .3s ease;}
+    .preview-item img{width:100%;height:100%;object-fit:cover;}
+    .preview-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:background var(--t-fast);}
+    .preview-remove:hover{background:var(--danger);}
+    @keyframes fadeIn{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:scale(1);}}
+
+    .char-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+    .char-hint{font-size:12px;color:var(--text-muted);}
+    .char-count{font-size:12px;color:var(--text-muted);}
+    .char-count.near{color:var(--warning);}
+    .char-count.exceed{color:var(--danger);}
+
+    .field-error{display:none;font-size:12px;color:var(--danger);margin-top:6px;align-items:center;gap:4px;}
+    .field-error.show{display:flex;}
+
+    .form-divider{border:none;border-top:1px solid var(--border);margin:28px 0;}
+
+    .submit-row{display:flex;align-items:center;gap:16px;margin-top:32px;}
+    .btn-submit{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 28px;border-radius:var(--radius-sm);font-weight:700;font-size:16px;cursor:pointer;border:none;font-family:inherit;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;box-shadow:0 4px 14px rgba(7,111,164,.30);transition:all var(--t-smooth);}
+    .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(7,111,164,.40);}
+    .btn-submit:active{transform:scale(.97);}
+    .btn-submit:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none;}
+    .btn-reset{padding:15px 20px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-muted);transition:all var(--t-smooth);}
+    .btn-reset:hover{border-color:var(--danger);color:var(--danger);}
+    .spinner{display:none;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* Success */
+    #success-panel{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;flex:1;}
+    .success-circle{width:96px;height:96px;background:linear-gradient(135deg,var(--success),#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;color:white;margin:0 auto 28px;box-shadow:0 12px 40px rgba(16,185,129,.35);animation:popIn .5s cubic-bezier(0.22,1,0.36,1);}
+    @keyframes popIn{from{opacity:0;transform:scale(.4);}to{opacity:1;transform:scale(1);}}
+    .success-title{font-size:26px;font-weight:800;margin-bottom:12px;}
+    .success-desc{color:var(--text-muted);font-size:15px;max-width:420px;margin:0 auto 36px;}
+    .success-ref{background:rgba(7,111,164,.07);border:1px solid rgba(7,111,164,.2);border-radius:var(--radius-sm);padding:14px 24px;font-size:14px;color:var(--primary);margin-bottom:32px;display:inline-block;}
+    .success-ref strong{font-size:18px;letter-spacing:1px;display:block;margin-top:4px;}
+    .btn-back-home{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;font-weight:700;font-size:15px;text-decoration:none;box-shadow:0 4px 14px rgba(7,111,164,.28);transition:all var(--t-smooth);}
+    .btn-back-home:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(7,111,164,.38);}
+
+    @media(max-width:860px){.side-panel{display:none;}.form-container{padding:32px 24px 56px;}.mini-nav{padding:14px 24px;}}
+    @media(max-width:480px){.role-grid{grid-template-columns:1fr;}.submit-row{flex-direction:column;}.btn-reset{width:100%;}}
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+<!-- Right Form Area -->
+  <div class="form-area">
+
+    <nav class="mini-nav">
+      <a href="index.jsp" class="mini-logo">
+        <img src="assets/images/utedu-logo.png" alt="UTEdu Logo" class="mini-logo-img">
+        <span class="logo-tag">LMS</span>
+      </a>
+      <a href="javascript:history.back()" class="nav-back">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+      </a>
+    </nav>
+
+    <div class="form-container" id="form-section">
+      <div class="form-header">
+        <h1>Báo cáo sự cố</h1>
+        <p>Chỉ dành cho <strong>sinh viên</strong> và <strong>giảng viên</strong>. Vui lòng điền đầy đủ thông tin để admin xử lý kịp thời.</p>
+      </div>
+
+      <form id="report-form" novalidate>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="email">
+            <i class="fa-solid fa-envelope"></i> Địa chỉ email <span class="required">*</span>
+          </label>
+          <input type="email" class="form-control" id="email" placeholder="ten.ban@example.com" autocomplete="email">
+          <div class="field-error" id="email-err">
+            <i class="fa-solid fa-circle-exclamation"></i><span>Vui lòng nhập email hợp lệ</span>
+          </div>
+        </div>
+
+        <!-- Role -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fa-solid fa-user-tag"></i> Bạn là <span class="required">*</span>
+          </label>
+          <div class="role-grid">
+            <div>
+              <input type="radio" name="role" id="role-student" value="student" class="role-option">
+              <label class="role-label" for="role-student">
+                <span class="role-emoji">🎓</span>
+                <span class="role-name">Sinh viên</span>
+                <span class="role-hint">Đang học khóa học</span>
+              </label>
+            </div>
+            <div>
+              <input type="radio" name="role" id="role-instructor" value="instructor" class="role-option">
+              <label class="role-label" for="role-instructor">
+                <span class="role-emoji">👨‍🏫</span>
+                <span class="role-name">Giảng viên</span>
+                <span class="role-hint">Đang giảng dạy</span>
+              </label>
+            </div>
+          </div>
+          <div class="field-error" id="role-err">
+            <i class="fa-solid fa-circle-exclamation"></i><span>Vui lòng chọn vai trò của bạn</span>
+          </div>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Issue Type -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fa-solid fa-tags"></i> Loại sự cố <span class="required">*</span>
+          </label>
+          <div class="type-grid">
+            <div><input type="radio" name="issue_type" id="type-notification" value="notification" class="type-option"><label class="type-chip" for="type-notification"><i class="fa-solid fa-bell"></i> Thông báo</label></div>
+            <div><input type="radio" name="issue_type" id="type-quiz" value="quiz" class="type-option"><label class="type-chip" for="type-quiz"><i class="fa-solid fa-circle-question"></i> Bài kiểm tra / Quiz</label></div>
+            <div><input type="radio" name="issue_type" id="type-lesson" value="lesson" class="type-option"><label class="type-chip" for="type-lesson"><i class="fa-solid fa-play-circle"></i> Bài học / Video</label></div>
+            <div><input type="radio" name="issue_type" id="type-payment" value="payment" class="type-option"><label class="type-chip" for="type-payment"><i class="fa-solid fa-wallet"></i> Thanh toán / Ví</label></div>
+            <div><input type="radio" name="issue_type" id="type-account" value="account" class="type-option"><label class="type-chip" for="type-account"><i class="fa-solid fa-user-circle"></i> Tài khoản</label></div>
+            <div><input type="radio" name="issue_type" id="type-course" value="course" class="type-option"><label class="type-chip" for="type-course"><i class="fa-solid fa-book"></i> Khóa học</label></div>
+            <div><input type="radio" name="issue_type" id="type-ui" value="ui" class="type-option"><label class="type-chip" for="type-ui"><i class="fa-solid fa-desktop"></i> Giao diện / Hiển thị</label></div>
+            <div><input type="radio" name="issue_type" id="type-other" value="other" class="type-option"><label class="type-chip" for="type-other"><i class="fa-solid fa-ellipsis"></i> Khác</label></div>
+          </div>
+          <div class="field-error" id="type-err">
+            <i class="fa-solid fa-circle-exclamation"></i><span>Vui lòng chọn loại sự cố</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label" for="description">
+            <i class="fa-solid fa-pen-to-square"></i> Mô tả chi tiết sự cố <span class="required">*</span>
+          </label>
+          <textarea class="form-control" id="description" maxlength="2000"
+            placeholder="Mô tả sự cố bạn gặp phải: sự cố xảy ra khi nào, ở đâu trong hệ thống, các bước để tái hiện lỗi, và kết quả mong đợi..."></textarea>
+          <div class="char-row">
+            <span class="char-hint">Tối thiểu 20 ký tự</span>
+            <span class="char-count" id="char-count">0 / 2000</span>
+          </div>
+          <div class="field-error" id="desc-err">
+            <i class="fa-solid fa-circle-exclamation"></i><span id="desc-err-msg">Vui lòng mô tả sự cố (ít nhất 20 ký tự)</span>
+          </div>
+        </div>
+
+        <!-- URL (optional) -->
+        <div class="form-group">
+          <label class="form-label" for="page-url">
+            <i class="fa-solid fa-link"></i> URL trang bị lỗi <span class="optional-tag">(không bắt buộc)</span>
+          </label>
+          <input type="url" class="form-control" id="page-url" placeholder="https://lms.example.com/student/quiz-attempt?id=...">
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Screenshot upload -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fa-solid fa-image"></i> Ảnh chụp màn hình <span class="optional-tag">(không bắt buộc, tối đa 3 ảnh)</span>
+          </label>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="screenshot-input" accept="image/*" multiple>
+            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+            <p class="upload-title">Kéo thả ảnh vào đây</p>
+            <p class="upload-hint">hoặc <span>nhấn để chọn ảnh</span> từ máy tính (PNG, JPG, WEBP — tối đa 5 MB / ảnh)</p>
+          </div>
+          <div id="preview-grid"></div>
+          <div class="field-error" id="img-err">
+            <i class="fa-solid fa-circle-exclamation"></i><span id="img-err-msg">Chỉ chấp nhận tối đa 3 ảnh, mỗi ảnh ≤ 5 MB</span>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-row">
+          <button type="submit" class="btn-submit" id="submit-btn">
+            <span id="btn-text"><i class="fa-solid fa-paper-plane"></i> Gửi báo cáo</span>
+            <span class="spinner" id="btn-spinner"></span>
+          </button>
+          <button type="button" class="btn-reset" id="reset-btn">
+            <i class="fa-solid fa-rotate-left"></i> Làm mới
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Success Panel -->
+    <div id="success-panel">
+      <div class="success-circle"><i class="fa-solid fa-check"></i></div>
+      <h2 class="success-title">Báo cáo đã được gửi!</h2>
+      <p class="success-desc">
+        Cảm ơn bạn đã phản hồi. Đội ngũ admin sẽ xem xét và liên hệ với bạn qua email trong vòng <strong>24 giờ làm việc</strong>.
+      </p>
+      <div class="success-ref">
+        Mã tham chiếu của bạn
+        <strong id="ref-code">—</strong>
+      </div>
+      <a href="index.jsp" class="btn-back-home">
+        <i class="fa-solid fa-house"></i> Về trang chủ
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const showErr = (id, show) => $(id).classList.toggle('show', show);
+
+  // Char counter
+  const desc    = $('description');
+  const counter = $('char-count');
+  desc.addEventListener('input', () => {
+    const len = desc.value.length;
+    counter.textContent = len + ' / 2000';
+    counter.className = 'char-count' + (len >= 1900 ? ' exceed' : len >= 1600 ? ' near' : '');
+  });
+
+  // File upload
+  const uploadZone  = $('upload-zone');
+  const fileInput   = $('screenshot-input');
+  const previewGrid = $('preview-grid');
+  let attachedFiles = [];
+  let attachedDataUrls = [];
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('dragover');
+    handleFiles(Array.from(e.dataTransfer.files));
+  });
+  fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+
+  function handleFiles(files) {
+    showErr('img-err', false);
+    const imgs = files.filter(f => f.type.startsWith('image/'));
+    if (imgs.some(f => f.size > 5*1024*1024)) {
+      $('img-err-msg').textContent = 'Mỗi ảnh không được vượt quá 5 MB.';
+      showErr('img-err', true); return;
+    }
+    if (attachedFiles.length + imgs.length > 3) {
+      $('img-err-msg').textContent = 'Chỉ được đính kèm tối đa 3 ảnh.';
+      showErr('img-err', true); return;
+    }
+    imgs.forEach(f => {
+      attachedFiles.push(f);
+      const reader = new FileReader();
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        const idx = attachedDataUrls.push(dataUrl) - 1;
+        addPreview(dataUrl, idx);
+      };
+      reader.readAsDataURL(f);
+    });
+    fileInput.value = '';
+  }
+
+  function addPreview(src, idx) {
+    const item = document.createElement('div');
+    item.className = 'preview-item'; item.dataset.idx = idx;
+    item.innerHTML = `<img src="${src}" alt="preview"><button type="button" class="preview-remove" title="Xóa ảnh"><i class="fa-solid fa-xmark"></i></button>`;
+    item.querySelector('.preview-remove').addEventListener('click', () => {
+      const targetIdx = Number(item.dataset.idx);
+      attachedFiles.splice(targetIdx, 1);
+      attachedDataUrls.splice(targetIdx, 1);
+      item.remove();
+      Array.from(previewGrid.children).forEach((el, i) => el.dataset.idx = i);
+      showErr('img-err', false);
+    });
+    previewGrid.appendChild(item);
+  }
+
+  // Validation
+  function validate() {
+    let ok = true;
+    const emailVal = $('email').value.trim();
+    const emailOk  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+    $('email').classList.toggle('error', !emailOk); showErr('email-err', !emailOk);
+    if (!emailOk) ok = false;
+
+    const roleOk = document.querySelector('input[name="role"]:checked');
+    showErr('role-err', !roleOk);
+    if (!roleOk) ok = false;
+
+    const typeOk = document.querySelector('input[name="issue_type"]:checked');
+    showErr('type-err', !typeOk);
+    if (!typeOk) ok = false;
+
+    const descVal = desc.value.trim();
+    const descOk  = descVal.length >= 10;
+    desc.classList.toggle('error', !descOk);
+    if (!descOk) $('desc-err-msg').textContent = descVal.length === 0
+      ? 'Vui lòng mô tả sự cố (ít nhất 10 ký tự)'
+      : 'Cần thêm ' + (10 - descVal.length) + ' ký tự nữa';
+    showErr('desc-err', !descOk);
+    if (!descOk) ok = false;
+    return ok;
+  }
+
+  $('email').addEventListener('input', () => { $('email').classList.remove('error'); showErr('email-err', false); });
+  desc.addEventListener('input', () => { desc.classList.remove('error'); showErr('desc-err', false); });
+
+  // Submit
+  $('report-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!validate()) return;
+    const btn = $('submit-btn'), btnText = $('btn-text'), spinner = $('btn-spinner');
+    btn.disabled = true;
+    btnText.style.display = 'none';
+    spinner.style.display = 'block';
+
+    const payload = {
+      email: $('email').value.trim(),
+      role: document.querySelector('input[name="role"]:checked').value,
+      issue_type: document.querySelector('input[name="issue_type"]:checked').value,
+      description: $('description').value.trim(),
+      page_url: $('page-url').value.trim() || '',
+      screenshots: attachedDataUrls.length > 0 ? JSON.stringify(attachedDataUrls) : ''
+    };
+
+    try {
+      const response = await fetch('api/report-issue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        $('ref-code').textContent = data.referenceCode;
+        $('form-section').style.display = 'none';
+        const sp = $('success-panel');
+        sp.style.display = 'flex';
+      } else {
+        alert(data.message || 'Không thể gửi báo cáo. Vui lòng kiểm tra lại!');
+        btn.disabled = false;
+        btnText.style.display = 'inline-flex';
+        spinner.style.display = 'none';
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Đã xảy ra lỗi khi gửi báo cáo tới máy chủ. Vui lòng thử lại!');
+      btn.disabled = false;
+      btnText.style.display = 'inline-flex';
+      spinner.style.display = 'none';
+    }
+  });
+
+  // Reset
+  $('reset-btn').addEventListener('click', () => {
+    $('report-form').reset();
+    attachedFiles = [];
+    attachedDataUrls = [];
+    previewGrid.innerHTML = '';
+    counter.textContent = '0 / 2000'; counter.className = 'char-count';
+    document.querySelectorAll('.form-control.error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.field-error.show').forEach(el => el.classList.remove('show'));
+    $('email').focus();
+  });
+
+  window.addEventListener('scroll', () => {
+    document.querySelector('.mini-nav').style.boxShadow = window.scrollY > 8 ? '0 2px 12px rgba(9,60,98,.10)' : '';
+  });
+</script>
+</body>
+</html>

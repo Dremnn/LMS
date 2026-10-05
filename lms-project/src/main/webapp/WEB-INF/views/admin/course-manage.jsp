@@ -108,6 +108,13 @@
         body.dark-theme .btn-ghost:hover{background:#076FA4 !important;color:#fff !important;}
         body.dark-theme .reject-input{background:#111312;border-color:#093C62;color:#F4F8FA;}
         body.dark-theme .empty-state{background:#182535;border-color:#093C62;color:#9DB9CB;}
+
+        /* ADMIN SUB-NAV TABS */
+        .admin-nav-tabs{display:flex;gap:12px;border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:1px;margin-top:16px;}
+        .admin-tab{padding:10px 20px;border-radius:10px 10px 0 0;font-size:14px;font-weight:700;color:rgba(255,255,255,.8);text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+        .admin-tab:hover{color:#fff;background:rgba(255,255,255,.1);}
+        .admin-tab.active{color:#093C62;background:#F4F8FA;}
+        body.dark-theme .admin-tab.active{background:#111312;color:#38BDF8;}
     </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
@@ -148,7 +155,8 @@
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
             <% } else if ("admin".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline"><i class="fa-solid fa-book"></i> Quản trị khóa học</a>
+                <a href="<%=request.getContextPath()%>/admin/issues" class="btn btn-outline" style="border-color:#076FA4;background:rgba(7,111,164,.1);"><i class="fa-solid fa-triangle-exclamation"></i> Xử lý sự cố</a>
             <% } else { %>
                 <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
             <% } %>
@@ -162,6 +170,17 @@
 
 <div class="page-header">
     <h1><i class="fa-solid fa-folder-open"></i> Quản lý khóa học (Admin)</h1>
+    <p style="opacity:.85;font-size:14px;margin-bottom:12px;">Kiểm duyệt, theo dõi và quản lý toàn bộ khóa học trong hệ thống.</p>
+
+    <!-- ADMIN TABS -->
+    <div class="admin-nav-tabs">
+        <a href="<%=request.getContextPath()%>/admin" class="admin-tab active">
+            <i class="fa-solid fa-graduation-cap"></i> Quản lý khóa học
+        </a>
+        <a href="<%=request.getContextPath()%>/admin/issues" class="admin-tab">
+            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo sự cố & Lỗi
+        </a>
+    </div>
 </div>
 
 <div class="main">

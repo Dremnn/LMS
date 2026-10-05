@@ -91,7 +91,13 @@ public class AuthFilter implements Filter {
                                path.equals("/logout") || 
                                path.equals("/test-db") ||
                                path.equals("/courses") ||           
-                               path.equals("/courses/detail"); 
+                               path.equals("/courses/detail") ||
+                               path.equals("/instructors") ||
+                               path.equals("/learning-paths") ||
+                               path.equals("/resources") ||
+                               path.equals("/report-issue.html") ||
+                               path.equals("/report-issue") ||
+                               path.startsWith("/api/report-issue");
 
         if (isPublicPage) {
             // Cho phép đi tiếp không cần kiểm tra phân quyền
@@ -119,8 +125,8 @@ public class AuthFilter implements Filter {
         // =====================================================================
         String role = currentUser.getRole();
 
-        // 3.1. Phân quyền khu vực ADMIN (/admin/*)
-        if (path.startsWith("/admin/")) {
+        // 3.1. Phân quyền khu vực ADMIN (/admin/* hoặc /admin)
+        if (path.equals("/admin") || path.startsWith("/admin/")) {
             if (!"admin".equalsIgnoreCase(role)) {
                 // Không phải admin mà cố tình vào -> Báo lỗi 403 (Forbidden - Cấm truy cập)
                 httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập khu vực Quản trị viên!");
