@@ -18,7 +18,7 @@ public class AppContextListener implements ServletContextListener {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         NotificationService notificationService = new NotificationService();
 
-        // Run every minute for testing, usually every hour in prod
+        // Chờ 15 giây sau khi server khởi động xong mới bắt đầu quét định kỳ
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 notificationService.checkAndNotifyQuizDeadlines();
@@ -26,7 +26,7 @@ public class AppContextListener implements ServletContextListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, 0, 1, TimeUnit.MINUTES);
+        }, 15, 60, TimeUnit.SECONDS);
     }
 
     @Override

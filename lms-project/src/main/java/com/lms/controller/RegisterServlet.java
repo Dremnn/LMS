@@ -2,6 +2,7 @@ package com.lms.controller;
 
 import com.lms.model.User;
 import com.lms.service.AuthService;
+import com.lms.util.MailUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -64,7 +65,10 @@ public class RegisterServlet extends HttpServlet {
             // 2. Gọi tầng Service để thực hiện nghiệp vụ đăng ký
             User newUser = authService.register(fullName, email, password, confirmPassword, role);
 
-            // 3. ĐĂNG KÝ THÀNH CÔNG:
+            // 3. GỬI WELCOME EMAIL (Bất đồng bộ - Không chặn luồng, try-catch an toàn tuyệt đối)
+            MailUtil.sendWelcomeEmailAsync(newUser.getEmail(), newUser.getFullName());
+
+            // 4. ĐĂNG KÝ THÀNH CÔNG:
             // Sử dụng Post/Redirect/Get pattern để tránh bị gửi lại form khi người dùng F5
             response.sendRedirect(request.getContextPath() + "/login?registerSuccess=true");
 

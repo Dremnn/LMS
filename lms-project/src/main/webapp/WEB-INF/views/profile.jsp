@@ -87,6 +87,9 @@
                     <a href="${pageContext.request.contextPath}/student/my-courses" class="nav-link">Khóa học của tôi</a>
                 <% } %>
                 <a href="${pageContext.request.contextPath}/profile" class="nav-link active">Hồ sơ</a>
+                <% if (!"admin".equals(role)) { %>
+                    <a href="${pageContext.request.contextPath}/report-issue.html" class="nav-link">Báo cáo</a>
+                <% } %>
                 <div class="user-badge">
                     <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
                         <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
@@ -100,6 +103,7 @@
                     <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">Quản lý</a>
                 <% } else if ("admin".equals(role)) { %>
                     <a href="${pageContext.request.contextPath}/admin" class="btn btn-outline">Quản trị</a>
+                    <a href="${pageContext.request.contextPath}/admin/issues" class="btn btn-outline" style="border-color:#076FA4;background:rgba(7,111,164,.1);"><i class="fa-solid fa-triangle-exclamation"></i> Xử lý sự cố</a>
                 <% } %>
                 <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
             <% } else { %>
