@@ -267,68 +267,126 @@ public class CourseDAO {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
+            // 1. Xóa attempt_answers của các quiz thuộc khóa học hoặc thuộc các section của khóa học
             try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM lesson_progress WHERE enrollment_id IN " +
-                    "(SELECT id FROM enrollments WHERE course_id = ?)")) {
+                    "DELETE FROM attempt_answers WHERE attempt_id IN (" +
+                    "  SELECT id FROM quiz_attempts WHERE quiz_id IN (" +
+                    "    SELECT id FROM quizzes WHERE course_id = ? OR section_id IN (SELECT id FROM sections WHERE course_id = ?)" +
+                    "  )" +
+                    ") OR question_id IN (" +
+                    "  SELECT id FROM questions WHERE quiz_id IN (" +
+                    "    SELECT id FROM quizzes WHERE course_id = ? OR section_id IN (SELECT id FROM sections WHERE course_id = ?)" +
+                    "  )" +
+                    ")")) {
+                stmt.setInt(1, courseId);
+                stmt.setInt(2, courseId);
+                stmt.setInt(3, courseId);
+                stmt.setInt(4, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 2. Xóa quiz_attempts
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM quiz_attempts WHERE quiz_id IN (" +
+                    "  SELECT id FROM quizzes WHERE course_id = ? OR section_id IN (SELECT id FROM sections WHERE course_id = ?)" +
+                    ")")) {
+                stmt.setInt(1, courseId);
+                stmt.setInt(2, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 3. Xóa answer_options
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM answer_options WHERE question_id IN (" +
+                    "  SELECT id FROM questions WHERE quiz_id IN (" +
+                    "    SELECT id FROM quizzes WHERE course_id = ? OR section_id IN (SELECT id FROM sections WHERE course_id = ?)" +
+                    "  )" +
+                    ")")) {
+                stmt.setInt(1, courseId);
+                stmt.setInt(2, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 4. Xóa questions
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM questions WHERE quiz_id IN (" +
+                    "  SELECT id FROM quizzes WHERE course_id = ? OR section_id IN (SELECT id FROM sections WHERE course_id = ?)" +
+                    ")")) {
+                stmt.setInt(1, courseId);
+                stmt.setInt(2, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 5. Xóa quizzes
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM quizzes WHERE course_id = ? OR section_id IN (SELECT id FROM sections WHERE course_id = ?)")) {
+                stmt.setInt(1, courseId);
+                stmt.setInt(2, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 6. Xóa lesson_progress
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM lesson_progress WHERE enrollment_id IN (" +
+                    "  SELECT id FROM enrollments WHERE course_id = ?" +
+                    ") OR lesson_id IN (" +
+                    "  SELECT id FROM lessons WHERE section_id IN (SELECT id FROM sections WHERE course_id = ?)" +
+                    ")")) {
+                stmt.setInt(1, courseId);
+                stmt.setInt(2, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 7. Xóa lessons
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM lessons WHERE section_id IN (SELECT id FROM sections WHERE course_id = ?)")) {
                 stmt.setInt(1, courseId);
                 stmt.executeUpdate();
             }
 
-            try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM attempt_answers WHERE attempt_id IN " +
-                    "(SELECT id FROM quiz_attempts WHERE quiz_id IN " +
-                    "(SELECT id FROM quizzes WHERE course_id = ?))")) {
-                stmt.setInt(1, courseId);
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM quiz_attempts WHERE quiz_id IN " +
-                    "(SELECT id FROM quizzes WHERE course_id = ?)")) {
-                stmt.setInt(1, courseId);
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM enrollments WHERE course_id = ?")) {
-                stmt.setInt(1, courseId);
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM answer_options WHERE question_id IN " +
-                    "(SELECT id FROM questions WHERE quiz_id IN " +
-                    "(SELECT id FROM quizzes WHERE course_id = ?))")) {
-                stmt.setInt(1, courseId);
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM questions WHERE quiz_id IN " +
-                    "(SELECT id FROM quizzes WHERE course_id = ?)")) {
-                stmt.setInt(1, courseId);
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM quizzes WHERE course_id = ?")) {
-                stmt.setInt(1, courseId);
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM lessons WHERE section_id IN " +
-                    "(SELECT id FROM sections WHERE course_id = ?)")) {
-                stmt.setInt(1, courseId);
-                stmt.executeUpdate();
-            }
-
+            // 8. Xóa sections
             try (PreparedStatement stmt = conn.prepareStatement(
                     "DELETE FROM sections WHERE course_id = ?")) {
                 stmt.setInt(1, courseId);
                 stmt.executeUpdate();
             }
 
+            // 9. Xóa certificates
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM certificates WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 10. Xóa reviews
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM reviews WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 11. Xóa events
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM events WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 12. Xóa enrollments
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "DELETE FROM enrollments WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 13. Cập nhật wallet_transactions (giữ nguyên lịch sử giao dịch ví của user nhưng xóa liên kết khóa học)
+            try (PreparedStatement stmt = conn.prepareStatement(
+                    "UPDATE wallet_transactions SET course_id = NULL WHERE course_id = ?")) {
+                stmt.setInt(1, courseId);
+                stmt.executeUpdate();
+            }
+
+            // 14. Xóa chính khóa học
             int affected;
             try (PreparedStatement stmt = conn.prepareStatement(
                     "DELETE FROM courses WHERE id = ?")) {

@@ -70,7 +70,7 @@ public class AdminCourseServlet extends HttpServlet {
                 if (deleted) {
                     session.setAttribute("flashSuccess", "Đã xóa khóa học thành công!");
                 } else {
-                    throw new IllegalStateException("Không thể xóa khóa học! Có thể khóa học đang có dữ liệu ràng buộc (học viên đã tham gia).");
+                    throw new IllegalStateException("Không thể xóa khóa học! Khóa học không tồn tại hoặc đã xảy ra lỗi.");
                 }
             } else if ("/admin/courses/warn".equals(path)) {
                 String reason = request.getParameter("reason");
