@@ -81,6 +81,9 @@
     </div>
         <div class="nav-links">
             <a href="${pageContext.request.contextPath}/courses" class="nav-link">Khóa học</a>
+        <a href="${pageContext.request.contextPath}/instructors" class="nav-link">Giảng viên</a>
+        <a href="${pageContext.request.contextPath}/learning-paths" class="nav-link">Lộ trình</a>
+        <a href="${pageContext.request.contextPath}/resources" class="nav-link">Tài liệu</a>
             <% if (currentUser != null) { %>
                 <% if ("student".equals(role)) { %>
                     <a href="${pageContext.request.contextPath}/dashboard" class="nav-link">Bảng điều khiển</a>
