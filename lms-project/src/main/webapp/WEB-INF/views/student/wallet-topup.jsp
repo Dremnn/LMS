@@ -149,10 +149,9 @@
                         <input type="text" id="referenceCode" name="referenceCode" class="form-control"
                                placeholder="Ví dụ: FT23091412345">
                     </div>
-                    <p style="font-size: 13px; color: var(--text-muted);">
-                        <i class="fa-solid fa-circle-info"></i>
-                        Sau khi quét mã QR và chuyển khoản đúng nội dung, bấm nút bên dưới để xác nhận.
-                        (Bản demo: số dư được cộng ngay, chưa xác thực tự động với ngân hàng.)
+                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+                        <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i>
+                        Sau khi chuyển khoản, bấm <b>"Tôi đã chuyển khoản"</b> để hoàn tất. Hệ thống sẽ tự động cập nhật số dư và gửi email biên lai xác nhận giao dịch đến <b><%=currentUser != null ? currentUser.getEmail() : ""%></b>.
                     </p>
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
                         <i class="fa-solid fa-check"></i> Tôi đã chuyển khoản

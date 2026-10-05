@@ -1,7 +1,9 @@
 package com.lms.controller;
 
+import com.lms.dao.UserDAO;
 import com.lms.model.User;
 import com.lms.service.WalletService;
+import com.lms.util.MailUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -86,13 +88,39 @@ public class WalletServlet extends HttpServlet {
         try {
             BigDecimal amount = new BigDecimal(amountStr.trim().replace(",", ""));
 
-            walletService.topUp(currentUser.getId(), amount, referenceCode);
+            String refCode = (referenceCode != null && !referenceCode.trim().isEmpty())
+                    ? referenceCode.trim()
+                    : "CK" + System.currentTimeMillis();
+
+            BigDecimal newBalance = walletService.topUp(currentUser.getId(), amount, refCode);
 
             // Cập nhật lại session để navbar/hồ sơ hiển thị số dư mới ngay, không cần đăng nhập lại
-            currentUser.setBalance(currentUser.getBalance().add(amount));
+            if (newBalance != null) {
+                currentUser.setBalance(newBalance);
+            } else {
+                currentUser.setBalance(currentUser.getBalance().add(amount));
+            }
             session.setAttribute("currentUser", currentUser);
 
-            session.setAttribute("flashSuccess", "Nạp tiền thành công! Số dư của bạn đã được cập nhật.");
+            // Lấy email của người dùng
+            String toEmail = currentUser.getEmail();
+            if (toEmail == null || toEmail.trim().isEmpty()) {
+                User dbUser = new UserDAO().findById(currentUser.getId());
+                if (dbUser != null) {
+                    toEmail = dbUser.getEmail();
+                }
+            }
+
+            // Gửi email xác nhận chuyển khoản nạp tiền bất đồng bộ (Async, không làm gián đoạn HTTP request)
+            MailUtil.sendTransferConfirmationEmailAsync(
+                    toEmail,
+                    currentUser.getFullName(),
+                    amount,
+                    refCode,
+                    currentUser.getBalance()
+            );
+
+            session.setAttribute("flashSuccess", "Nạp tiền thành công! Biên lai xác nhận giao dịch đã được gửi đến email " + (toEmail != null ? toEmail : "") + ".");
             response.sendRedirect(request.getContextPath() + "/profile");
 
         } catch (NumberFormatException e) {
