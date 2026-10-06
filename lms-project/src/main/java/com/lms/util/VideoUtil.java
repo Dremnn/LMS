@@ -22,7 +22,7 @@ public class VideoUtil {
         Matcher matcher = YOUTUBE_PATTERN.matcher(url);
         if (matcher.find()) {
             String videoId = matcher.group(1);
-            return "https://www.youtube.com/embed/" + videoId;
+            return "https://www.youtube.com/embed/" + videoId + "?rel=0&modestbranding=1&enablejsapi=1";
         }
 
         return null; // Không phải link YouTube
