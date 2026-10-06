@@ -54,6 +54,10 @@
         .form-check input[type=checkbox]{width:20px;height:20px;accent-color:#076FA4;cursor:pointer;flex-shrink:0;}
         .form-check-label{font-size:15px;color:#093C62;cursor:pointer;font-weight:500;}
         .divider{border:none;border-top:1px solid #C6D8E3;margin:28px 0;}
+        .lesson-desc-box{background:#FFFFFF;border-radius:16px;padding:22px 26px;border:1px solid #C6D8E3;box-shadow:0 4px 20px rgba(9,60,98,.05);margin-top:20px;}
+        .lesson-desc-header{font-size:15px;font-weight:700;color:#093C62;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+        .lesson-desc-header i{color:#076FA4;}
+        .lesson-desc-body{font-size:14.5px;color:#334155;line-height:1.7;white-space:pre-wrap;}
 
         /* ---- DARK THEME CHO LESSON VIEW (Ô 1: #111312, Ô 2: #182535, Ô 3: #093C62) ---- */
         body.dark-theme .sidebar{background:rgba(24,37,53,0.96);border-right-color:#093C62;box-shadow:2px 0 16px rgba(0,0,0,.4);}
@@ -72,6 +76,10 @@
         body.dark-theme .no-video{background:#182535;border-color:#093C62;color:#9DB9CB;}
         body.dark-theme .doc-link{background:#182535;border-color:#093C62;color:#9DB9CB;}
         body.dark-theme .doc-link:hover{border-color:#076FA4;color:#F4F8FA;box-shadow:0 6px 20px rgba(7,111,164,.25);}
+        body.dark-theme .lesson-desc-box{background:#182535;border-color:#093C62;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+        body.dark-theme .lesson-desc-header{color:#F4F8FA;}
+        body.dark-theme .lesson-desc-header i{color:#38BDF8;}
+        body.dark-theme .lesson-desc-body{color:#9DB9CB;}
         body.dark-theme .complete-card{background:#182535;border-color:#093C62;box-shadow:0 4px 20px rgba(0,0,0,.3);}
         body.dark-theme .complete-card h3{color:#F4F8FA;}
         body.dark-theme .form-check-label{color:#9DB9CB;}
@@ -105,9 +113,6 @@
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link">← Chi tiết khóa học</a>
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
@@ -285,6 +290,18 @@
             <a href="${currentLesson.documentUrl}" target="_blank" class="doc-link">
                 📄 Tải/Mở tài liệu bài học
             </a>
+        </c:if>
+
+        <%-- Mô tả nội dung bài học (luôn hiển thị nếu có) --%>
+        <c:if test="${not empty currentLesson.description}">
+            <div class="lesson-desc-box">
+                <div class="lesson-desc-header">
+                    <i class="fa-solid fa-circle-info"></i> Mô tả bài học
+                </div>
+                <div class="lesson-desc-body">
+                    <c:out value="${currentLesson.description}"/>
+                </div>
+            </div>
         </c:if>
 
         <hr class="divider">

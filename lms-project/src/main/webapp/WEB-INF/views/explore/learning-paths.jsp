@@ -385,9 +385,6 @@
     </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link active">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>

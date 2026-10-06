@@ -25,6 +25,9 @@ public class Lesson implements Serializable {
     @Column(name = "document_url")
     private String documentUrl;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "duration_minutes")
     private Integer durationMinutes;
 
@@ -48,6 +51,17 @@ public class Lesson implements Serializable {
         this.orderIndex = orderIndex;
     }
 
+    public Lesson(int sectionId, String title, String videoUrl, String documentUrl,
+                  Integer durationMinutes, int orderIndex, String description) {
+        this.sectionId = sectionId;
+        this.title = title;
+        this.videoUrl = videoUrl;
+        this.documentUrl = documentUrl;
+        this.durationMinutes = durationMinutes;
+        this.orderIndex = orderIndex;
+        this.description = description;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -68,6 +82,9 @@ public class Lesson implements Serializable {
 
     public int getOrderIndex() { return orderIndex; }
     public void setOrderIndex(int orderIndex) { this.orderIndex = orderIndex; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public Section getSection() { return section; }
     public void setSection(Section section) { this.section = section; }

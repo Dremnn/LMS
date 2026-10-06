@@ -135,11 +135,12 @@ public class CourseContentServlet extends HttpServlet {
                 String videoUrl = request.getParameter("videoUrl");
                 String documentUrl = request.getParameter("documentUrl");
                 String durationStr = request.getParameter("durationMinutes");
+                String description = request.getParameter("description");
 
                 Integer duration = (durationStr != null && !durationStr.isEmpty())
                         ? Integer.parseInt(durationStr) : null;
 
-                courseService.addLesson(sectionId, currentUser.getId(), title, videoUrl, documentUrl, duration);
+                courseService.addLesson(sectionId, currentUser.getId(), title, videoUrl, documentUrl, duration, description);
 
             } else if ("/instructor/courses/lessons/edit".equals(path)) {
                 courseId = Integer.parseInt(request.getParameter("courseId"));
@@ -149,11 +150,12 @@ public class CourseContentServlet extends HttpServlet {
                 String videoUrl = request.getParameter("videoUrl");
                 String documentUrl = request.getParameter("documentUrl");
                 String durationStr = request.getParameter("durationMinutes");
+                String description = request.getParameter("description");
 
                 Integer duration = (durationStr != null && !durationStr.isEmpty())
                         ? Integer.parseInt(durationStr) : null;
 
-                courseService.updateLesson(lessonId, currentUser.getId(), title, videoUrl, documentUrl, duration);
+                courseService.updateLesson(lessonId, currentUser.getId(), title, videoUrl, documentUrl, duration, description);
 
             } else if ("/instructor/courses/lessons/delete".equals(path)) {
                 courseId = Integer.parseInt(request.getParameter("courseId"));

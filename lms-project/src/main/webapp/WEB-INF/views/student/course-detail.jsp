@@ -136,6 +136,8 @@
         body.dark-theme .score-big, body.dark-theme .reviews-summary-info h4, body.dark-theme .review-form-card h4, body.dark-theme .review-name { color: #FFFFFF !important; }
         body.dark-theme .score-count, body.dark-theme .reviews-summary-info p, body.dark-theme .review-date, body.dark-theme .review-comment { color: #9DB9CB !important; }
         body.dark-theme .review-textarea { background: #111312 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
+        body.dark-theme .lesson-desc-content { background: #111a24 !important; color: #9DB9CB !important; border-top-color: #093C62 !important; }
+        body.dark-theme .btn-toggle-desc { color: #38BDF8 !important; }
     </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
@@ -175,9 +177,6 @@
     </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
@@ -295,9 +294,16 @@
                 <c:otherwise>
                     <% if ("instructor".equals(role) || "admin".equals(role)) { %>
                         <%-- Instructor/Admin không được đăng ký khóa học --%>
-                        <div style="background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;">
-                            <i class="fa-solid fa-lock"></i>
-                            <%= "instructor".equals(role) ? "Tài khoản giảng viên không thể đăng ký khóa học." : "Tài khoản quản trị viên không thể đăng ký khóa học." %>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div style="background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;">
+                                <i class="fa-solid fa-lock"></i>
+                                <%= "instructor".equals(role) ? "Tài khoản giảng viên không thể đăng ký khóa học." : "Tài khoản quản trị viên không thể đăng ký khóa học." %>
+                            </div>
+                            <c:if test="${sessionScope.currentUser.role == 'admin' || sessionScope.currentUser.id == course.instructorId}">
+                                <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn-enroll" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+                                    <i class="fa-solid fa-pen-to-square"></i> Quản lý nội dung khóa học
+                                </a>
+                            </c:if>
                         </div>
                     <% } else { %>
                         <%-- Chưa đăng ký: hiện form đăng ký --%>
@@ -330,37 +336,54 @@
             <c:forEach var="section" items="${course.sectionsCache}" varStatus="st">
                 <div class="section-card">
                     <div class="section-header">
-                        <h3>Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
+                        <div>
+                            <h3>Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
+                            <c:if test="${not empty section.description}">
+                                <div style="font-size:12.5px;color:#64748B;font-weight:400;margin-top:4px;"><c:out value="${section.description}"/></div>
+                            </c:if>
+                        </div>
                         <span style="font-size:12px;color:#64748B;font-weight:500;">${section.lessons.size()} bài học</span>
                     </div>
                     <div class="section-body">
                         <c:choose>
                             <c:when test="${not empty section.lessons}">
                                 <c:forEach var="lesson" items="${section.lessons}">
-                                    <div class="lesson-item">
-                                        <span class="lesson-name">
-                                            <c:choose>
-                                                <c:when test="${not empty enrollment}">
-                                                    <%-- Đã đăng ký: tên bài là link dẫn vào xem nội dung --%>
-                                                    <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
-                                                       style="color:#076FA4;text-decoration:none;font-weight:600;"
-                                                       onmouseover="this.style.textDecoration='underline'"
-                                                       onmouseout="this.style.textDecoration='none'">
-                                                        <i class="fa-solid fa-circle-play" style="color:#076FA4;"></i> <c:out value="${lesson.title}"/>
-                                                    </a>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <%-- Chưa đăng ký: text tĩnh + icon khóa --%>
-                                                    <span style="color:#94A3B8;"><i class="fa-solid fa-lock" style="color:#CBD5E1;"></i> <c:out value="${lesson.title}"/></span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                        <span class="lesson-duration">
-                                            <c:choose>
-                                                <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
-                                                <c:otherwise>N/A</c:otherwise>
-                                            </c:choose>
-                                        </span>
+                                    <div class="lesson-wrapper" style="border-top:1px solid #F1F5F9;">
+                                        <div class="lesson-item" style="border-top:none;">
+                                            <span class="lesson-name">
+                                                <c:if test="${not empty lesson.description}">
+                                                    <button type="button" class="btn-toggle-desc" onclick="toggleLessonDesc('${lesson.id}', this)" title="Thu gọn / Mở rộng mô tả bài học" style="background:none;border:none;cursor:pointer;color:#076FA4;padding:4px 6px;font-size:12px;display:inline-flex;align-items:center;border-radius:4px;transition:all 0.2s;">
+                                                        <i class="fa-solid fa-chevron-right toggle-icon-${lesson.id}"></i>
+                                                    </button>
+                                                </c:if>
+                                                <c:choose>
+                                                    <c:when test="${not empty enrollment}">
+                                                        <%-- Đã đăng ký: tên bài là link dẫn vào xem nội dung --%>
+                                                        <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
+                                                           style="color:#076FA4;text-decoration:none;font-weight:600;"
+                                                           onmouseover="this.style.textDecoration='underline'"
+                                                           onmouseout="this.style.textDecoration='none'">
+                                                            <i class="fa-solid fa-circle-play" style="color:#076FA4;"></i> <c:out value="${lesson.title}"/>
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <%-- Chưa đăng ký: text tĩnh + icon khóa --%>
+                                                        <span style="color:#94A3B8;"><i class="fa-solid fa-lock" style="color:#CBD5E1;"></i> <c:out value="${lesson.title}"/></span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                            <span class="lesson-duration">
+                                                <c:choose>
+                                                    <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
+                                                    <c:otherwise>N/A</c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                        </div>
+                                        <c:if test="${not empty lesson.description}">
+                                            <div id="lesson-desc-${lesson.id}" class="lesson-desc-content" style="display:none;padding:10px 24px 14px 44px;font-size:13.5px;color:#475569;background:#f8fafc;border-top:1px dashed #e2e8f0;line-height:1.6;white-space:pre-wrap;">
+                                                <i class="fa-solid fa-circle-info" style="color:#076FA4;margin-right:4px;"></i> <c:out value="${lesson.description}"/>
+                                            </div>
+                                        </c:if>
                                     </div>
                                 </c:forEach>
                             </c:when>
@@ -574,6 +597,24 @@
     <span class="toggle-text">Chế độ Tối</span>
 </div>
 
+<script>
+    function toggleLessonDesc(lessonId, btn) {
+        const el = document.getElementById('lesson-desc-' + lessonId);
+        if (!el) return;
+        const isHidden = el.style.display === 'none' || el.style.display === '';
+        el.style.display = isHidden ? 'block' : 'none';
+        const icon = btn.querySelector('i');
+        if (icon) {
+            if (isHidden) {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            }
+        }
+    }
+</script>
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
 
 </body>

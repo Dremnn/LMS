@@ -13,7 +13,7 @@ public class LessonDAO {
     public List<Lesson> findBySectionId(int sectionId) {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT id, section_id, title, video_url, document_url, " +
-                     "duration_minutes, order_index FROM lessons " +
+                     "duration_minutes, order_index, description FROM lessons " +
                      "WHERE section_id = ? ORDER BY order_index ASC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -37,7 +37,7 @@ public class LessonDAO {
     public List<Lesson> findByCourseId(int courseId) {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT l.id, l.section_id, l.title, l.video_url, l.document_url, " +
-                     "l.duration_minutes, l.order_index " +
+                     "l.duration_minutes, l.order_index, l.description " +
                      "FROM lessons l INNER JOIN sections s ON l.section_id = s.id " +
                      "WHERE s.course_id = ? ORDER BY s.order_index ASC, l.order_index ASC";
 
@@ -60,7 +60,7 @@ public class LessonDAO {
     // 3. Tìm 1 bài học theo ID
     public Lesson findById(int id) {
         String sql = "SELECT id, section_id, title, video_url, document_url, " +
-                     "duration_minutes, order_index FROM lessons WHERE id = ?";
+                     "duration_minutes, order_index, description FROM lessons WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -104,7 +104,7 @@ public class LessonDAO {
     // vì đã có Trigger trg_lesson_update_total_lessons tự động xử lý (đã viết ở phần DB)
     public boolean save(Lesson lesson) {
         String sql = "INSERT INTO lessons (section_id, title, video_url, document_url, " +
-                     "duration_minutes, order_index) VALUES (?, ?, ?, ?, ?, ?)";
+                     "duration_minutes, order_index, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -121,6 +121,7 @@ public class LessonDAO {
             }
 
             stmt.setInt(6, lesson.getOrderIndex());
+            stmt.setString(7, lesson.getDescription());
 
             int affectedRows = stmt.executeUpdate();
 
@@ -141,7 +142,7 @@ public class LessonDAO {
     // 6. Sửa bài học
     public boolean update(Lesson lesson) {
         String sql = "UPDATE lessons SET title = ?, video_url = ?, document_url = ?, " +
-                     "duration_minutes = ? WHERE id = ?";
+                     "duration_minutes = ?, description = ? WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -156,7 +157,8 @@ public class LessonDAO {
                 stmt.setNull(4, Types.INTEGER);
             }
 
-            stmt.setInt(5, lesson.getId());
+            stmt.setString(5, lesson.getDescription());
+            stmt.setInt(6, lesson.getId());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -212,6 +214,7 @@ public class LessonDAO {
         lesson.setDurationMinutes(rs.wasNull() ? null : duration);
 
         lesson.setOrderIndex(rs.getInt("order_index"));
+        lesson.setDescription(rs.getString("description"));
         return lesson;
     }
 }

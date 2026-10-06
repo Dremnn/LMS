@@ -138,9 +138,6 @@
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/instructor/courses" class="nav-link">← Danh sách khóa học</a>
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
@@ -230,7 +227,7 @@
                             </form>
 
                             <%-- Đổi tên chương --%>
-                            <button type="button" class="btn-action-sm" onclick="openEditSectionModal(${section.id}, '<c:out value="${section.title}" escapeXml="true"/>')">
+                            <button type="button" class="btn-action-sm" data-id="${section.id}" data-title="<c:out value="${section.title}" escapeXml="true"/>" onclick="openEditSectionModal(this)">
                                 <i class="fa-solid fa-pen-to-square"></i> Đổi tên
                             </button>
 
@@ -254,16 +251,27 @@
                                             <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}" style="color:inherit; text-decoration:underline; font-weight:600;">
                                                 <c:out value="${lesson.title}"/>
                                             </a>
+                                            <c:if test="${not empty lesson.description}">
+                                                <span title="<c:out value="${lesson.description}"/>" style="font-size:11px;color:#6b7280;margin-left:8px;font-weight:normal;background:#edf2f7;padding:2px 6px;border-radius:4px;">
+                                                    <i class="fa-solid fa-align-left"></i> Có mô tả
+                                                </span>
+                                            </c:if>
                                         </span>
                                         <div style="display:flex;align-items:center;gap:8px;">
                                             <span class="lesson-dur">
                                                 <c:choose>
-                                                    <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
-                                                    <c:otherwise>N/A</c:otherwise>
+                                                     <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
+                                                     <c:otherwise>N/A</c:otherwise>
                                                 </c:choose>
                                             </span>
                                             <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;"
-                                                    onclick="openEditLessonModal(${lesson.id}, '<c:out value="${lesson.title}" escapeXml="true"/>', '${lesson.durationMinutes != null ? lesson.durationMinutes : ''}', '<c:out value="${lesson.videoUrl}" escapeXml="true"/>', '<c:out value="${lesson.documentUrl}" escapeXml="true"/>')">
+                                                    data-id="${lesson.id}"
+                                                    data-title="<c:out value="${lesson.title}" escapeXml="true"/>"
+                                                    data-duration="${lesson.durationMinutes != null ? lesson.durationMinutes : ''}"
+                                                    data-video="<c:out value="${lesson.videoUrl}" escapeXml="true"/>"
+                                                    data-doc="<c:out value="${lesson.documentUrl}" escapeXml="true"/>"
+                                                    data-desc="<c:out value="${lesson.description}" escapeXml="true"/>"
+                                                    onclick="openEditLessonModal(this)">
                                                 <i class="fa-solid fa-pen"></i> Sửa
                                             </button>
                                             <form action="${pageContext.request.contextPath}/instructor/courses/lessons/delete" method="post" style="display:inline;"
@@ -306,6 +314,10 @@
                                     <label>URL Tài liệu</label>
                                     <input type="text" name="documentUrl" class="form-control" placeholder="https://drive.google.com/...">
                                 </div>
+                            </div>
+                            <div class="form-group" style="margin-top:10px;">
+                                <label>Mô tả nội dung bài học (tùy chọn)</label>
+                                <textarea name="description" class="form-control" rows="2" placeholder="Tóm tắt ngắn gọn nội dung bài học, mục tiêu học tập..."></textarea>
                             </div>
                             <div style="margin-top:12px;">
                                 <button type="submit" class="btn btn-primary btn-sm">➕ Thêm bài học</button>
@@ -494,6 +506,10 @@
                 <label>URL Tài liệu</label>
                 <input type="text" name="documentUrl" id="modalEditLessonDoc" class="form-control" placeholder="https://drive.google.com/..." style="margin-top:4px;">
             </div>
+            <div class="form-group" style="margin-bottom:18px;">
+                <label>Mô tả nội dung bài học</label>
+                <textarea name="description" id="modalEditLessonDesc" class="form-control" rows="3" placeholder="Tóm tắt nội dung bài học..." style="margin-top:4px;"></textarea>
+            </div>
             <div style="display:flex;justify-content:flex-end;gap:10px;">
                 <button type="button" class="btn btn-outline btn-sm" onclick="closeEditLessonModal()">Hủy</button>
                 <button type="submit" class="btn btn-primary btn-sm">💾 Lưu thay đổi</button>
@@ -503,24 +519,40 @@
 </div>
 
 <script>
-    function openEditSectionModal(sectionId, title) {
-        document.getElementById('modalEditSectionId').value = sectionId;
-        document.getElementById('modalEditSectionTitle').value = title;
+    function openEditSectionModal(arg1, title) {
+        if (typeof arg1 === 'object' && arg1 !== null) {
+            document.getElementById('modalEditSectionId').value = arg1.dataset.id || '';
+            document.getElementById('modalEditSectionTitle').value = arg1.dataset.title || '';
+        } else {
+            document.getElementById('modalEditSectionId').value = arg1 || '';
+            document.getElementById('modalEditSectionTitle').value = title || '';
+        }
         document.getElementById('editSectionModal').classList.add('active');
     }
     function closeEditSectionModal() {
         document.getElementById('editSectionModal').classList.remove('active');
     }
-    function openEditLessonModal(lessonId, title, duration, videoUrl, docUrl) {
-        document.getElementById('modalEditLessonId').value = lessonId;
-        document.getElementById('modalEditLessonTitle').value = title;
-        document.getElementById('modalEditLessonDuration').value = duration || '';
-        document.getElementById('modalEditLessonVideo').value = videoUrl || '';
-        document.getElementById('modalEditLessonDoc').value = docUrl || '';
+    function openEditLessonModal(arg1, title, duration, videoUrl, docUrl, desc) {
+        if (typeof arg1 === 'object' && arg1 !== null) {
+            document.getElementById('modalEditLessonId').value = arg1.dataset.id || '';
+            document.getElementById('modalEditLessonTitle').value = arg1.dataset.title || '';
+            document.getElementById('modalEditLessonDuration').value = arg1.dataset.duration || '';
+            document.getElementById('modalEditLessonVideo').value = arg1.dataset.video || '';
+            document.getElementById('modalEditLessonDoc').value = arg1.dataset.doc || '';
+            document.getElementById('modalEditLessonDesc').value = arg1.dataset.desc || '';
+        } else {
+            document.getElementById('modalEditLessonId').value = arg1 || '';
+            document.getElementById('modalEditLessonTitle').value = title || '';
+            document.getElementById('modalEditLessonDuration').value = duration || '';
+            document.getElementById('modalEditLessonVideo').value = videoUrl || '';
+            document.getElementById('modalEditLessonDoc').value = docUrl || '';
+            document.getElementById('modalEditLessonDesc').value = desc || '';
+        }
         document.getElementById('editLessonModal').classList.add('active');
     }
     function closeEditLessonModal() {
         document.getElementById('editLessonModal').classList.remove('active');
+    }
 </script>
 
 <!-- Dynamic Island Theme Toggle -->

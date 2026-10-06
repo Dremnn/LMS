@@ -316,7 +316,7 @@ public class CourseService {
     // 11. QUẢN LÝ BÀI HỌC (Lesson)
     // =========================================================================
     public Lesson addLesson(int sectionId, int currentInstructorId, String title,
-                             String videoUrl, String documentUrl, Integer durationMinutes) {
+                             String videoUrl, String documentUrl, Integer durationMinutes, String description) {
 
         Section section = sectionDAO.findById(sectionId);
         if (section == null) {
@@ -336,7 +336,7 @@ public class CourseService {
 
         int nextOrder = lessonDAO.getNextOrderIndex(sectionId);
         Lesson lesson = new Lesson(sectionId, title.trim(), videoUrl, documentUrl,
-                durationMinutes, nextOrder);
+                durationMinutes, nextOrder, description != null ? description.trim() : null);
 
         boolean saved = lessonDAO.save(lesson);
         if (!saved) {
@@ -345,8 +345,13 @@ public class CourseService {
         return lesson;
     }
 
-    public void updateLesson(int lessonId, int currentInstructorId, String title,
+    public Lesson addLesson(int sectionId, int currentInstructorId, String title,
                              String videoUrl, String documentUrl, Integer durationMinutes) {
+        return addLesson(sectionId, currentInstructorId, title, videoUrl, documentUrl, durationMinutes, null);
+    }
+
+    public void updateLesson(int lessonId, int currentInstructorId, String title,
+                             String videoUrl, String documentUrl, Integer durationMinutes, String description) {
         Lesson lesson = lessonDAO.findById(lessonId);
         if (lesson == null) {
             throw new IllegalArgumentException("Bài học không tồn tại!");
@@ -370,11 +375,17 @@ public class CourseService {
         lesson.setVideoUrl(videoUrl != null && !videoUrl.trim().isEmpty() ? videoUrl.trim() : null);
         lesson.setDocumentUrl(documentUrl != null && !documentUrl.trim().isEmpty() ? documentUrl.trim() : null);
         lesson.setDurationMinutes(durationMinutes);
+        lesson.setDescription(description != null ? description.trim() : null);
 
         boolean updated = lessonDAO.update(lesson);
         if (!updated) {
             throw new RuntimeException("Có lỗi xảy ra khi cập nhật bài học!");
         }
+    }
+
+    public void updateLesson(int lessonId, int currentInstructorId, String title,
+                             String videoUrl, String documentUrl, Integer durationMinutes) {
+        updateLesson(lessonId, currentInstructorId, title, videoUrl, documentUrl, durationMinutes, null);
     }
 
     public void deleteLesson(int lessonId, int currentInstructorId) {

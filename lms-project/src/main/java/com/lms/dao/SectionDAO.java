@@ -12,7 +12,7 @@ public class SectionDAO {
     // 1. Lấy toàn bộ chương của 1 khóa học, sắp theo order_index
     public List<Section> findByCourseId(int courseId) {
         List<Section> list = new ArrayList<>();
-        String sql = "SELECT id, course_id, title, order_index FROM sections " +
+        String sql = "SELECT id, course_id, title, order_index, description FROM sections " +
                      "WHERE course_id = ? ORDER BY order_index ASC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -33,7 +33,7 @@ public class SectionDAO {
 
     // 2. Tìm 1 section theo ID (dùng khi kiểm tra quyền sở hữu trước khi thêm Lesson)
     public Section findById(int id) {
-        String sql = "SELECT id, course_id, title, order_index FROM sections WHERE id = ?";
+        String sql = "SELECT id, course_id, title, order_index, description FROM sections WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -295,6 +295,7 @@ public class SectionDAO {
         section.setCourseId(rs.getInt("course_id"));
         section.setTitle(rs.getString("title"));
         section.setOrderIndex(rs.getInt("order_index"));
+        section.setDescription(rs.getString("description"));
         return section;
     }
 }
