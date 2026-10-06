@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý nội dung - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;}
@@ -146,10 +146,8 @@
         </c:choose>
         <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link"><i class="fa-solid fa-circle-info"></i> Giới thiệu khóa học</a>
         <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-            <% } %>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
             <div class="user-dropdown">
                 <div class="user-badge">
                     <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
@@ -161,7 +159,15 @@
                     <span class="role-tag"><%=role%></span>
                     <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
                 </div>
-                <div class="user-dropdown-menu">
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="${pageContext.request.contextPath}/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="${pageContext.request.contextPath}/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
                     <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
                         <i class="fa-solid fa-graduation-cap"></i> Khóa học
                     </a>

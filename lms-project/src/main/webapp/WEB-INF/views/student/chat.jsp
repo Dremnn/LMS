@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tin nhắn - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
@@ -124,42 +124,7 @@
         </div>
         <div class="nav-links">
             <% if (currentUser != null) { %>
-                <% if ("student".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
-                    <a href="<%=request.getContextPath()%>/chat" class="nav-link active">Tin nhắn</a>
-                <% } %>
-                <div class="user-dropdown">
-                    <div class="user-badge">
-                        <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                            <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                        <% } else { %>
-                            <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                        <% } %>
-                        <span><%=currentUser.getFullName()%></span>
-                        <span class="role-tag"><%=role%></span>
-                        <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
-                    </div>
-                    <div class="user-dropdown-menu">
-                        <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
-                            <i class="fa-solid fa-graduation-cap"></i> Khóa học
-                        </a>
-                        <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
-                            <i class="fa-solid fa-id-badge"></i> Hồ sơ
-                        </a>
-                        <% if (!"admin".equals(role)) { %>
-                            <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
-                            </a>
-                        <% } %>
-                    </div>
-                </div>
-                <% if ("instructor".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
-                <% } else if ("admin".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
-                <% } else { %>
-                    <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
-                <% } %>
+
                 <a href="<%=request.getContextPath()%>/student/wallet" class="btn btn-outline" style="border-color:#076FA4; color:#076FA4;">
                     <i class="fa-solid fa-wallet"></i> <%= currentUser.getBalance() != null ? String.format("%,.0f đ", currentUser.getBalance()) : "0 đ" %>
                 </a>

@@ -18,7 +18,7 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
 
     <style>
@@ -194,11 +194,9 @@
     </div>
     <div class="nav-links">
         <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-            <% } %>
 
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
             <div class="user-dropdown">
                 <div class="user-badge">
                     <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
@@ -210,7 +208,15 @@
                     <span class="role-tag"><%=role%></span>
                     <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
                 </div>
-                <div class="user-dropdown-menu">
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="<%=request.getContextPath()%>/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
                     <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
                         <i class="fa-solid fa-graduation-cap"></i> Khóa học
                     </a>

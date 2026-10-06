@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi thông báo - UTEdu LMS Giảng viên</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=38">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=38">
     <style>
         .page-header { background: linear-gradient(135deg, #093C62, #076FA4); color: #fff; padding: 24px 28px; border-radius: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(9, 60, 98, .15); }
@@ -62,41 +62,7 @@
         </div>
         <div class="nav-links">
             <% if (currentUser != null) { %>
-                <% if ("student".equals(role)) { %>
-                    <a href="${pageContext.request.contextPath}/dashboard" class="nav-link">Bảng điều khiển</a>
-                <% } %>
-                <div class="user-dropdown">
-                    <div class="user-badge">
-                        <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                            <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                        <% } else { %>
-                            <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                        <% } %>
-                        <span><%=currentUser.getFullName()%></span>
-                        <span class="role-tag"><%=role%></span>
-                        <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
-                    </div>
-                    <div class="user-dropdown-menu">
-                        <a href="${pageContext.request.contextPath}/courses" class="user-dropdown-item">
-                            <i class="fa-solid fa-graduation-cap"></i> Khóa học
-                        </a>
-                        <a href="${pageContext.request.contextPath}/profile" class="user-dropdown-item">
-                            <i class="fa-solid fa-id-badge"></i> Hồ sơ
-                        </a>
-                        <% if (!"admin".equals(role)) { %>
-                            <a href="${pageContext.request.contextPath}/report-issue.jsp" class="user-dropdown-item">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
-                            </a>
-                        <% } %>
-                    </div>
-                </div>
-                <% if ("instructor".equals(role)) { %>
-                    <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline" style="border-color:#076FA4; color:#076FA4;">Quản lý khóa học</a>
-                <% } else if ("admin".equals(role)) { %>
-                    <a href="${pageContext.request.contextPath}/admin" class="btn btn-outline">Quản trị</a>
-                <% } else { %>
-                    <a href="${pageContext.request.contextPath}/student/my-courses" class="btn btn-outline">Của tôi</a>
-                <% } %>
+
                 <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger" style="margin-left: 8px;">Đăng xuất</a>
             <% } else { %>
                 <a href="${pageContext.request.contextPath}/courses" class="nav-link">Khóa học</a>
