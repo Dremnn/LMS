@@ -201,6 +201,7 @@
                                 <div class="actions">
                                     <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>
                                     <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info"><i class="fa-solid fa-folder-open"></i> Nội dung</a>
+                                    <a href="${pageContext.request.contextPath}/instructor/groups?courseId=${course.id}" class="btn btn-sm btn-info"><i class="fa-solid fa-users"></i> Quản lý nhóm học</a>
                                     
                                     <c:if test="${course.status == 'draft'}">
                                         <form action="${pageContext.request.contextPath}/instructor/courses/submit" method="post">

@@ -182,6 +182,15 @@
             <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></c:when>
             <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
         </c:choose>
+        
+        <div style="margin-left: auto;">
+            <a href="${pageContext.request.contextPath}/instructor/groups?courseId=${course.id}" class="btn btn-primary" style="margin-right: 10px;">
+                <i class="fa-solid fa-users-gear"></i> Quản lý Nhóm
+            </a>
+            <a href="${pageContext.request.contextPath}/lesson?courseId=${course.id}&preview=true" class="btn btn-success">
+                <i class="fa-solid fa-play"></i> Xem bài học
+            </a>
+        </div>
     </div>
 </div>
 

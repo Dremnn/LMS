@@ -122,7 +122,7 @@ public class StudyGroupDAO {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
             TypedQuery<GroupMember> q = em.createQuery(
-                "SELECT gm FROM GroupMember gm WHERE gm.studyGroup.id = :groupId", GroupMember.class);
+                "SELECT gm FROM GroupMember gm JOIN FETCH gm.student WHERE gm.studyGroup.id = :groupId", GroupMember.class);
             q.setParameter("groupId", groupId);
             return q.getResultList();
         } finally {

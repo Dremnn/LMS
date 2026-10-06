@@ -283,8 +283,8 @@
             </a>
         </c:if>
 
-        <%-- Nút vào không gian Nhóm (Chỉ hiện cho Student đã enroll) --%>
-        <c:if test="${enrollment != null}">
+        <%-- Nút vào không gian Nhóm (Chỉ hiện cho Student đã enroll và Giáo viên lúc Preview) --%>
+        <c:if test="${enrollment != null || isPreview}">
             <a href="${pageContext.request.contextPath}/student/my-group?courseId=${course.id}" class="doc-link" style="background:#0ea5e9; color:#fff; border-color:#0ea5e9; margin-left: ${empty currentLesson.documentUrl ? '0' : '12px'};">
                 <i class="fa-solid fa-users"></i> Xem Nhóm Của Tôi & Nộp Bài
             </a>

@@ -47,7 +47,10 @@ public class InstructorGroupServlet extends HttpServlet {
             int courseId = Integer.parseInt(courseIdStr);
             Course course = courseDAO.findById(courseId);
             
-            if (course == null || (course.getInstructor().getId() != currentUser.getId() && !"admin".equals(currentUser.getRole()))) {
+            boolean isOwner = (course != null && course.getInstructorId() == currentUser.getId());
+            boolean isAdmin = "admin".equals(currentUser.getRole());
+
+            if (course == null || (!isOwner && !isAdmin)) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập khóa học này.");
                 return;
             }
@@ -98,7 +101,7 @@ public class InstructorGroupServlet extends HttpServlet {
                 int membersPerGroup = Integer.parseInt(req.getParameter("membersPerGroup"));
                 
                 Course course = courseDAO.findById(courseId);
-                if (course != null && (course.getInstructor().getId() == currentUser.getId() || "admin".equals(currentUser.getRole()))) {
+                if (course != null && (course.getInstructorId() == currentUser.getId() || "admin".equals(currentUser.getRole()))) {
                     int created = groupService.autoDivideGroups(courseId, membersPerGroup);
                     session.setAttribute("flashSuccess", "Đã tạo thành công " + created + " nhóm mới!");
                 }
