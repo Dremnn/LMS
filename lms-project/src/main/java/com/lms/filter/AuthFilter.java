@@ -96,6 +96,7 @@ public class AuthFilter implements Filter {
                                path.equals("/learning-paths") ||
                                path.equals("/resources") ||
                                path.equals("/report-issue.html") ||
+                               path.equals("/report-issue.jsp") ||
                                path.equals("/report-issue") ||
                                path.startsWith("/api/report-issue");
 

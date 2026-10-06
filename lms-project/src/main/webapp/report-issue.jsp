@@ -1,37 +1,25 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.lms.model.User" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%
+    User currentUser = (User) session.getAttribute("currentUser");
+    String role = currentUser != null ? currentUser.getRole() : "";
+    String userEmail = currentUser != null && currentUser.getEmail() != null ? currentUser.getEmail() : "";
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=report-issue.jsp">
-  <script>
-    // Tự động chuyển tiếp đến trang JSP tương ứng
-    window.location.replace("report-issue.jsp");
-  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Báo lỗi & Sự cố — UTEdu LMS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/lms-design.css?v=35">
-  <link rel="stylesheet" href="assets/css/lms-animations.css?v=35">
-
-  <script>
-    // Kiểm tra cookie theme trước khi render body để tránh chớp nháy giao diện
-    (function() {
-      var value = '; ' + document.cookie;
-      var parts = value.split('; app_theme=');
-      if (parts.length === 2 && parts.pop().split(';').shift() === 'dark') {
-        document.documentElement.classList.add('dark-theme');
-        document.addEventListener('DOMContentLoaded', function() {
-          if (document.body) document.body.classList.add('dark-theme');
-        });
-      }
-    })();
-  </script>
+  <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=36">
+  <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=36">
 
   <style>
-    /* Bổ sung và tinh chỉnh style riêng cho trang Report Issue đồng bộ với lms-design.css */
     .report-main-content {
       min-height: calc(100vh - 160px);
       padding: 40px 20px 60px;
@@ -534,9 +522,7 @@
       box-shadow: 0 8px 24px rgba(7, 111, 164, 0.4);
     }
 
-    /* ============================================================ */
-    /* DARK THEME OVERRIDES CHO TRANG BÁO CÁO SỰ CỐ                 */
-    /* ============================================================ */
+    /* Dark Mode Overrides */
     body.dark-theme .report-card-wrapper {
       background: #182535 !important;
       border-color: #273e57 !important;
@@ -680,25 +666,58 @@
     }
   </style>
 </head>
-<body class="mesh-bg">
+<body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 
 <!-- NAVBAR ĐỒNG BỘ CHUẨN LMS -->
 <nav class="lms-navbar">
   <div class="nav-left">
-    <a href="index.jsp" class="lms-logo">
-      <img src="assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
+    <a href="<%=request.getContextPath()%>/" class="lms-logo">
+      <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
       <span class="logo-tag">LMS</span>
     </a>
+    <% if (currentUser != null) { %>
+    <div class="quick-actions">
+      <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
+        <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
+      </a>
+      <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
+        <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+      </a>
+    </div>
+    <% } %>
   </div>
   <div class="nav-links">
-    <a href="courses" class="nav-link">Khóa học</a>
-    <a href="instructors" class="nav-link">Giảng viên</a>
-    <a href="learning-paths" class="nav-link">Lộ trình</a>
-    <a href="resources" class="nav-link">Tài liệu</a>
-    <a href="report-issue.html" class="nav-link active">Báo cáo</a>
-    <a href="javascript:history.back()" class="btn btn-outline" style="padding: 8px 18px; font-size: 13px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
-      <i class="fa-solid fa-arrow-left"></i> Quay lại
-    </a>
+    <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+    <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
+    <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
+    <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
+    <a href="<%=request.getContextPath()%>/report-issue.jsp" class="nav-link active">Báo cáo</a>
+    <% if (currentUser != null) { %>
+      <% if ("student".equals(role)) { %>
+        <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
+        <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
+      <% } %>
+      <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
+      <div class="user-badge">
+        <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+          <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+        <% } else { %>
+          <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+        <% } %>
+        <span><%=currentUser.getFullName()%></span>
+        <span class="role-tag"><%=role%></span>
+      </div>
+      <% if ("instructor".equals(role)) { %>
+        <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+      <% } else if ("admin".equals(role)) { %>
+        <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+        <a href="<%=request.getContextPath()%>/admin/issues" class="btn btn-outline" style="border-color:#076FA4;background:rgba(7,111,164,.1);"><i class="fa-solid fa-triangle-exclamation"></i> Xử lý sự cố</a>
+      <% } %>
+      <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+    <% } else { %>
+      <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+      <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
+    <% } %>
   </div>
 </nav>
 
@@ -720,7 +739,7 @@
         <label class="form-label" for="email">
           <i class="fa-solid fa-envelope"></i> Địa chỉ email của bạn <span class="required">*</span>
         </label>
-        <input type="email" class="form-control" id="email" placeholder="ví dụ: yourname@example.com" autocomplete="email">
+        <input type="email" class="form-control" id="email" value="<%= userEmail %>" placeholder="ví dụ: yourname@example.com" autocomplete="email">
         <div class="field-error" id="email-err">
           <i class="fa-solid fa-circle-exclamation"></i><span>Vui lòng nhập địa chỉ email hợp lệ để nhận phản hồi</span>
         </div>
@@ -733,7 +752,7 @@
         </label>
         <div class="role-grid">
           <div>
-            <input type="radio" name="role" id="role-student" value="student" class="role-option">
+            <input type="radio" name="role" id="role-student" value="student" class="role-option" <%= ("student".equalsIgnoreCase(role) || role.isEmpty()) ? "checked" : "" %>>
             <label class="role-label" for="role-student">
               <span class="role-emoji">🎓</span>
               <span class="role-name">Sinh viên / Học viên</span>
@@ -741,7 +760,7 @@
             </label>
           </div>
           <div>
-            <input type="radio" name="role" id="role-instructor" value="instructor" class="role-option">
+            <input type="radio" name="role" id="role-instructor" value="instructor" class="role-option" <%= "instructor".equalsIgnoreCase(role) ? "checked" : "" %>>
             <label class="role-label" for="role-instructor">
               <span class="role-emoji">👨‍🏫</span>
               <span class="role-name">Giảng viên</span>
@@ -845,10 +864,10 @@
       <strong id="ref-code">—</strong>
     </div>
     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-      <a href="index.jsp" class="btn-back-home">
+      <a href="<%=request.getContextPath()%>/" class="btn-back-home">
         <i class="fa-solid fa-house"></i> Về trang chủ
       </a>
-      <a href="report-issue.html" class="btn btn-outline" style="border-radius: 10px; padding: 13px 24px; font-weight: 600;">
+      <a href="<%=request.getContextPath()%>/report-issue.jsp" class="btn btn-outline" style="border-radius: 10px; padding: 13px 24px; font-weight: 600;">
         <i class="fa-solid fa-plus"></i> Gửi thêm báo cáo khác
       </a>
     </div>
@@ -860,7 +879,7 @@
   <div class="container">
     <div class="footer-grid" style="align-items: flex-start;">
       <div class="footer-col brand-col">
-        <a href="index.jsp" class="lms-logo footer-logo" style="margin-bottom: 16px;">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo footer-logo" style="margin-bottom: 16px;">
           <span class="logo-icon">🎓</span><span class="logo-text">UTEdu LMS</span>
         </a>
         <p class="footer-desc">Nền tảng học trực tuyến thế hệ mới. Nâng tầm tri thức, kiến tạo tương lai thế hệ trẻ.</p>
@@ -875,20 +894,20 @@
       <div class="footer-col">
         <h4 class="footer-title">Khám phá</h4>
         <ul class="footer-links">
-          <li><a href="courses?sortBy=popular">Khoá học nổi bật</a></li>
-          <li><a href="instructors">Giảng viên tiêu biểu</a></li>
-          <li><a href="learning-paths">Lộ trình học tập</a></li>
-          <li><a href="resources">Thư viện tài liệu</a></li>
+          <li><a href="<%=request.getContextPath()%>/courses?sortBy=popular">Khoá học nổi bật</a></li>
+          <li><a href="<%=request.getContextPath()%>/instructors">Giảng viên tiêu biểu</a></li>
+          <li><a href="<%=request.getContextPath()%>/learning-paths">Lộ trình học tập</a></li>
+          <li><a href="<%=request.getContextPath()%>/resources">Thư viện tài liệu</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h4 class="footer-title">Hỗ trợ & Trợ giúp</h4>
         <ul class="footer-links">
-          <li><a href="report-issue.html">Báo cáo sự cố</a></li>
-          <li><a href="courses">Tất cả khóa học</a></li>
-          <li><a href="login">Đăng nhập tài khoản</a></li>
-          <li><a href="register">Đăng ký thành viên</a></li>
+          <li><a href="<%=request.getContextPath()%>/report-issue.jsp">Báo cáo sự cố</a></li>
+          <li><a href="<%=request.getContextPath()%>/courses">Tất cả khóa học</a></li>
+          <li><a href="<%=request.getContextPath()%>/login">Đăng nhập tài khoản</a></li>
+          <li><a href="<%=request.getContextPath()%>/register">Đăng ký thành viên</a></li>
         </ul>
       </div>
 
@@ -919,7 +938,7 @@
 </div>
 
 <!-- SCRIPTS -->
-<script src="assets/js/lms-app.js"></script>
+<script src="<%=request.getContextPath()%>/assets/js/lms-app.js"></script>
 <script>
   const $ = id => document.getElementById(id);
   const showErr = (id, show) => {
@@ -927,7 +946,6 @@
     if (el) el.classList.toggle('show', show);
   };
 
-  // Bộ đếm ký tự mô tả
   const desc = $('description');
   const counter = $('char-count');
   if (desc && counter) {
@@ -938,7 +956,6 @@
     });
   }
 
-  // Tải lên ảnh chụp màn hình (Drag & Drop + File input)
   const uploadZone  = $('upload-zone');
   const fileInput   = $('screenshot-input');
   const previewGrid = $('preview-grid');
@@ -998,7 +1015,6 @@
     previewGrid.appendChild(item);
   }
 
-  // Xác thực biểu mẫu
   function validate() {
     let ok = true;
     const emailVal = $('email').value.trim();
@@ -1038,7 +1054,6 @@
     showErr('desc-err', false);
   });
 
-  // Gửi biểu mẫu qua API fetch
   $('report-form').addEventListener('submit', async e => {
     e.preventDefault();
     if (!validate()) return;
@@ -1061,7 +1076,7 @@
     };
 
     try {
-      const response = await fetch('api/report-issue', {
+      const response = await fetch('<%=request.getContextPath()%>/api/report-issue', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=UTF-8'
@@ -1092,7 +1107,6 @@
     }
   });
 
-  // Làm mới biểu mẫu
   $('reset-btn').addEventListener('click', () => {
     $('report-form').reset();
     attachedFiles = [];
