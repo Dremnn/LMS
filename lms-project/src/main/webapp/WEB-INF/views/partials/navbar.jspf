@@ -1,0 +1,78 @@
+<%@ page pageEncoding="UTF-8" %>
+<%--
+    Navbar dùng chung cho các trang Bài tập.
+    Trang nhúng cần khai báo TRƯỚC khi include (scriptlet):
+        String navBackUrl;    // đường dẫn quay lại (không gồm contextPath), VD "/instructor/courses"
+        String navBackLabel;  // chữ hiển thị, VD "← Danh sách khóa học"
+    Biến currentUser / role được khai báo trong file này.
+--%>
+<% com.lms.model.User currentUser = (com.lms.model.User) session.getAttribute("currentUser");
+   String role = currentUser != null ? currentUser.getRole() : ""; %>
+<!-- NAVBAR -->
+<nav class="lms-navbar">
+    <div class="nav-left">
+        <a href="<%=request.getContextPath()%>/" class="lms-logo">
+            <img src="<%=request.getContextPath()%>/assets/images/utedu-logo.png" alt="UTEdu" class="lms-logo-img" style="height: 36px !important; width: auto; max-height: 36px;">
+            <span class="logo-tag">LMS</span>
+        </a>
+        <% if (currentUser != null) { %>
+        <div class="quick-actions">
+            <a href="<%=request.getContextPath()%>/chat" class="quick-action-btn" title="Tin nhắn">
+                <i class="fa-solid fa-comment-dots"></i><span class="quick-action-text">Tin nhắn</span>
+            </a>
+            <a href="<%=request.getContextPath()%>/notifications" class="quick-action-btn" title="Thông báo">
+                <i class="fa-solid fa-bell"></i><span class="quick-action-text">Thông báo</span>
+            </a>
+        </div>
+        <% } %>
+    </div>
+    <div class="nav-links">
+        <% if (currentUser != null) { %>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="<%=request.getContextPath()%>/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+            <% if ("instructor".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
+            <% } else if ("admin".equals(role)) { %>
+                <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
+            <% } %>
+            <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
+        <% } else { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
+        <% } %>
+    </div>
+</nav>

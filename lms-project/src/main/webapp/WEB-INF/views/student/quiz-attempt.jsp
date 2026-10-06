@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${quiz.title} - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .hero{background:linear-gradient(135deg,#093C62,#076FA4);color:#fff;padding:40px 36px 48px;}
@@ -68,27 +68,45 @@
         <% } %>
     </div>
     <div class="nav-links">
-        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
-        <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-            <% } %>
-            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
-                <% if (!"admin".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
-                <% } %>
-            <div class="user-badge">
-                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                <% } else { %>
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                <% } %>
-                <span><%=currentUser.getFullName()%></span>
-                <span class="role-tag"><%=role%></span>
+        <% if (currentUser == null) { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
+        <% } else { %>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="<%=request.getContextPath()%>/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
             </div>
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -96,9 +114,6 @@
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
-        <% } else { %>
-            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
-            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
     </div>
 </nav>
@@ -124,6 +139,13 @@
 </div>
 
 <div class="main">
+    <c:if test="${isPreview}">
+        <div style="background:#E0F2FE;border:1px solid #7DD3FC;color:#0369A1;padding:14px 20px;border-radius:12px;margin-bottom:24px;font-weight:600;display:flex;align-items:center;gap:10px;">
+            <i class="fa-solid fa-circle-info" style="font-size:18px;"></i>
+            <span>Chế độ xem trước bài kiểm tra (Giảng viên / Quản trị viên). Bạn có thể xem nội dung câu hỏi nhưng không thể nộp bài.</span>
+        </div>
+    </c:if>
+
     <c:if test="${not empty error}">
         <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <c:out value="${error}"/></div>
     </c:if>
@@ -152,10 +174,10 @@
                         <label class="option-label">
                             <c:choose>
                                 <c:when test="${question.questionType == 'single_choice'}">
-                                    <input type="radio" name="answer_${question.id}" value="${option.id}" />
+                                    <input type="radio" name="answer_${question.id}" value="${option.id}" ${isPreview ? 'disabled' : ''} />
                                 </c:when>
                                 <c:otherwise>
-                                    <input type="checkbox" name="answer_${question.id}" value="${option.id}" />
+                                    <input type="checkbox" name="answer_${question.id}" value="${option.id}" ${isPreview ? 'disabled' : ''} />
                                 </c:otherwise>
                             </c:choose>
                             <c:out value="${option.content}"/>
@@ -169,12 +191,21 @@
             <div class="submit-bar-info">
                 📋 Tổng <strong>${questions.size()}</strong> câu hỏi · Điểm đạt: <strong>${quiz.passScore}/100</strong>
             </div>
-            <button type="submit" class="btn-submit"><i class="fa-solid fa-rocket"></i> Nộp bài</button>
+            <c:choose>
+                <c:when test="${isPreview}">
+                    <button type="button" class="btn-submit" disabled style="opacity:0.65;cursor:not-allowed;background:#64748B;">
+                        <i class="fa-solid fa-lock"></i> Xem trước (Không thể nộp)
+                    </button>
+                </c:when>
+                <c:otherwise>
+                    <button type="submit" class="btn-submit"><i class="fa-solid fa-rocket"></i> Nộp bài</button>
+                </c:otherwise>
+            </c:choose>
         </div>
     </form>
 </div>
 
-<c:if test="${remainingSeconds != null}">
+<c:if test="${remainingSeconds != null && !isPreview}">
 <script>
     // remainingSeconds được server tính sẵn (dựa trên mốc bắt đầu lưu trong session),
     // nên F5 lại trang không làm reset đồng hồ đếm ngược.

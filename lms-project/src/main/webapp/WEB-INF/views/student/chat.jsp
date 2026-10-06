@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tin nhắn - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
@@ -123,32 +123,14 @@
             <% } %>
         </div>
         <div class="nav-links">
-            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
             <% if (currentUser != null) { %>
-                <% if ("student".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
-                    <a href="<%=request.getContextPath()%>/chat" class="nav-link active">Tin nhắn</a>
-                <% } %>
-                <div class="user-badge">
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                    <span><%=currentUser.getFullName()%></span>
-                    <span class="role-tag"><%=role%></span>
-                </div>
-                <% if ("instructor".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
-                <% } else if ("admin".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
-                <% } else { %>
-                    <a href="<%=request.getContextPath()%>/student/my-courses" class="btn btn-outline">Của tôi</a>
-                <% } %>
+
                 <a href="<%=request.getContextPath()%>/student/wallet" class="btn btn-outline" style="border-color:#076FA4; color:#076FA4;">
                     <i class="fa-solid fa-wallet"></i> <%= currentUser.getBalance() != null ? String.format("%,.0f đ", currentUser.getBalance()) : "0 đ" %>
                 </a>
                 <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
             <% } else { %>
+                <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
                 <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
                 <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
             <% } %>

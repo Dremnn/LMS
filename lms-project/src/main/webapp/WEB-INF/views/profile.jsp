@@ -17,7 +17,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ sơ cá nhân - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=30">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=32">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lms-animations.css?v=32">
     <style>
         body { margin: 0; padding: 0; min-height: 100vh; }
@@ -80,27 +80,41 @@
         <% } %>
     </div>
         <div class="nav-links">
-            <a href="${pageContext.request.contextPath}/courses" class="nav-link">Khóa học</a>
-        <a href="${pageContext.request.contextPath}/instructors" class="nav-link">Giảng viên</a>
-        <a href="${pageContext.request.contextPath}/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="${pageContext.request.contextPath}/resources" class="nav-link">Tài liệu</a>
             <% if (currentUser != null) { %>
-                <% if ("student".equals(role)) { %>
-                    <a href="${pageContext.request.contextPath}/dashboard" class="nav-link">Bảng điều khiển</a>
-                    <a href="${pageContext.request.contextPath}/student/my-courses" class="nav-link">Khóa học của tôi</a>
-                <% } %>
-                <a href="${pageContext.request.contextPath}/profile" class="nav-link active">Hồ sơ</a>
-                <% if (!"admin".equals(role)) { %>
-                    <a href="${pageContext.request.contextPath}/report-issue.html" class="nav-link">Báo cáo</a>
-                <% } %>
-                <div class="user-badge">
-                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                    <% } else { %>
-                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+
+                <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+                <div class="user-dropdown">
+                    <div class="user-badge">
+                        <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                            <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                        <% } else { %>
+                            <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                        <% } %>
+                        <span><%=currentUser.getFullName()%></span>
+                        <span class="role-tag"><%=role%></span>
+                        <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                    </div>
+                    <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="${pageContext.request.contextPath}/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="${pageContext.request.contextPath}/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
                     <% } %>
-                    <span><%=currentUser.getFullName()%></span>
-                    <span class="role-tag"><%=role%></span>
+                        <a href="${pageContext.request.contextPath}/courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                        </a>
+                        <a href="${pageContext.request.contextPath}/profile" class="user-dropdown-item">
+                            <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                        </a>
+                        <% if (!"admin".equals(role)) { %>
+                            <a href="${pageContext.request.contextPath}/report-issue.jsp" class="user-dropdown-item">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                            </a>
+                        <% } %>
+                    </div>
                 </div>
                 <% if ("instructor".equals(role)) { %>
                     <a href="${pageContext.request.contextPath}/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -110,6 +124,7 @@
                 <% } %>
                 <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger">Đăng xuất</a>
             <% } else { %>
+                <a href="${pageContext.request.contextPath}/courses" class="nav-link">Khóa học</a>
                 <a href="${pageContext.request.contextPath}/login" class="btn btn-outline">Đăng nhập</a>
                 <a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Đăng ký</a>
             <% } %>
@@ -165,7 +180,18 @@
             <!-- Thẻ hiển thị Số dư đã nhận từ bán khóa học (không có nút nạp tiền - GV chỉ nhận, không nạp) -->
             <div class="balance-card" style="margin-bottom: 16px;">
                 <div>
-                    <div class="label">Số dư đã nhận từ khóa học</div>
+                    <div class="label">Số dư đã nhận từ khóa học (sau trừ 3% hoa hồng)</div>
+                    <div class="amount">
+                        <fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ
+                    </div>
+                </div>
+            </div>
+        </c:if>
+        <c:if test="${profileUser.role == 'admin'}">
+            <!-- Thẻ hiển thị Số dư hoa hồng admin nhận được (3% mỗi lượt đăng ký khóa học có phí) -->
+            <div class="balance-card" style="margin-bottom: 16px;">
+                <div>
+                    <div class="label">Hoa hồng nền tảng đã nhận (3% mỗi khóa học có phí)</div>
                     <div class="amount">
                         <fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ
                     </div>
@@ -195,7 +221,7 @@
                         </c:choose>
                     </span>
                 </div>
-                <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor'}">
+                <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor' || profileUser.role == 'admin'}">
                     <div class="info-row">
                         <span class="label"><i class="fa-solid fa-wallet"></i> Số dư ví</span>
                         <span class="value"><fmt:formatNumber value="${profileUser.balance}" type="number" groupingUsed="true"/>đ</span>
@@ -228,7 +254,7 @@
                 </form>
             </div>
 
-            <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor'}">
+            <c:if test="${profileUser.role == 'student' || profileUser.role == 'instructor' || profileUser.role == 'admin'}">
                 <div class="panel">
                     <h2>Lịch sử giao dịch ví</h2>
                     <c:choose>
@@ -248,7 +274,8 @@
                                         for (WalletTransaction tx : historyList) {
                                             String txType = tx.getType();
                                             // Các loại cộng tiền (+): nạp tiền, GV nhận tiền bán khóa học, SV được hoàn tiền
-                                            boolean isCredit = "topup".equals(txType) || "earning".equals(txType) || "refund".equals(txType);
+                                            boolean isCredit = "topup".equals(txType) || "earning".equals(txType) || "refund".equals(txType)
+                                                    || "commission".equals(txType);
 
                                             String typeLabel;
                                             String content;
@@ -257,8 +284,16 @@
                                                     typeLabel = "Nạp tiền";
                                                     content = "Mã GD: " + (tx.getReferenceCode() == null || tx.getReferenceCode().isEmpty() ? "—" : tx.getReferenceCode());
                                                     break;
+                                                case "commission":
+                                                    typeLabel = "Hoa hồng nền tảng (3%)";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
+                                                case "commission_refund":
+                                                    typeLabel = "Thu hồi hoa hồng (hoàn tiền)";
+                                                    content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
+                                                    break;
                                                 case "earning":
-                                                    typeLabel = "Nhận tiền khóa học";
+                                                    typeLabel = "Nhận tiền khóa học (97%)";
                                                     content = "Khóa học: " + (tx.getCourseName() != null ? tx.getCourseName() : "");
                                                     break;
                                                 case "refund":

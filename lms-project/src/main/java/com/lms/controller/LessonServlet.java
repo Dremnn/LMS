@@ -77,19 +77,26 @@ public class LessonServlet extends HttpServlet {
 
             int courseId = section.getCourseId();
 
-            // 2. Kiểm tra quyền truy cập (Admin/Instructor được xem trước, Student phải đăng ký)
+            // 3. Lấy toàn bộ nội dung khóa học (để hiển thị sidebar danh sách chương/bài)
+            Course course = courseService.getCourseDetail(courseId);
+
+            // 2. Kiểm tra quyền truy cập (Admin/Instructor chủ khóa học được xem trước, Student phải đăng ký)
             boolean isPreview = false;
-            if (currentUser != null && ("admin".equals(currentUser.getRole()) || "instructor".equals(currentUser.getRole()))) {
+            if (currentUser != null && "admin".equals(currentUser.getRole())) {
                 isPreview = true;
+            } else if (currentUser != null && "instructor".equals(currentUser.getRole())) {
+                if (course != null && course.getInstructorId() == currentUser.getId()) {
+                    isPreview = true;
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền xem khóa học của giảng viên khác!");
+                    return;
+                }
             }
 
             Enrollment enrollment = null;
             if (!isPreview) {
                 enrollment = enrollmentService.getEnrollmentOrThrow(currentUser.getId(), courseId);
             }
-
-            // 3. Lấy toàn bộ nội dung khóa học (để hiển thị sidebar danh sách chương/bài)
-            Course course = courseService.getCourseDetail(courseId);
 
             // Lấy thêm danh sách Quiz để hiển thị ở sidebar
             List<com.lms.model.Quiz> quizzes = new com.lms.service.QuizService().getAllQuizzesForCourse(course);
@@ -105,14 +112,24 @@ public class LessonServlet extends HttpServlet {
                 }
             }
 
+            // Danh sách bài tập của khóa học
+            List<com.lms.model.Assignment> assignments;
+            if (isPreview) {
+                assignments = new com.lms.dao.AssignmentDAO().findByCourseForInstructor(courseId);
+            } else {
+                assignments = new com.lms.dao.AssignmentDAO().findByCourseForStudent(courseId, currentUser.getId());
+            }
+
             String youtubeEmbedUrl = VideoUtil.getYouTubeEmbedUrl(lesson.getVideoUrl());
 
             request.setAttribute("course", course);
             request.setAttribute("currentLesson", lesson);
             request.setAttribute("enrollment", enrollment);
+            request.setAttribute("isPreview", isPreview);
             request.setAttribute("completedLessonIds", completedLessonIds);
             request.setAttribute("youtubeEmbedUrl", youtubeEmbedUrl); // null nếu không phải YouTube
             request.setAttribute("quizzes", quizzes); // Truyền xuống JSP
+            request.setAttribute("assignments", assignments);
 
             request.getRequestDispatcher("/WEB-INF/views/student/lesson-view.jsp")
                     .forward(request, response);
@@ -138,6 +155,14 @@ public class LessonServlet extends HttpServlet {
         try {
             lessonId = Integer.parseInt(request.getParameter("lessonId"));
             int courseId = Integer.parseInt(request.getParameter("courseId"));
+
+            // Giảng viên và Quản trị viên không được đánh dấu tiến độ bài học
+            if (currentUser != null && ("instructor".equals(currentUser.getRole()) || "admin".equals(currentUser.getRole()))) {
+                HttpSession session = request.getSession();
+                session.setAttribute("flashError", "Giảng viên và Quản trị viên không thể đánh dấu tiến độ hoàn thành bài học!");
+                response.sendRedirect(request.getContextPath() + "/student/lessons/view?lessonId=" + lessonId);
+                return;
+            }
 
             // Checkbox HTML: nếu được tick, giá trị param sẽ tồn tại (VD "on" hoặc "true");
             // nếu KHÔNG tick, checkbox sẽ hoàn toàn KHÔNG được gửi lên request

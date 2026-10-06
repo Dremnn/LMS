@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý nội dung - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;}
@@ -135,29 +135,51 @@
         </div>
         <% } %>
     </div>
-    <div class="nav-links">
         <a href="<%=request.getContextPath()%>/instructor/courses" class="nav-link">← Danh sách khóa học</a>
-        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
+        <c:choose>
+            <c:when test="${not empty firstLessonId}">
+                <a href="<%=request.getContextPath()%>/student/lessons/view?lessonId=${firstLessonId}" class="nav-link"><i class="fa-solid fa-play"></i> Xem bài học</a>
+            </c:when>
+            <c:otherwise>
+                <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link"><i class="fa-solid fa-eye"></i> Xem khóa học</a>
+            </c:otherwise>
+        </c:choose>
+        <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link"><i class="fa-solid fa-circle-info"></i> Giới thiệu khóa học</a>
         <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-            <% } %>
-            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
-            <% if (!"admin".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
-            <% } %>
-            <div class="user-badge">
-                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                <% } else { %>
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                <% } %>
-                <span><%=currentUser.getFullName()%></span>
-                <span class="role-tag"><%=role%></span>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="${pageContext.request.contextPath}/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="${pageContext.request.contextPath}/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
             </div>
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -166,22 +188,42 @@
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
             <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
     </div>
 </nav>
 
-<div class="page-header">
-    <h1><i class="fa-solid fa-folder-open"></i> <c:out value="${course.title}"/></h1>
-    <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
-        <span style="font-size:14px;opacity:.85;">Quản lý nội dung khóa học</span>
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+    <div>
+        <h1><i class="fa-solid fa-folder-open"></i> <c:out value="${course.title}"/></h1>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+            <span style="font-size:14px;opacity:.85;">Quản lý nội dung khóa học</span>
+            <c:choose>
+                <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
+                <c:when test="${course.status == 'published'}"><span class="badge badge-published"><i class="fa-solid fa-circle-check"></i> Published</span></c:when>
+                <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></c:when>
+                <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
+            </c:choose>
+        </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <c:choose>
-            <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
-            <c:when test="${course.status == 'published'}"><span class="badge badge-published"><i class="fa-solid fa-circle-check"></i> Published</span></c:when>
-            <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></c:when>
-            <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
+            <c:when test="${not empty firstLessonId}">
+                <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${firstLessonId}" class="btn" style="background:#10B981;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+                    <i class="fa-solid fa-play"></i> Xem bài học (Giao diện học viên)
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn" style="background:#10B981;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+                    <i class="fa-solid fa-eye"></i> Xem khóa học
+                </a>
+            </c:otherwise>
         </c:choose>
+        <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn" style="background:rgba(255,255,255,0.18);color:#fff;border:1.5px solid rgba(255,255,255,0.4);border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:all 0.2s;">
+            <i class="fa-solid fa-circle-info"></i> Trang giới thiệu
+        </a>
     </div>
 </div>
 
@@ -230,7 +272,7 @@
                             </form>
 
                             <%-- Đổi tên chương --%>
-                            <button type="button" class="btn-action-sm" onclick="openEditSectionModal(${section.id}, '<c:out value="${section.title}" escapeXml="true"/>')">
+                            <button type="button" class="btn-action-sm" data-id="${section.id}" data-title="<c:out value="${section.title}" escapeXml="true"/>" onclick="openEditSectionModal(this)">
                                 <i class="fa-solid fa-pen-to-square"></i> Đổi tên
                             </button>
 
@@ -254,16 +296,32 @@
                                             <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}" style="color:inherit; text-decoration:underline; font-weight:600;">
                                                 <c:out value="${lesson.title}"/>
                                             </a>
+                                            <c:if test="${not empty lesson.description}">
+                                                <span title="<c:out value="${lesson.description}"/>" style="font-size:11px;color:#6b7280;margin-left:8px;font-weight:normal;background:#edf2f7;padding:2px 6px;border-radius:4px;">
+                                                    <i class="fa-solid fa-align-left"></i> Có mô tả
+                                                </span>
+                                            </c:if>
                                         </span>
                                         <div style="display:flex;align-items:center;gap:8px;">
                                             <span class="lesson-dur">
                                                 <c:choose>
-                                                    <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
-                                                    <c:otherwise>N/A</c:otherwise>
+                                                     <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
+                                                     <c:otherwise>N/A</c:otherwise>
                                                 </c:choose>
                                             </span>
+                                            <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
+                                               class="btn-action-sm" style="padding:3px 8px;font-size:11px;background:#0284c7;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+                                               title="Xem bài học này ở giao diện học viên">
+                                                <i class="fa-solid fa-eye"></i> Xem bài học
+                                            </a>
                                             <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;"
-                                                    onclick="openEditLessonModal(${lesson.id}, '<c:out value="${lesson.title}" escapeXml="true"/>', '${lesson.durationMinutes != null ? lesson.durationMinutes : ''}', '<c:out value="${lesson.videoUrl}" escapeXml="true"/>', '<c:out value="${lesson.documentUrl}" escapeXml="true"/>')">
+                                                    data-id="${lesson.id}"
+                                                    data-title="<c:out value="${lesson.title}" escapeXml="true"/>"
+                                                    data-duration="${lesson.durationMinutes != null ? lesson.durationMinutes : ''}"
+                                                    data-video="<c:out value="${lesson.videoUrl}" escapeXml="true"/>"
+                                                    data-doc="<c:out value="${lesson.documentUrl}" escapeXml="true"/>"
+                                                    data-desc="<c:out value="${lesson.description}" escapeXml="true"/>"
+                                                    onclick="openEditLessonModal(this)">
                                                 <i class="fa-solid fa-pen"></i> Sửa
                                             </button>
                                             <form action="${pageContext.request.contextPath}/instructor/courses/lessons/delete" method="post" style="display:inline;"
@@ -306,6 +364,10 @@
                                     <label>URL Tài liệu</label>
                                     <input type="text" name="documentUrl" class="form-control" placeholder="https://drive.google.com/...">
                                 </div>
+                            </div>
+                            <div class="form-group" style="margin-top:10px;">
+                                <label>Mô tả nội dung bài học (tùy chọn)</label>
+                                <textarea name="description" class="form-control" rows="2" placeholder="Tóm tắt ngắn gọn nội dung bài học, mục tiêu học tập..."></textarea>
                             </div>
                             <div style="margin-top:12px;">
                                 <button type="submit" class="btn btn-primary btn-sm">➕ Thêm bài học</button>
@@ -372,6 +434,11 @@
                                 </div>
                             </div>
                             <div style="display:flex;align-items:center;gap:8px;">
+                                <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}" class="btn btn-sm"
+                                   style="background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+                                   title="Xem giao diện làm bài của học viên">
+                                    <i class="fa-solid fa-eye"></i> Xem Quiz
+                                </a>
                                 <a href="${pageContext.request.contextPath}/instructor/quizzes/manage?id=${quiz.id}" class="btn btn-sm quiz-item-btn">
                                     <i class="fa-solid fa-pen-to-square"></i> Quản lý câu hỏi
                                 </a>
@@ -392,6 +459,64 @@
                 <div class="quiz-empty-card">
                     Chưa có Quiz nào được tạo.
                 </div>
+            </c:otherwise>
+        </c:choose>
+    </div>
+
+    <%-- ===== PHẦN BÀI TẬP ===== --%>
+    <div class="quiz-section-block" style="margin-top:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <h3>📎 Bài tập khóa học</h3>
+            <a href="${pageContext.request.contextPath}/instructor/assignments/new?courseId=${course.id}"
+               class="btn btn-primary btn-sm">➕ Tạo bài tập mới</a>
+        </div>
+        <p class="quiz-section-desc">Giao bài tập để học viên nộp file (doc, docx, txt, pdf, ...). Có thể đặt hạn nộp; học viên sẽ được nhắc trước hạn 24 giờ.</p>
+
+        <c:choose>
+            <c:when test="${not empty assignments}">
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <c:forEach var="asg" items="${assignments}">
+                        <div class="quiz-item-card">
+                            <div>
+                                <div class="quiz-item-title"><c:out value="${asg.title}"/></div>
+                                <div class="quiz-item-meta">
+                                    <c:choose>
+                                        <c:when test="${asg.sectionId != null}"> (Chương: <c:out value="${asg.sectionTitle}"/>)</c:when>
+                                        <c:otherwise> (Toàn khóa học)</c:otherwise>
+                                    </c:choose>
+                                    · <c:choose>
+                                        <c:when test="${not empty asg.dueAt}">Hạn nộp: ${asg.dueAtDisplay}<c:if test="${asg.overdue}"> (đã hết hạn)</c:if></c:when>
+                                        <c:otherwise>Không đặt hạn nộp</c:otherwise>
+                                    </c:choose>
+                                    · Đã nộp: ${asg.submissionCount}/${asg.enrolledCount}
+                                    <c:if test="${asg.hasAttachment}"> · 📎 <c:out value="${asg.attachName}"/></c:if>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="btn btn-sm"
+                                   style="background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+                                   title="Xem giao diện nộp bài của học viên">
+                                    <i class="fa-solid fa-eye"></i> Xem Bài tập
+                                </a>
+                                <a href="${pageContext.request.contextPath}/instructor/assignments/submissions?id=${asg.id}" class="btn btn-sm quiz-item-btn">
+                                    <i class="fa-solid fa-inbox"></i> Bài nộp (${asg.submissionCount})
+                                </a>
+                                <a href="${pageContext.request.contextPath}/instructor/assignments/edit?id=${asg.id}" class="btn btn-sm quiz-item-btn">
+                                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                </a>
+                                <form action="${pageContext.request.contextPath}/instructor/assignments/delete" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa bài tập này? Toàn bộ bài nộp của học viên cũng sẽ bị xóa!');">
+                                    <input type="hidden" name="courseId" value="${course.id}">
+                                    <input type="hidden" name="assignmentId" value="${asg.id}">
+                                    <button type="submit" class="btn-danger-sm"><i class="fa-solid fa-trash"></i> Xóa</button>
+                                </form>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="quiz-empty-card">Chưa có bài tập nào được tạo.</div>
             </c:otherwise>
         </c:choose>
     </div>
@@ -445,6 +570,10 @@
                 <label>URL Tài liệu</label>
                 <input type="text" name="documentUrl" id="modalEditLessonDoc" class="form-control" placeholder="https://drive.google.com/..." style="margin-top:4px;">
             </div>
+            <div class="form-group" style="margin-bottom:18px;">
+                <label>Mô tả nội dung bài học</label>
+                <textarea name="description" id="modalEditLessonDesc" class="form-control" rows="3" placeholder="Tóm tắt nội dung bài học..." style="margin-top:4px;"></textarea>
+            </div>
             <div style="display:flex;justify-content:flex-end;gap:10px;">
                 <button type="button" class="btn btn-outline btn-sm" onclick="closeEditLessonModal()">Hủy</button>
                 <button type="submit" class="btn btn-primary btn-sm">💾 Lưu thay đổi</button>
@@ -454,24 +583,40 @@
 </div>
 
 <script>
-    function openEditSectionModal(sectionId, title) {
-        document.getElementById('modalEditSectionId').value = sectionId;
-        document.getElementById('modalEditSectionTitle').value = title;
+    function openEditSectionModal(arg1, title) {
+        if (typeof arg1 === 'object' && arg1 !== null) {
+            document.getElementById('modalEditSectionId').value = arg1.dataset.id || '';
+            document.getElementById('modalEditSectionTitle').value = arg1.dataset.title || '';
+        } else {
+            document.getElementById('modalEditSectionId').value = arg1 || '';
+            document.getElementById('modalEditSectionTitle').value = title || '';
+        }
         document.getElementById('editSectionModal').classList.add('active');
     }
     function closeEditSectionModal() {
         document.getElementById('editSectionModal').classList.remove('active');
     }
-    function openEditLessonModal(lessonId, title, duration, videoUrl, docUrl) {
-        document.getElementById('modalEditLessonId').value = lessonId;
-        document.getElementById('modalEditLessonTitle').value = title;
-        document.getElementById('modalEditLessonDuration').value = duration || '';
-        document.getElementById('modalEditLessonVideo').value = videoUrl || '';
-        document.getElementById('modalEditLessonDoc').value = docUrl || '';
+    function openEditLessonModal(arg1, title, duration, videoUrl, docUrl, desc) {
+        if (typeof arg1 === 'object' && arg1 !== null) {
+            document.getElementById('modalEditLessonId').value = arg1.dataset.id || '';
+            document.getElementById('modalEditLessonTitle').value = arg1.dataset.title || '';
+            document.getElementById('modalEditLessonDuration').value = arg1.dataset.duration || '';
+            document.getElementById('modalEditLessonVideo').value = arg1.dataset.video || '';
+            document.getElementById('modalEditLessonDoc').value = arg1.dataset.doc || '';
+            document.getElementById('modalEditLessonDesc').value = (arg1.dataset.desc || '').trim();
+        } else {
+            document.getElementById('modalEditLessonId').value = arg1 || '';
+            document.getElementById('modalEditLessonTitle').value = title || '';
+            document.getElementById('modalEditLessonDuration').value = duration || '';
+            document.getElementById('modalEditLessonVideo').value = videoUrl || '';
+            document.getElementById('modalEditLessonDoc').value = docUrl || '';
+            document.getElementById('modalEditLessonDesc').value = (desc || '').trim();
+        }
         document.getElementById('editLessonModal').classList.add('active');
     }
     function closeEditLessonModal() {
         document.getElementById('editLessonModal').classList.remove('active');
+    }
 </script>
 
 <!-- Dynamic Island Theme Toggle -->

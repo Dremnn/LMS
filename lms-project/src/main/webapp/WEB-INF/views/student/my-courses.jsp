@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Khóa học của tôi - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .page-header{background:rgba(255,255,255,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,0.8);padding:44px 40px;text-align:center;}
@@ -190,27 +190,41 @@
         <% } %>
     </div>
     <div class="nav-links">
-        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
         <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link active">Khóa học của tôi</a>
-            <% } %>
-            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
-                <% if (!"admin".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
-                <% } %>
-            <div class="user-badge">
-                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                <% } else { %>
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                <% } %>
-                <span><%=currentUser.getFullName()%></span>
-                <span class="role-tag"><%=role%></span>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="${pageContext.request.contextPath}/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="${pageContext.request.contextPath}/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
             </div>
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -219,6 +233,7 @@
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
             <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
@@ -287,10 +302,16 @@
                             <span class="enrolled-date">
                                 <i class="fa-regular fa-calendar-check"></i> Đăng ký: ${enrollment.formattedEnrolledAt}
                             </span>
-                            <a href="${pageContext.request.contextPath}/courses/detail?id=${enrollment.courseId}"
-                               class="btn btn-primary" style="padding:10px 22px;border-radius:10px;font-weight:700;">
-                                <i class="fa-solid fa-play"></i> Vào học
-                            </a>
+                            <span style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <a href="${pageContext.request.contextPath}/student/assignments?courseId=${enrollment.courseId}"
+                                   class="btn btn-outline" style="padding:10px 18px;border-radius:10px;font-weight:700;">
+                                    <i class="fa-solid fa-paperclip"></i> Bài tập
+                                </a>
+                                <a href="${pageContext.request.contextPath}/courses/detail?id=${enrollment.courseId}"
+                                   class="btn btn-primary" style="padding:10px 22px;border-radius:10px;font-weight:700;">
+                                    <i class="fa-solid fa-play"></i> Vào học
+                                </a>
+                            </span>
                         </div>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import com.lms.model.WalletTransaction;
 import com.lms.util.DBConnection;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -16,6 +17,10 @@ import java.util.List;
  * để đảm bảo không bao giờ lệch số dư nếu có lỗi giữa chừng.
  */
 public class WalletService {
+
+    // Hoa hồng nền tảng: 3% giá khóa học được chuyển cho tài khoản admin,
+    // giảng viên nhận phần còn lại (97%)
+    public static final BigDecimal COMMISSION_RATE = new BigDecimal("0.03");
 
     private final UserDAO userDAO;
     private final WalletTransactionDAO walletTransactionDAO;
@@ -66,8 +71,8 @@ public class WalletService {
 
     // =========================================================================
     // 2. THANH TOÁN KHÓA HỌC BẰNG SỐ DƯ VÍ
-    // Trừ tiền của Student VÀ cộng tiền cho Instructor trong CÙNG 1 transaction
-    // (toàn bộ giá trị khóa học được chuyển thẳng cho giảng viên, không thu phí nền tảng)
+    // Trừ tiền của Student, cộng 97% cho Instructor và 3% hoa hồng cho Admin
+    // trong CÙNG 1 transaction (hoặc thành công cả 3, hoặc rollback cả 3)
     // Ném IllegalStateException("Số dư không đủ...") nếu không đủ tiền
     // Trả về số dư MỚI của student sau khi trừ
     // =========================================================================
@@ -93,16 +98,34 @@ public class WalletService {
             paymentTx.setBalanceAfter(studentNewBalance);
             walletTransactionDAO.insert(conn, paymentTx);
 
+            // Tách hoa hồng: admin nhận 3%, giảng viên nhận phần còn lại
+            Integer adminId = userDAO.findFirstAdminId();
+            BigDecimal commission = calcCommission(price, instructorId, adminId);
+            BigDecimal instructorShare = price.subtract(commission);
+
             // Cộng tiền cho giảng viên sở hữu khóa học
-            BigDecimal instructorNewBalance = userDAO.addBalance(conn, instructorId, price);
+            BigDecimal instructorNewBalance = userDAO.addBalance(conn, instructorId, instructorShare);
             if (instructorNewBalance == null) {
                 conn.rollback();
                 throw new RuntimeException("Không tìm thấy tài khoản giảng viên để cộng tiền!");
             }
 
-            WalletTransaction earningTx = new WalletTransaction(instructorId, "earning", price, null, courseId);
+            WalletTransaction earningTx = new WalletTransaction(instructorId, "earning", instructorShare, null, courseId);
             earningTx.setBalanceAfter(instructorNewBalance);
             walletTransactionDAO.insert(conn, earningTx);
+
+            // Cộng hoa hồng cho admin
+            if (commission.signum() > 0) {
+                BigDecimal adminNewBalance = userDAO.addBalance(conn, adminId, commission);
+                if (adminNewBalance == null) {
+                    conn.rollback();
+                    throw new RuntimeException("Không tìm thấy tài khoản admin để cộng hoa hồng!");
+                }
+
+                WalletTransaction commissionTx = new WalletTransaction(adminId, "commission", commission, null, courseId);
+                commissionTx.setBalanceAfter(adminNewBalance);
+                walletTransactionDAO.insert(conn, commissionTx);
+            }
 
             conn.commit();
             return studentNewBalance;
@@ -120,8 +143,8 @@ public class WalletService {
 
     // =========================================================================
     // 2b. HOÀN TIỀN KHÓA HỌC (Refund) - dùng khi Student hủy đăng ký trong thời hạn cho phép
-    // Hoàn lại tiền cho Student VÀ trừ lại đúng số tiền đó khỏi Instructor,
-    // trong CÙNG 1 transaction (hoặc thành công cả 2, hoặc rollback cả 2)
+    // Hoàn lại 100% tiền cho Student, đồng thời trừ lại phần 97% của Instructor
+    // và 3% hoa hồng của Admin, trong CÙNG 1 transaction (hoặc thành công hết, hoặc rollback hết)
     // =========================================================================
     public void refundCourse(int studentId, int instructorId, int courseId, BigDecimal price) {
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
@@ -133,18 +156,38 @@ public class WalletService {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
+            // Tính lại đúng phần hoa hồng đã chia lúc thanh toán
+            Integer adminId = userDAO.findFirstAdminId();
+            BigDecimal commission = calcCommission(price, instructorId, adminId);
+            BigDecimal instructorShare = price.subtract(commission);
+
             // Trừ lại tiền của giảng viên trước - nếu giảng viên không còn đủ số dư này
             // (ví dụ đã rút/tiêu hết) thì hủy toàn bộ thao tác hoàn tiền
-            BigDecimal instructorNewBalance = userDAO.deductBalance(conn, instructorId, price);
+            BigDecimal instructorNewBalance = userDAO.deductBalance(conn, instructorId, instructorShare);
             if (instructorNewBalance == null) {
                 conn.rollback();
                 throw new IllegalStateException(
                         "Không thể hoàn tiền vì số dư của giảng viên không đủ. Vui lòng liên hệ quản trị viên!");
             }
 
-            WalletTransaction deductionTx = new WalletTransaction(instructorId, "refund_deduction", price, null, courseId);
+            WalletTransaction deductionTx = new WalletTransaction(instructorId, "refund_deduction", instructorShare, null, courseId);
             deductionTx.setBalanceAfter(instructorNewBalance);
             walletTransactionDAO.insert(conn, deductionTx);
+
+            // Thu hồi hoa hồng đã chuyển cho admin
+            if (commission.signum() > 0) {
+                BigDecimal adminNewBalance = userDAO.deductBalance(conn, adminId, commission);
+                if (adminNewBalance == null) {
+                    conn.rollback();
+                    throw new IllegalStateException(
+                            "Không thể hoàn tiền vì số dư của admin không đủ để thu hồi hoa hồng. Vui lòng liên hệ quản trị viên!");
+                }
+
+                WalletTransaction commissionRefundTx =
+                        new WalletTransaction(adminId, "commission_refund", commission, null, courseId);
+                commissionRefundTx.setBalanceAfter(adminNewBalance);
+                walletTransactionDAO.insert(conn, commissionRefundTx);
+            }
 
             // Hoàn tiền vào ví Student
             BigDecimal studentNewBalance = userDAO.addBalance(conn, studentId, price);
@@ -175,6 +218,22 @@ public class WalletService {
     // =========================================================================
     public List<WalletTransaction> getHistory(int userId) {
         return walletTransactionDAO.findByUser(userId, 20);
+    }
+
+    // =========================================================================
+    // Tính hoa hồng admin = 3% giá khóa học (làm tròn 2 chữ số thập phân).
+    // Trả về 0 (không thu hoa hồng) nếu: chưa có admin, hoặc chủ khóa học chính là admin.
+    // Dùng chung cho cả thanh toán và hoàn tiền để 2 chiều luôn khớp nhau.
+    // =========================================================================
+    private BigDecimal calcCommission(BigDecimal price, int instructorId, Integer adminId) {
+        if (adminId == null) {
+            System.err.println("[WalletService] Chưa có tài khoản admin - bỏ qua hoa hồng, giảng viên nhận 100%.");
+            return BigDecimal.ZERO;
+        }
+        if (adminId == instructorId) {
+            return BigDecimal.ZERO; // admin tự bán khóa học: không cần chia
+        }
+        return price.multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP);
     }
 
     private void rollbackQuietly(Connection conn) {

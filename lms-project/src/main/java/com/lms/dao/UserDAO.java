@@ -228,6 +228,24 @@ public class UserDAO {
         }
         return null; // Không đủ số dư
     }
+    // =========================================================================
+    // 9. Lấy id của tài khoản admin nhận hoa hồng (admin tạo sớm nhất, đang active)
+    // Trả về null nếu hệ thống chưa có admin nào
+    // =========================================================================
+    public Integer findFirstAdminId() {
+        String sql = "SELECT id FROM users WHERE role = 'admin' AND status = 'active' ORDER BY id ASC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public java.util.List<Integer> getAllStudentIds() {
         java.util.List<Integer> list = new java.util.ArrayList<>();
         String sql = "SELECT id FROM users WHERE role = 'student'";

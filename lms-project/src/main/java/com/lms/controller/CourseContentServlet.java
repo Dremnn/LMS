@@ -77,8 +77,24 @@ public class CourseContentServlet extends HttpServlet {
             // Lấy danh sách quiz của khóa học (mới thêm)
             java.util.List<com.lms.model.Quiz> quizzes = new com.lms.service.QuizService().getAllQuizzesForCourse(course);
 
+            // Danh sách bài tập của khóa học (kèm số bài đã nộp)
+            java.util.List<com.lms.model.Assignment> assignments =
+                    new com.lms.service.AssignmentService().listForInstructor(course.getId(), currentUser);
+
+            Integer firstLessonId = null;
+            if (course.getSectionsCache() != null) {
+                for (com.lms.model.Section s : course.getSectionsCache()) {
+                    if (s.getLessons() != null && !s.getLessons().isEmpty()) {
+                        firstLessonId = s.getLessons().get(0).getId();
+                        break;
+                    }
+                }
+            }
+
             request.setAttribute("course", course);
             request.setAttribute("quizzes", quizzes);
+            request.setAttribute("assignments", assignments);
+            request.setAttribute("firstLessonId", firstLessonId);
             request.getRequestDispatcher("/WEB-INF/views/instructor/course-manage.jsp")
                     .forward(request, response);
 
@@ -130,11 +146,16 @@ public class CourseContentServlet extends HttpServlet {
                 String videoUrl = request.getParameter("videoUrl");
                 String documentUrl = request.getParameter("documentUrl");
                 String durationStr = request.getParameter("durationMinutes");
+                String description = request.getParameter("description");
+                if (description != null) {
+                    description = description.trim();
+                    if (description.isEmpty()) description = null;
+                }
 
                 Integer duration = (durationStr != null && !durationStr.isEmpty())
                         ? Integer.parseInt(durationStr) : null;
 
-                courseService.addLesson(sectionId, currentUser.getId(), title, videoUrl, documentUrl, duration);
+                courseService.addLesson(sectionId, currentUser.getId(), title, videoUrl, documentUrl, duration, description);
 
             } else if ("/instructor/courses/lessons/edit".equals(path)) {
                 courseId = Integer.parseInt(request.getParameter("courseId"));
@@ -144,11 +165,16 @@ public class CourseContentServlet extends HttpServlet {
                 String videoUrl = request.getParameter("videoUrl");
                 String documentUrl = request.getParameter("documentUrl");
                 String durationStr = request.getParameter("durationMinutes");
+                String description = request.getParameter("description");
+                if (description != null) {
+                    description = description.trim();
+                    if (description.isEmpty()) description = null;
+                }
 
                 Integer duration = (durationStr != null && !durationStr.isEmpty())
                         ? Integer.parseInt(durationStr) : null;
 
-                courseService.updateLesson(lessonId, currentUser.getId(), title, videoUrl, documentUrl, duration);
+                courseService.updateLesson(lessonId, currentUser.getId(), title, videoUrl, documentUrl, duration, description);
 
             } else if ("/instructor/courses/lessons/delete".equals(path)) {
                 courseId = Integer.parseInt(request.getParameter("courseId"));

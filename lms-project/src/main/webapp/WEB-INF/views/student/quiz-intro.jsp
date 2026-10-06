@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin Quiz - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .main{max-width:680px;margin:60px auto;padding:0 24px;}
@@ -66,27 +66,45 @@
     </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link">← Chi tiết khóa học</a>
-        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
-        <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-            <% } %>
-            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
-                <% if (!"admin".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
-                <% } %>
-            <div class="user-badge">
-                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                <% } else { %>
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                <% } %>
-                <span><%=currentUser.getFullName()%></span>
-                <span class="role-tag"><%=role%></span>
+        <% if (currentUser == null) { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
+            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
+            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
+        <% } else { %>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="${pageContext.request.contextPath}/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="${pageContext.request.contextPath}/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
             </div>
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -94,9 +112,6 @@
                 <a href="<%=request.getContextPath()%>/admin" class="btn btn-outline">Quản trị</a>
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
-        <% } else { %>
-            <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
-            <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
     </div>
 </nav>
@@ -163,30 +178,48 @@
                 </div>
             </c:if>
 
-            <div class="status-box">
-                <c:choose>
-                    <c:when test="${attemptsUsed == 0}">
-                        <div class="status-icon">🆕</div>
-                        <div class="status-text">
-                            <strong>Chưa làm bài.</strong><br>
-                            Hãy sẵn sàng trước khi bắt đầu. Bạn phải đạt ít nhất ${quiz.passScore} điểm để qua bài kiểm tra này.
+            <c:choose>
+                <c:when test="${isPreview}">
+                    <div class="status-box" style="background:#e0f2fe;border-color:#7dd3fc;">
+                        <div class="status-icon" style="color:#0284c7 !important;"><i class="fa-solid fa-eye" style="color:#0284c7 !important;"></i></div>
+                        <div class="status-text" style="color:#0369a1;">
+                            <strong>Chế độ xem trước bài kiểm tra (Giảng viên / Quản trị viên).</strong><br>
+                            Bạn có thể xem trước các câu hỏi và trải nghiệm giao diện làm bài của học sinh mà không bị tính lượt làm bài hay ghi nhận kết quả.
                         </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="status-icon"><i class="fa-solid fa-chart-line"></i></div>
-                        <div class="status-text">
-                            <strong>Đã làm bài (${attemptsUsed} lần).</strong><br>
-                            Điểm cao nhất của bạn hiện tại là: <strong style="font-size:16px;">${highestScore != null ? highestScore : 0}</strong> / 100.
-                            <c:if test="${highestScore >= quiz.passScore}">
-                                <span style="color:#276749;font-weight:bold;"> (Đã Đạt <i class="fa-solid fa-circle-check"></i>)</span>
-                            </c:if>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="status-box">
+                        <c:choose>
+                            <c:when test="${attemptsUsed == 0}">
+                                <div class="status-icon">🆕</div>
+                                <div class="status-text">
+                                    <strong>Chưa làm bài.</strong><br>
+                                    Hãy sẵn sàng trước khi bắt đầu. Bạn phải đạt ít nhất ${quiz.passScore} điểm để qua bài kiểm tra này.
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="status-icon"><i class="fa-solid fa-chart-line"></i></div>
+                                <div class="status-text">
+                                    <strong>Đã làm bài (${attemptsUsed} lần).</strong><br>
+                                    Điểm cao nhất của bạn hiện tại là: <strong style="font-size:16px;">${highestScore != null ? highestScore : 0}</strong> / 100.
+                                    <c:if test="${highestScore >= quiz.passScore}">
+                                        <span style="color:#276749;font-weight:bold;"> (Đã Đạt <i class="fa-solid fa-circle-check"></i>)</span>
+                                    </c:if>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </c:otherwise>
+            </c:choose>
 
             <div class="actions">
                 <c:choose>
+                    <c:when test="${isPreview}">
+                        <a href="${pageContext.request.contextPath}/student/quizzes/attempt?id=${quiz.id}${not empty param.lessonId ? '&lessonId=' : ''}${param.lessonId}" class="btn-start" style="background:linear-gradient(135deg, #0284c7, #0369a1);">
+                            <i class="fa-solid fa-eye"></i> Xem trước đề thi
+                        </a>
+                    </c:when>
                     <c:when test="${!quiz.openNow}">
                         <a href="#" class="btn-start disabled">🚫 Quiz không khả dụng lúc này</a>
                     </c:when>
@@ -204,7 +237,7 @@
                         <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${param.lessonId}" class="btn btn-outline" style="padding:14px 24px;font-size:15px;">Quay lại bài học</a>
                     </c:when>
                     <c:otherwise>
-                        <a href="${pageContext.request.contextPath}/student/my-courses" class="btn btn-outline" style="padding:14px 24px;font-size:15px;">Quay lại khóa học</a>
+                        <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn btn-outline" style="padding:14px 24px;font-size:15px;">Quay lại khóa học</a>
                     </c:otherwise>
                 </c:choose>
             </div>

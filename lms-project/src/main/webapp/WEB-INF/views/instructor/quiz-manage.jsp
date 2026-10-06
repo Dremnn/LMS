@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Quiz - LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .btn-danger-sm{padding:6px 14px;background:#fed7d7;color:#9b2c2c;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;}
@@ -105,27 +105,41 @@
     </div>
     <div class="nav-links">
         <a href="<%=request.getContextPath()%>/instructor/courses" class="nav-link">← Khóa học</a>
-        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
         <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/student/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-            <% } %>
-            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
-            <% if (!"admin".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
-            <% } %>
-            <div class="user-badge">
-                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                <% } else { %>
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                <% } %>
-                <span><%=currentUser.getFullName()%></span>
-                <span class="role-tag"><%=role%></span>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="<%=request.getContextPath()%>/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
             </div>
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -134,6 +148,7 @@
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
             <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
@@ -192,10 +207,16 @@
                             </div>
                         </c:forEach>
                     </div>
+                    <c:if test="${not empty question.explanation}">
+                        <div class="question-explanation" style="margin-top:10px;padding:9px 13px;background:rgba(18,105,176,0.06);border-left:3px solid var(--primary);border-radius:6px;font-size:13.5px;color:var(--text-main);line-height:1.5;">
+                            <strong style="color:var(--primary);"><i class="fa-solid fa-lightbulb"></i> Giải thích:</strong> <c:out value="${question.explanation}"/>
+                        </div>
+                    </c:if>
                     <div id="qdata_${question.id}" style="display:none;"
                          data-id="${question.id}"
                          data-content="<c:out value="${question.content}" escapeXml="true"/>"
-                         data-type="${question.questionType}">
+                         data-type="${question.questionType}"
+                         data-explanation="<c:out value="${question.explanation}" escapeXml="true"/>">
                         <c:forEach var="opt" items="${question.options}">
                             <span class="opt-item" data-content="<c:out value="${opt.content}" escapeXml="true"/>" data-correct="${opt.correct}"></span>
                         </c:forEach>
@@ -266,6 +287,12 @@
                 <div class="hint">💡 Với loại "1 đáp án đúng", chỉ được tick đúng 1 ô "Đáp án đúng".</div>
             </div>
 
+            <div class="form-group">
+                <label for="explanation">Giải thích chi tiết (tùy chọn)</label>
+                <textarea id="explanation" name="explanation" rows="2" placeholder="Nhập giải thích vì sao đáp án đúng, kiến thức cần ghi nhớ..."></textarea>
+                <div class="hint">💡 Phần giải thích này sẽ hiển thị cho học viên sau khi hoàn thành bài quiz.</div>
+            </div>
+
             <button type="submit" class="btn-submit">💾 Lưu câu hỏi</button>
         </form>
     </div>
@@ -304,6 +331,12 @@
                 <div class="hint">💡 Với loại "1 đáp án đúng", chỉ được tick đúng 1 ô "Đáp án đúng".</div>
             </div>
 
+            <div class="form-group">
+                <label for="editExplanation">Giải thích chi tiết (tùy chọn)</label>
+                <textarea id="editExplanation" name="explanation" rows="2" placeholder="Nhập giải thích vì sao đáp án đúng, kiến thức cần ghi nhớ..."></textarea>
+                <div class="hint">💡 Phần giải thích này sẽ hiển thị cho học viên sau khi hoàn thành bài quiz.</div>
+            </div>
+
             <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
                 <button type="button" class="btn btn-outline btn-sm" onclick="closeEditQuestionModal()">Hủy</button>
                 <button type="submit" class="btn-submit" style="padding:8px 20px;">💾 Lưu thay đổi</button>
@@ -333,6 +366,7 @@
         document.getElementById('modalEditQuestionId').value = questionId;
         document.getElementById('editContent').value = dataEl.getAttribute('data-content');
         document.getElementById('editQuestionType').value = dataEl.getAttribute('data-type');
+        document.getElementById('editExplanation').value = dataEl.getAttribute('data-explanation') || '';
 
         var container = document.getElementById('editOptionsContainer');
         container.innerHTML = '';

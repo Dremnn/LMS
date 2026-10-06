@@ -61,35 +61,52 @@ public class EnrollmentServlet extends HttpServlet {
 
         try {
             int courseId = Integer.parseInt(request.getParameter("courseId"));
+            HttpSession session = request.getSession();
 
             if ("/enrollments/cancel".equals(path)) {
                 enrollmentService.unenroll(currentUser.getId(), courseId);
-                response.sendRedirect(request.getContextPath() + "/student/my-courses");
+                session.setAttribute("flashSuccess", "Đã hủy đăng ký khóa học thành công!");
+                response.sendRedirect(request.getContextPath() + "/courses/detail?id=" + courseId);
             } else if ("/enrollments/refund".equals(path)) {
                 enrollmentService.refundEnrollment(currentUser.getId(), courseId);
-                HttpSession session = request.getSession();
-                session.setAttribute("flashSuccess", "Đã hủy đăng ký và hoàn tiền thành công!");
-                response.sendRedirect(request.getContextPath() + "/student/my-courses");
+                // Cập nhật lại thông tin user trong session (số dư mới sau khi hoàn tiền)
+                com.lms.dao.UserDAO userDAO = new com.lms.dao.UserDAO();
+                session.setAttribute("currentUser", userDAO.findById(currentUser.getId()));
+                session.setAttribute("flashSuccess", "Đã hủy đăng ký và hoàn lại tiền vào ví thành công!");
+                response.sendRedirect(request.getContextPath() + "/courses/detail?id=" + courseId);
             } else {
                 enrollmentService.enroll(currentUser.getId(), courseId);
-                // Đăng ký thành công -> chuyển tới trang "Khóa học của tôi"
-                response.sendRedirect(request.getContextPath() + "/student/my-courses");
+                // Cập nhật lại thông tin user trong session (số dư mới sau khi thanh toán)
+                com.lms.dao.UserDAO userDAO = new com.lms.dao.UserDAO();
+                session.setAttribute("currentUser", userDAO.findById(currentUser.getId()));
+                session.setAttribute("flashSuccess", "Đăng ký khóa học thành công! Bạn có thể bắt đầu học ngay.");
+                // Đăng ký thành công -> vẫn ở trang course/detail
+                response.sendRedirect(request.getContextPath() + "/courses/detail?id=" + courseId);
             }
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            // Lỗi nghiệp vụ (đã đăng ký rồi, khóa học chưa published...)
+            // Lỗi nghiệp vụ (đã đăng ký rồi, số dư không đủ, khóa học chưa published...)
             // Dùng flash message qua session vì đang redirect, không forward
             HttpSession session = request.getSession();
             session.setAttribute("flashError", e.getMessage());
 
             String courseId = request.getParameter("courseId");
-            response.sendRedirect(request.getContextPath() + "/courses/detail?id=" + courseId);
+            if (courseId != null && !courseId.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/courses/detail?id=" + courseId);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/courses");
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
             HttpSession session = request.getSession();
             session.setAttribute("flashError", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại!");
-            response.sendRedirect(request.getContextPath() + "/courses");
+            String courseId = request.getParameter("courseId");
+            if (courseId != null && !courseId.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/courses/detail?id=" + courseId);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/courses");
+            }
         }
     }
 }

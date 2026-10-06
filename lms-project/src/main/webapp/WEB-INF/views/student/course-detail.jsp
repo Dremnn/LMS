@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${course.title} - UTEdu LMS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <style>
         .hero-section{background:rgba(255,255,255,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,0.8);padding:50px 40px 60px;}
@@ -45,6 +45,7 @@
         .lesson-name a{color:#1E293B;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:color .15s;}
         .lesson-name a:hover{color:#076FA4;}
         .lesson-duration{font-size:13px;color:#94A3B8;white-space:nowrap;font-weight:500;}
+        .lesson-desc-content{padding:12px 24px 16px 24px;font-size:13.5px;color:#475569;background:#F8FAFC;border-top:1px solid #F1F5F9;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
         .empty-lessons{padding:18px 24px;color:#94A3B8;font-size:14px;font-style:italic;}
         .empty-state{text-align:center;padding:70px 20px;color:#94A3B8;background:#fff;border-radius:16px;border:1px solid #E2E8F0;}
         .progress-box{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px 20px;margin-bottom:20px;}
@@ -136,6 +137,8 @@
         body.dark-theme .score-big, body.dark-theme .reviews-summary-info h4, body.dark-theme .review-form-card h4, body.dark-theme .review-name { color: #FFFFFF !important; }
         body.dark-theme .score-count, body.dark-theme .reviews-summary-info p, body.dark-theme .review-date, body.dark-theme .review-comment { color: #9DB9CB !important; }
         body.dark-theme .review-textarea { background: #111312 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
+        body.dark-theme .lesson-desc-content { background: #111a24 !important; color: #9DB9CB !important; border-top-color: #093C62 !important; }
+        body.dark-theme .btn-toggle-desc { color: #38BDF8 !important; }
     </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
@@ -174,27 +177,41 @@
         <% } %>
     </div>
     <div class="nav-links">
-        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
-        <a href="<%=request.getContextPath()%>/instructors" class="nav-link">Giảng viên</a>
-        <a href="<%=request.getContextPath()%>/learning-paths" class="nav-link">Lộ trình</a>
-        <a href="<%=request.getContextPath()%>/resources" class="nav-link">Tài liệu</a>
         <% if (currentUser != null) { %>
-            <% if ("student".equals(role)) { %>
-                <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
-                <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
-            <% } %>
-            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
-                <% if (!"admin".equals(role)) { %>
-                    <a href="<%=request.getContextPath()%>/report-issue.html" class="nav-link">Báo cáo</a>
-                <% } %>
-            <div class="user-badge">
-                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                <% } else { %>
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                <% } %>
-                <span><%=currentUser.getFullName()%></span>
-                <span class="role-tag"><%=role%></span>
+
+            <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu" style="display: none;">
+                    <% if ("student".equals(role)) { %>
+                        <a href="${pageContext.request.contextPath}/dashboard" class="user-dropdown-item">
+                            <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
+                        </a>
+                        <a href="${pageContext.request.contextPath}/student/my-courses" class="user-dropdown-item">
+                            <i class="fa-solid fa-book-open"></i> Khóa học của tôi
+                        </a>
+                    <% } %>
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
             </div>
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -203,6 +220,7 @@
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
             <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>
@@ -295,9 +313,18 @@
                 <c:otherwise>
                     <% if ("instructor".equals(role) || "admin".equals(role)) { %>
                         <%-- Instructor/Admin không được đăng ký khóa học --%>
-                        <div style="background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;">
-                            <i class="fa-solid fa-lock"></i>
-                            <%= "instructor".equals(role) ? "Tài khoản giảng viên không thể đăng ký khóa học." : "Tài khoản quản trị viên không thể đăng ký khóa học." %>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div style="background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;">
+                                <i class="fa-solid fa-lock"></i>
+                                <%= "instructor".equals(role) ? "Tài khoản giảng viên không thể đăng ký khóa học." : "Tài khoản quản trị viên không thể đăng ký khóa học." %>
+                            </div>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <c:if test="${sessionScope.currentUser.role == 'admin' || sessionScope.currentUser.id == course.instructorId}">
+                                    <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;font-size:15px;font-weight:700;border-radius:12px;background:#093C62;color:#fff;">
+                                        <i class="fa-solid fa-pen-to-square"></i> Quản lý nội dung
+                                    </a>
+                                </c:if>
+                            </div>
                         </div>
                     <% } else { %>
                         <%-- Chưa đăng ký: hiện form đăng ký --%>
@@ -330,37 +357,52 @@
             <c:forEach var="section" items="${course.sectionsCache}" varStatus="st">
                 <div class="section-card">
                     <div class="section-header">
-                        <h3>Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
+                        <div>
+                            <h3>Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
+                            <c:if test="${not empty section.description}">
+                                <div style="font-size:12.5px;color:#64748B;font-weight:400;margin-top:4px;"><c:out value="${section.description}"/></div>
+                            </c:if>
+                        </div>
                         <span style="font-size:12px;color:#64748B;font-weight:500;">${section.lessons.size()} bài học</span>
                     </div>
                     <div class="section-body">
                         <c:choose>
                             <c:when test="${not empty section.lessons}">
                                 <c:forEach var="lesson" items="${section.lessons}">
-                                    <div class="lesson-item">
-                                        <span class="lesson-name">
-                                            <c:choose>
-                                                <c:when test="${not empty enrollment}">
-                                                    <%-- Đã đăng ký: tên bài là link dẫn vào xem nội dung --%>
-                                                    <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
-                                                       style="color:#076FA4;text-decoration:none;font-weight:600;"
-                                                       onmouseover="this.style.textDecoration='underline'"
-                                                       onmouseout="this.style.textDecoration='none'">
-                                                        <i class="fa-solid fa-circle-play" style="color:#076FA4;"></i> <c:out value="${lesson.title}"/>
-                                                    </a>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <%-- Chưa đăng ký: text tĩnh + icon khóa --%>
-                                                    <span style="color:#94A3B8;"><i class="fa-solid fa-lock" style="color:#CBD5E1;"></i> <c:out value="${lesson.title}"/></span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                        <span class="lesson-duration">
-                                            <c:choose>
-                                                <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
-                                                <c:otherwise>N/A</c:otherwise>
-                                            </c:choose>
-                                        </span>
+                                    <div class="lesson-wrapper" style="border-top:1px solid #F1F5F9;">
+                                        <div class="lesson-item" style="border-top:none;">
+                                            <span class="lesson-name">
+                                                <c:if test="${not empty lesson.description}">
+                                                    <button type="button" class="btn-toggle-desc" onclick="toggleLessonDesc('${lesson.id}', this)" title="Thu gọn / Mở rộng mô tả bài học" style="background:none;border:none;cursor:pointer;color:#076FA4;padding:4px 6px;font-size:12px;display:inline-flex;align-items:center;border-radius:4px;transition:all 0.2s;">
+                                                        <i class="fa-solid fa-chevron-right toggle-icon-${lesson.id}"></i>
+                                                    </button>
+                                                </c:if>
+                                                <c:choose>
+                                                    <c:when test="${not empty enrollment || sessionScope.currentUser.role == 'admin' || (sessionScope.currentUser.role == 'instructor' && sessionScope.currentUser.id == course.instructorId)}">
+                                                        <%-- Đã đăng ký: tên bài là link dẫn vào xem nội dung --%>
+                                                        <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
+                                                           style="color:#076FA4;text-decoration:none;font-weight:600;"
+                                                           onmouseover="this.style.textDecoration='underline'"
+                                                           onmouseout="this.style.textDecoration='none'">
+                                                            <i class="fa-solid fa-circle-play" style="color:#076FA4;"></i> <c:out value="${lesson.title}"/>
+                                                        </a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <%-- Chưa đăng ký: text tĩnh + icon khóa --%>
+                                                        <span style="color:#94A3B8;"><i class="fa-solid fa-lock" style="color:#CBD5E1;"></i> <c:out value="${lesson.title}"/></span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                            <span class="lesson-duration">
+                                                <c:choose>
+                                                    <c:when test="${lesson.durationMinutes != null}">${lesson.durationMinutes} phút</c:when>
+                                                    <c:otherwise>N/A</c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                        </div>
+                                        <c:if test="${not empty lesson.description}">
+                                            <div id="lesson-desc-${lesson.id}" class="lesson-desc-content" style="display:none;"><c:out value="${fn:trim(lesson.description)}"/></div>
+                                        </c:if>
                                     </div>
                                 </c:forEach>
                             </c:when>
@@ -574,6 +616,24 @@
     <span class="toggle-text">Chế độ Tối</span>
 </div>
 
+<script>
+    function toggleLessonDesc(lessonId, btn) {
+        const el = document.getElementById('lesson-desc-' + lessonId);
+        if (!el) return;
+        const isHidden = el.style.display === 'none' || el.style.display === '';
+        el.style.display = isHidden ? 'block' : 'none';
+        const icon = btn.querySelector('i');
+        if (icon) {
+            if (isHidden) {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            }
+        }
+    }
+</script>
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
 
 </body>
