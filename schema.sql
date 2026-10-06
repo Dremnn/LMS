@@ -516,3 +516,35 @@ BEGIN
 END;
 $$;
 
+
+-- =============================================
+-- Tính năng CHIA NHÓM (Study Groups)
+-- =============================================
+
+CREATE TABLE study_groups (
+    id SERIAL PRIMARY KEY,
+    course_id INT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    max_members INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE group_members (
+    id SERIAL PRIMARY KEY,
+    group_id INT NOT NULL REFERENCES study_groups(id) ON DELETE CASCADE,
+    student_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(50) DEFAULT 'MEMBER',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (group_id, student_id) -- Tránh 1 người vào 1 nhóm 2 lần
+);
+
+CREATE TABLE group_submissions (
+    id SERIAL PRIMARY KEY,
+    assignment_id INT NOT NULL, -- Sẽ reference đến bảng assignments nếu có
+    group_id INT NOT NULL REFERENCES study_groups(id) ON DELETE CASCADE,
+    submitter_id INT NOT NULL REFERENCES users(id),
+    file_url TEXT NOT NULL,
+    score DECIMAL(5,2),
+    feedback TEXT,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

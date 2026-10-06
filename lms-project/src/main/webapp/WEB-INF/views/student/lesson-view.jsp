@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -76,6 +76,15 @@
         body.dark-theme .complete-card h3{color:#F4F8FA;}
         body.dark-theme .form-check-label{color:#9DB9CB;}
         body.dark-theme .divider{border-top-color:#093C62;}
+        /* ---- CUSTOM YOUTUBE CONTROLS ---- */
+        .video-wrap { margin-bottom: 0 !important; }
+        .custom-yt-controls { background: #093C62; display: flex; align-items: center; padding: 12px 16px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; margin-bottom: 28px; gap: 12px; box-shadow: 0 12px 36px rgba(0,0,0,.15); }
+        .yt-control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; padding: 4px 8px; transition: color 0.2s; }
+        .yt-control-btn:hover { color: #10B981; }
+        .yt-time-display { color: #C6D8E3; font-size: 13px; font-weight: 500; min-width: 80px; text-align: center; font-family: monospace; }
+        .yt-progress-container { flex: 1; cursor: pointer; padding: 8px 0; }
+        .yt-progress-bg { background: rgba(255,255,255,0.2); height: 6px; border-radius: 4px; overflow: hidden; position: relative; }
+        .yt-progress-fill { background: #10B981; height: 100%; width: 0%; border-radius: 4px; transition: width 0.1s linear; }
     </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
@@ -228,12 +237,23 @@
         <c:choose>
             <%-- Trường hợp 1: Link YouTube -> nhúng bằng iframe --%>
             <c:when test="${not empty youtubeEmbedUrl}">
-                <div class="video-wrap" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                    <iframe src="${youtubeEmbedUrl}"
+                <div class="video-wrap" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
+                    <iframe id="youtube-player" src="${youtubeEmbedUrl}"
                             style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen>
                     </iframe>
+                </div>
+                <%-- Custom Video Controls --%>
+                <div class="custom-yt-controls" id="customControls">
+                    <button id="ytPlayPauseBtn" class="yt-control-btn"><i class="fa-solid fa-play"></i></button>
+                    <span id="ytVideoTime" class="yt-time-display">0:00 / 0:00</span>
+                    <div class="yt-progress-container" id="ytProgressBarContainer">
+                        <div class="yt-progress-bg">
+                            <div class="yt-progress-fill" id="ytProgressBarFill"></div>
+                        </div>
+                    </div>
+                    <button id="ytMuteBtn" class="yt-control-btn"><i class="fa-solid fa-volume-high"></i></button>
                 </div>
             </c:when>
 
@@ -260,6 +280,13 @@
         <c:if test="${not empty currentLesson.documentUrl}">
             <a href="${currentLesson.documentUrl}" target="_blank" class="doc-link">
                 📄 Tải/Mở tài liệu bài học
+            </a>
+        </c:if>
+
+        <%-- Nút vào không gian Nhóm (Chỉ hiện cho Student đã enroll) --%>
+        <c:if test="${enrollment != null}">
+            <a href="${pageContext.request.contextPath}/student/my-group?courseId=${course.id}" class="doc-link" style="background:#0ea5e9; color:#fff; border-color:#0ea5e9; margin-left: ${empty currentLesson.documentUrl ? '0' : '12px'};">
+                <i class="fa-solid fa-users"></i> Xem Nhóm Của Tôi & Nộp Bài
             </a>
         </c:if>
 
@@ -294,6 +321,87 @@
 </div>
 
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
+
+<c:if test="${not empty youtubeEmbedUrl}">
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+    var player;
+    var timeUpdater;
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('youtube-player', {
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        // Toggle Play/Pause
+        document.getElementById('ytPlayPauseBtn').addEventListener('click', function() {
+            var state = player.getPlayerState();
+            if (state == YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        });
+
+        // Toggle Mute
+        document.getElementById('ytMuteBtn').addEventListener('click', function() {
+            if (player.isMuted()) {
+                player.unMute();
+                this.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            } else {
+                player.mute();
+                this.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+            }
+        });
+
+        // Seek (Tua video)
+        document.getElementById('ytProgressBarContainer').addEventListener('click', function(e) {
+            var rect = this.getBoundingClientRect();
+            var pos = (e.clientX - rect.left) / this.offsetWidth;
+            player.seekTo(pos * player.getDuration());
+        });
+        
+        updateTimeDisplay();
+    }
+
+    function onPlayerStateChange(event) {
+        var playBtn = document.getElementById('ytPlayPauseBtn');
+        if (event.data == YT.PlayerState.PLAYING) {
+            playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            timeUpdater = setInterval(updateTimeDisplay, 500);
+        } else {
+            playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            clearInterval(timeUpdater);
+        }
+    }
+
+    function updateTimeDisplay() {
+        if(player && player.getCurrentTime) {
+            var current = player.getCurrentTime();
+            var duration = player.getDuration();
+            
+            if (duration > 0) {
+                var percent = (current / duration) * 100;
+                document.getElementById('ytProgressBarFill').style.width = percent + '%';
+            }
+
+            document.getElementById('ytVideoTime').innerText = formatTime(current) + " / " + formatTime(duration);
+        }
+    }
+
+    function formatTime(seconds) {
+        if(!seconds) return "0:00";
+        var m = Math.floor(seconds / 60);
+        var s = Math.floor(seconds % 60);
+        return m + ":" + (s < 10 ? "0" : "") + s;
+    }
+</script>
+</c:if>
 
 </body>
 </html>
