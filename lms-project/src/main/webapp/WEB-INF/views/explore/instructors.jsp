@@ -379,21 +379,35 @@
         <% } %>
     </div>
     <div class="nav-links">
-        <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/dashboard" class="nav-link">Bảng điều khiển</a>
                 <a href="<%=request.getContextPath()%>/student/my-courses" class="nav-link">Khóa học của tôi</a>
             <% } %>
-            <a href="<%=request.getContextPath()%>/profile" class="nav-link">Hồ sơ</a>
-            <div class="user-badge">
-                <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
-                    <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
-                <% } else { %>
-                    <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
-                <% } %>
-                <span><%=currentUser.getFullName()%></span>
-                <span class="role-tag"><%=role%></span>
+            <div class="user-dropdown">
+                <div class="user-badge">
+                    <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
+                        <img src="<%=currentUser.getAvatarUrl()%>" alt="Avatar" class="user-avatar" style="object-fit: cover;">
+                    <% } else { %>
+                        <div class="user-avatar"><%=currentUser.getFullName() != null && !currentUser.getFullName().isEmpty() ? currentUser.getFullName().substring(0,1).toUpperCase() : "U"%></div>
+                    <% } %>
+                    <span><%=currentUser.getFullName()%></span>
+                    <span class="role-tag"><%=role%></span>
+                    <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
+                </div>
+                <div class="user-dropdown-menu">
+                    <a href="<%=request.getContextPath()%>/courses" class="user-dropdown-item">
+                        <i class="fa-solid fa-graduation-cap"></i> Khóa học
+                    </a>
+                    <a href="<%=request.getContextPath()%>/profile" class="user-dropdown-item">
+                        <i class="fa-solid fa-id-badge"></i> Hồ sơ
+                    </a>
+                    <% if (!"admin".equals(role)) { %>
+                        <a href="<%=request.getContextPath()%>/report-issue.jsp" class="user-dropdown-item">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Báo cáo
+                        </a>
+                    <% } %>
+                </div>
             </div>
             <% if ("instructor".equals(role)) { %>
                 <a href="<%=request.getContextPath()%>/instructor/courses" class="btn btn-outline">Quản lý</a>
@@ -402,6 +416,7 @@
             <% } %>
             <a href="<%=request.getContextPath()%>/logout" class="btn btn-danger">Đăng xuất</a>
         <% } else { %>
+            <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
             <a href="<%=request.getContextPath()%>/login" class="btn btn-outline">Đăng nhập</a>
             <a href="<%=request.getContextPath()%>/register" class="btn btn-primary">Đăng ký</a>
         <% } %>

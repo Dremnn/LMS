@@ -24,6 +24,9 @@ public class Question implements Serializable {
     @Column(name = "question_type", nullable = false)
     private String questionType; // "single_choice" | "multi_choice"
 
+    @Column(name = "explanation", columnDefinition = "TEXT")
+    private String explanation;
+
     // Quan hệ ORM
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", insertable = false, updatable = false)
@@ -41,6 +44,13 @@ public class Question implements Serializable {
         this.questionType = questionType;
     }
 
+    public Question(int quizId, String content, String questionType, String explanation) {
+        this.quizId = quizId;
+        this.content = content;
+        this.questionType = questionType;
+        this.explanation = explanation;
+    }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -52,6 +62,9 @@ public class Question implements Serializable {
 
     public String getQuestionType() { return questionType; }
     public void setQuestionType(String questionType) { this.questionType = questionType; }
+
+    public String getExplanation() { return explanation; }
+    public void setExplanation(String explanation) { this.explanation = explanation; }
 
     public Quiz getQuiz() { return quiz; }
     public void setQuiz(Quiz quiz) { this.quiz = quiz; }

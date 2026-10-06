@@ -15,7 +15,7 @@ public class QuestionDAO {
     //  việc ẨN đáp án đúng khi Student làm bài sẽ xử lý ở tầng Service, không xử lý ở đây)
     public List<Question> findByQuizId(int quizId) {
         List<Question> questions = new ArrayList<>();
-        String sql = "SELECT id, quiz_id, content, question_type FROM questions WHERE quiz_id = ?";
+        String sql = "SELECT id, quiz_id, content, question_type, explanation FROM questions WHERE quiz_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -67,7 +67,7 @@ public class QuestionDAO {
 
     // 3. Tìm 1 câu hỏi theo ID (kèm đáp án)
     public Question findById(int id) {
-        String sql = "SELECT id, quiz_id, content, question_type FROM questions WHERE id = ?";
+        String sql = "SELECT id, quiz_id, content, question_type, explanation FROM questions WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -91,7 +91,7 @@ public class QuestionDAO {
     // Dùng Transaction: nếu 1 trong các bước insert bị lỗi, rollback toàn bộ
     // (tránh trường hợp câu hỏi được tạo nhưng thiếu đáp án do lỗi giữa chừng)
     public boolean saveWithOptions(Question question) {
-        String questionSql = "INSERT INTO questions (quiz_id, content, question_type) VALUES (?, ?, ?)";
+        String questionSql = "INSERT INTO questions (quiz_id, content, question_type, explanation) VALUES (?, ?, ?, ?)";
         String optionSql = "INSERT INTO answer_options (question_id, content, is_correct) VALUES (?, ?, ?)";
 
         Connection conn = null;
@@ -103,6 +103,7 @@ public class QuestionDAO {
                 qStmt.setInt(1, question.getQuizId());
                 qStmt.setString(2, question.getContent());
                 qStmt.setString(3, question.getQuestionType());
+                qStmt.setString(4, question.getExplanation());
                 qStmt.executeUpdate();
 
                 try (ResultSet keys = qStmt.getGeneratedKeys()) {
@@ -149,7 +150,7 @@ public class QuestionDAO {
 
     // 5. Cập nhật câu hỏi và danh sách đáp án trong 1 Transaction
     public boolean updateWithOptions(Question question) {
-        String updateQuestionSql = "UPDATE questions SET content = ?, question_type = ? WHERE id = ?";
+        String updateQuestionSql = "UPDATE questions SET content = ?, question_type = ?, explanation = ? WHERE id = ?";
         String delAttemptAnswersSql = "DELETE FROM attempt_answers WHERE question_id = ?";
         String delOptionsSql = "DELETE FROM answer_options WHERE question_id = ?";
         String insertOptionSql = "INSERT INTO answer_options (question_id, content, is_correct) VALUES (?, ?, ?)";
@@ -162,7 +163,8 @@ public class QuestionDAO {
             try (PreparedStatement qStmt = conn.prepareStatement(updateQuestionSql)) {
                 qStmt.setString(1, question.getContent());
                 qStmt.setString(2, question.getQuestionType());
-                qStmt.setInt(3, question.getId());
+                qStmt.setString(3, question.getExplanation());
+                qStmt.setInt(4, question.getId());
                 qStmt.executeUpdate();
             }
 
@@ -250,6 +252,7 @@ public class QuestionDAO {
         q.setQuizId(rs.getInt("quiz_id"));
         q.setContent(rs.getString("content"));
         q.setQuestionType(rs.getString("question_type"));
+        q.setExplanation(rs.getString("explanation"));
         return q;
     }
 }

@@ -164,9 +164,13 @@ public class QuizAttemptServlet extends HttpServlet {
         }
 
         Quiz quiz = quizService.getQuizById(attempt.getQuizId());
+        List<Question> questions = new com.lms.dao.QuestionDAO().findByQuizId(quiz.getId());
+        Map<Integer, List<Integer>> selectedMap = quizAttemptDAO.getAttemptSelectedOptions(attemptId);
 
         request.setAttribute("attempt", attempt);
         request.setAttribute("quiz", quiz);
+        request.setAttribute("questions", questions);
+        request.setAttribute("selectedMap", selectedMap);
         request.getRequestDispatcher("/WEB-INF/views/student/quiz-result.jsp")
                 .forward(request, response);
     }

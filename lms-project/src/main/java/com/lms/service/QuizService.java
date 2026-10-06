@@ -120,6 +120,11 @@ public class QuizService {
     // =========================================================================
     public Question addQuestion(int currentInstructorId, int quizId, String content,
                                  String questionType, List<AnswerOption> options) {
+        return addQuestion(currentInstructorId, quizId, content, questionType, options, null);
+    }
+
+    public Question addQuestion(int currentInstructorId, int quizId, String content,
+                                 String questionType, List<AnswerOption> options, String explanation) {
 
         getQuizAndVerifyOwnership(quizId, currentInstructorId);
 
@@ -147,7 +152,8 @@ public class QuizService {
             }
         }
 
-        Question question = new Question(quizId, content.trim(), questionType);
+        Question question = new Question(quizId, content.trim(), questionType,
+                (explanation != null && !explanation.trim().isEmpty()) ? explanation.trim() : null);
         question.setOptions(options);
 
         boolean saved = questionDAO.saveWithOptions(question);
@@ -174,6 +180,11 @@ public class QuizService {
     // =========================================================================
     public Question updateQuestion(int currentInstructorId, int questionId, String content,
                                    String questionType, List<AnswerOption> options) {
+        return updateQuestion(currentInstructorId, questionId, content, questionType, options, null);
+    }
+
+    public Question updateQuestion(int currentInstructorId, int questionId, String content,
+                                   String questionType, List<AnswerOption> options, String explanation) {
         Question existing = questionDAO.findById(questionId);
         if (existing == null) {
             throw new IllegalArgumentException("Câu hỏi không tồn tại!");
@@ -205,7 +216,8 @@ public class QuizService {
             }
         }
 
-        Question question = new Question(existing.getQuizId(), content.trim(), questionType);
+        Question question = new Question(existing.getQuizId(), content.trim(), questionType,
+                (explanation != null && !explanation.trim().isEmpty()) ? explanation.trim() : null);
         question.setId(questionId);
         question.setOptions(options);
 

@@ -225,7 +225,8 @@ public class QuizManageServlet extends HttpServlet {
             }
         }
 
-        Question question = quizService.addQuestion(currentUser.getId(), quizId, content, questionType, options);
+        String explanation = request.getParameter("explanation");
+        Question question = quizService.addQuestion(currentUser.getId(), quizId, content, questionType, options, explanation);
 
         response.sendRedirect(request.getContextPath() + "/instructor/quizzes/manage?id=" + quizId);
     }
@@ -237,6 +238,7 @@ public class QuizManageServlet extends HttpServlet {
         int questionId = Integer.parseInt(request.getParameter("questionId"));
         String content = request.getParameter("content");
         String questionType = request.getParameter("questionType");
+        String explanation = request.getParameter("explanation");
 
         String[] optionContents = request.getParameterValues("optionContent");
         String[] correctIndicesStr = request.getParameterValues("correctOption");
@@ -256,7 +258,7 @@ public class QuizManageServlet extends HttpServlet {
             }
         }
 
-        quizService.updateQuestion(currentUser.getId(), questionId, content, questionType, options);
+        quizService.updateQuestion(currentUser.getId(), questionId, content, questionType, options, explanation);
 
         response.sendRedirect(request.getContextPath() + "/instructor/quizzes/manage?id=" + quizId);
     }

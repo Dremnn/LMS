@@ -148,6 +148,29 @@ public class QuizAttemptDAO {
         return result;
     }
 
+    // 4b. Lấy danh sách các đáp án mà học viên đã chọn cho 1 attempt
+    public Map<Integer, List<Integer>> getAttemptSelectedOptions(int attemptId) {
+        Map<Integer, List<Integer>> result = new java.util.HashMap<>();
+        String sql = "SELECT question_id, selected_option_id FROM attempt_answers WHERE attempt_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, attemptId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int questionId = rs.getInt("question_id");
+                    int optionId = rs.getInt("selected_option_id");
+                    result.computeIfAbsent(questionId, k -> new java.util.ArrayList<>()).add(optionId);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     // 5. Lấy 1 attempt theo ID (dùng hiển thị trang kết quả sau khi nộp bài)
     public QuizAttempt findById(int id) {
         String sql = "SELECT id, student_id, quiz_id, score, is_passed, submitted_at " +

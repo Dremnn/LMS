@@ -239,6 +239,7 @@ CREATE TABLE questions (
     question_type   VARCHAR(20) NOT NULL DEFAULT 'single_choice'
                         CONSTRAINT ck_questions_type
                         CHECK (question_type IN ('single_choice', 'multi_choice')),
+    explanation     TEXT,
 
     CONSTRAINT fk_questions_quiz
         FOREIGN KEY (quiz_id)
