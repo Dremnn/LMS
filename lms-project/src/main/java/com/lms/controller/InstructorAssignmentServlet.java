@@ -47,10 +47,12 @@ public class InstructorAssignmentServlet extends HttpServlet {
     private static final String SUBMISSIONS_VIEW = "/WEB-INF/views/instructor/assignment-submissions.jsp";
 
     private AssignmentService assignmentService;
+    private com.lms.service.CourseService courseService;
 
     @Override
     public void init() throws ServletException {
         this.assignmentService = new AssignmentService();
+        this.courseService = new com.lms.service.CourseService();
     }
 
     private User getCurrentUser(HttpServletRequest request) {
@@ -71,21 +73,25 @@ public class InstructorAssignmentServlet extends HttpServlet {
         try {
             if ("/instructor/assignments/new".equals(path)) {
                 int courseId = Integer.parseInt(request.getParameter("courseId"));
-                Course course = assignmentService.getCourseForManage(courseId, currentUser);
+                assignmentService.getCourseForManage(courseId, currentUser);
+                Course course = courseService.getCourseDetail(courseId);
                 request.setAttribute("course", course);
                 request.setAttribute("editMode", false);
+                request.setAttribute("formAttachType", "course");
                 request.getRequestDispatcher(FORM_VIEW).forward(request, response);
 
             } else if ("/instructor/assignments/edit".equals(path)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 Assignment assignment = assignmentService.getForInstructor(id, currentUser);
-                Course course = assignmentService.getCourseForManage(assignment.getCourseId(), currentUser);
+                Course course = courseService.getCourseDetail(assignment.getCourseId());
                 request.setAttribute("course", course);
                 request.setAttribute("assignment", assignment);
                 request.setAttribute("editMode", true);
                 request.setAttribute("formTitle", assignment.getTitle());
                 request.setAttribute("formDescription", assignment.getDescription());
                 request.setAttribute("formDueAt", toInputValue(assignment.getDueAt()));
+                request.setAttribute("formAttachType", assignment.getSectionId() != null ? "section" : "course");
+                request.setAttribute("formSectionId", assignment.getSectionId());
                 request.getRequestDispatcher(FORM_VIEW).forward(request, response);
 
             } else if ("/instructor/assignments/submissions".equals(path)) {
@@ -177,6 +183,8 @@ public class InstructorAssignmentServlet extends HttpServlet {
                             User currentUser, boolean editMode) throws ServletException, IOException {
 
         String title = null, description = null, dueRaw = null;
+        String attachType = null;
+        Integer sectionId = null;
         int courseId = -1, assignmentId = -1;
 
         try {
@@ -188,6 +196,16 @@ public class InstructorAssignmentServlet extends HttpServlet {
             dueRaw = request.getParameter("dueAt");
             LocalDateTime dueAt = parseDue(dueRaw);
 
+            attachType = request.getParameter("attachType");
+            if ("section".equals(attachType)) {
+                String secRaw = request.getParameter("sectionId");
+                if (secRaw != null && !secRaw.trim().isEmpty()) {
+                    sectionId = Integer.parseInt(secRaw.trim());
+                } else {
+                    throw new IllegalArgumentException("Vui lòng chọn một chương học muốn gắn bài tập!");
+                }
+            }
+
             String fileName = filePart != null ? filePart.getSubmittedFileName() : null;
             byte[] fileBytes = (filePart != null && filePart.getSize() > 0)
                     ? filePart.getInputStream().readAllBytes() : null;
@@ -197,11 +215,11 @@ public class InstructorAssignmentServlet extends HttpServlet {
                 Assignment existing = assignmentService.getForInstructor(assignmentId, currentUser);
                 courseId = existing.getCourseId();
                 String attachMode = request.getParameter("removeAttachment") != null ? "remove" : "keep";
-                assignmentService.update(assignmentId, currentUser, title, description, dueAt,
+                assignmentService.update(assignmentId, sectionId, currentUser, title, description, dueAt,
                         attachMode, fileName, fileBytes);
             } else {
                 courseId = Integer.parseInt(request.getParameter("courseId"));
-                assignmentService.create(courseId, currentUser, title, description, dueAt, fileName, fileBytes);
+                assignmentService.create(courseId, sectionId, currentUser, title, description, dueAt, fileName, fileBytes);
             }
 
             response.sendRedirect(request.getContextPath() + "/instructor/courses/manage?id=" + courseId);
@@ -212,9 +230,9 @@ public class InstructorAssignmentServlet extends HttpServlet {
                 if (editMode) {
                     Assignment a = assignmentService.getForInstructor(assignmentId, currentUser);
                     request.setAttribute("assignment", a);
-                    request.setAttribute("course", assignmentService.getCourseForManage(a.getCourseId(), currentUser));
+                    request.setAttribute("course", courseService.getCourseDetail(a.getCourseId()));
                 } else {
-                    request.setAttribute("course", assignmentService.getCourseForManage(courseId, currentUser));
+                    request.setAttribute("course", courseService.getCourseDetail(courseId));
                 }
             } catch (RuntimeException ex) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, ex.getMessage());
@@ -225,6 +243,8 @@ public class InstructorAssignmentServlet extends HttpServlet {
             request.setAttribute("formTitle", title);
             request.setAttribute("formDescription", description);
             request.setAttribute("formDueAt", dueRaw);
+            request.setAttribute("formAttachType", attachType != null ? attachType : "course");
+            request.setAttribute("formSectionId", sectionId);
             request.getRequestDispatcher(FORM_VIEW).forward(request, response);
         }
     }

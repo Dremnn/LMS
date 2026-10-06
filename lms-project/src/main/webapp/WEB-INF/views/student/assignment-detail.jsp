@@ -74,6 +74,16 @@
         </c:if>
 
         <c:choose>
+            <c:when test="${isPreview}">
+                <div class="asg-alert" style="background:#E0F2FE;border:1px solid #7DD3FC;color:#0369A1;margin-bottom:16px;">
+                    <i class="fa-solid fa-eye"></i> Bạn đang xem bài tập ở chế độ xem trước (Giảng viên / Quản trị viên). Chỉ có thể xem nội dung đề bài và tải file tài liệu đính kèm, không thể nộp bài.
+                </div>
+                <div class="asg-actions" style="margin-top:8px;">
+                    <button type="button" class="asg-btn" disabled style="opacity:0.6;cursor:not-allowed;background:#94A3B8;">
+                        <i class="fa-solid fa-lock"></i> Nộp bài (Bị khóa trong chế độ xem trước)
+                    </button>
+                </div>
+            </c:when>
             <c:when test="${assignment.overdue}">
                 <div class="asg-alert error" style="margin-bottom:0;">
                     <i class="fa-solid fa-lock"></i> Đã quá hạn nộp bài - không thể nộp hoặc thay đổi bài nộp.

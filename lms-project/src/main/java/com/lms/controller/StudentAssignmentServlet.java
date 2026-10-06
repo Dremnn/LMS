@@ -71,25 +71,51 @@ public class StudentAssignmentServlet extends HttpServlet {
         }
 
         try {
+            boolean isInstructorOrAdmin = currentUser != null && ("admin".equals(currentUser.getRole()) || "instructor".equals(currentUser.getRole()));
+
             if ("/student/assignments".equals(path)) {
                 int courseId = Integer.parseInt(request.getParameter("courseId"));
-                Course course = assignmentService.getCourseForStudent(courseId, currentUser.getId());
-                List<Assignment> assignments = assignmentService.listForStudent(courseId, currentUser.getId());
+                Course course;
+                List<Assignment> assignments;
+                if (isInstructorOrAdmin) {
+                    course = assignmentService.getCourseForManage(courseId, currentUser);
+                    assignments = assignmentService.listForInstructor(courseId, currentUser);
+                } else {
+                    course = assignmentService.getCourseForStudent(courseId, currentUser.getId());
+                    assignments = assignmentService.listForStudent(courseId, currentUser.getId());
+                }
                 request.setAttribute("course", course);
                 request.setAttribute("assignments", assignments);
+                request.setAttribute("isPreview", isInstructorOrAdmin);
                 request.getRequestDispatcher("/WEB-INF/views/student/assignment-list.jsp").forward(request, response);
 
             } else if ("/student/assignments/view".equals(path)) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Assignment assignment = assignmentService.getForStudent(id, currentUser.getId());
-                AssignmentSubmission mine = assignmentService.getMySubmission(id, currentUser.getId());
+                Assignment assignment;
+                AssignmentSubmission mine = null;
+                if (currentUser != null && "admin".equals(currentUser.getRole())) {
+                    assignment = assignmentService.getForPreview(id);
+                } else if (currentUser != null && "instructor".equals(currentUser.getRole())) {
+                    assignment = assignmentService.getForInstructor(id, currentUser);
+                } else {
+                    assignment = assignmentService.getForStudent(id, currentUser.getId());
+                    mine = assignmentService.getMySubmission(id, currentUser.getId());
+                }
                 request.setAttribute("assignment", assignment);
                 request.setAttribute("mySubmission", mine);
+                request.setAttribute("isPreview", isInstructorOrAdmin);
                 request.getRequestDispatcher("/WEB-INF/views/student/assignment-detail.jsp").forward(request, response);
 
             } else if ("/student/assignments/download".equals(path)) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                FileData file = assignmentService.getAttachmentForStudent(id, currentUser.getId());
+                FileData file;
+                if (currentUser != null && "admin".equals(currentUser.getRole())) {
+                    file = assignmentService.getAttachmentForPreview(id);
+                } else if (currentUser != null && "instructor".equals(currentUser.getRole())) {
+                    file = assignmentService.getAttachmentForInstructor(id, currentUser);
+                } else {
+                    file = assignmentService.getAttachmentForStudent(id, currentUser.getId());
+                }
                 FileDownloadUtil.send(response, file);
 
             } else if ("/student/assignments/mysubmission/download".equals(path)) {
@@ -125,6 +151,15 @@ public class StudentAssignmentServlet extends HttpServlet {
 
         int assignmentId = -1;
         try {
+            assignmentId = Integer.parseInt(request.getParameter("assignmentId"));
+
+            if (currentUser != null && ("admin".equals(currentUser.getRole()) || "instructor".equals(currentUser.getRole()))) {
+                HttpSession session = request.getSession();
+                session.setAttribute("flashError", "Giảng viên và Quản trị viên không thể nộp bài tập!");
+                response.sendRedirect(request.getContextPath() + "/student/assignments/view?id=" + assignmentId);
+                return;
+            }
+
             // Đọc multipart trước để phát hiện file vượt giới hạn dung lượng
             try {
                 request.getParts();
@@ -132,7 +167,6 @@ public class StudentAssignmentServlet extends HttpServlet {
                 throw new IllegalArgumentException("File quá lớn! Dung lượng tối đa là 10 MB.");
             }
 
-            assignmentId = Integer.parseInt(request.getParameter("assignmentId"));
             String note = request.getParameter("note");
 
             Part filePart = request.getPart("file");

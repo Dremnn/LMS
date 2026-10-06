@@ -160,30 +160,48 @@
                 </div>
             </c:if>
 
-            <div class="status-box">
-                <c:choose>
-                    <c:when test="${attemptsUsed == 0}">
-                        <div class="status-icon">🆕</div>
-                        <div class="status-text">
-                            <strong>Chưa làm bài.</strong><br>
-                            Hãy sẵn sàng trước khi bắt đầu. Bạn phải đạt ít nhất ${quiz.passScore} điểm để qua bài kiểm tra này.
+            <c:choose>
+                <c:when test="${isPreview}">
+                    <div class="status-box" style="background:#e0f2fe;border-color:#7dd3fc;">
+                        <div class="status-icon" style="color:#0284c7 !important;"><i class="fa-solid fa-eye" style="color:#0284c7 !important;"></i></div>
+                        <div class="status-text" style="color:#0369a1;">
+                            <strong>Chế độ xem trước bài kiểm tra (Giảng viên / Quản trị viên).</strong><br>
+                            Bạn có thể xem trước các câu hỏi và trải nghiệm giao diện làm bài của học sinh mà không bị tính lượt làm bài hay ghi nhận kết quả.
                         </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="status-icon"><i class="fa-solid fa-chart-line"></i></div>
-                        <div class="status-text">
-                            <strong>Đã làm bài (${attemptsUsed} lần).</strong><br>
-                            Điểm cao nhất của bạn hiện tại là: <strong style="font-size:16px;">${highestScore != null ? highestScore : 0}</strong> / 100.
-                            <c:if test="${highestScore >= quiz.passScore}">
-                                <span style="color:#276749;font-weight:bold;"> (Đã Đạt <i class="fa-solid fa-circle-check"></i>)</span>
-                            </c:if>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="status-box">
+                        <c:choose>
+                            <c:when test="${attemptsUsed == 0}">
+                                <div class="status-icon">🆕</div>
+                                <div class="status-text">
+                                    <strong>Chưa làm bài.</strong><br>
+                                    Hãy sẵn sàng trước khi bắt đầu. Bạn phải đạt ít nhất ${quiz.passScore} điểm để qua bài kiểm tra này.
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="status-icon"><i class="fa-solid fa-chart-line"></i></div>
+                                <div class="status-text">
+                                    <strong>Đã làm bài (${attemptsUsed} lần).</strong><br>
+                                    Điểm cao nhất của bạn hiện tại là: <strong style="font-size:16px;">${highestScore != null ? highestScore : 0}</strong> / 100.
+                                    <c:if test="${highestScore >= quiz.passScore}">
+                                        <span style="color:#276749;font-weight:bold;"> (Đã Đạt <i class="fa-solid fa-circle-check"></i>)</span>
+                                    </c:if>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </c:otherwise>
+            </c:choose>
 
             <div class="actions">
                 <c:choose>
+                    <c:when test="${isPreview}">
+                        <a href="${pageContext.request.contextPath}/student/quizzes/attempt?id=${quiz.id}${not empty param.lessonId ? '&lessonId=' : ''}${param.lessonId}" class="btn-start" style="background:linear-gradient(135deg, #0284c7, #0369a1);">
+                            <i class="fa-solid fa-eye"></i> Xem trước đề thi
+                        </a>
+                    </c:when>
                     <c:when test="${!quiz.openNow}">
                         <a href="#" class="btn-start disabled">🚫 Quiz không khả dụng lúc này</a>
                     </c:when>
@@ -201,7 +219,7 @@
                         <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${param.lessonId}" class="btn btn-outline" style="padding:14px 24px;font-size:15px;">Quay lại bài học</a>
                     </c:when>
                     <c:otherwise>
-                        <a href="${pageContext.request.contextPath}/student/my-courses" class="btn btn-outline" style="padding:14px 24px;font-size:15px;">Quay lại khóa học</a>
+                        <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn btn-outline" style="padding:14px 24px;font-size:15px;">Quay lại khóa học</a>
                     </c:otherwise>
                 </c:choose>
             </div>

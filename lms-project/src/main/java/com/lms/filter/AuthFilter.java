@@ -144,8 +144,16 @@ public class AuthFilter implements Filter {
         }
 
         // 3.3. Phân quyền khu vực HỌC VIÊN (/student/* hoặc /courses/reviews*)
+        // Cho phép Giảng viên và Quản trị viên truy cập chế độ xem trước (preview) nội dung học tập
+        boolean isPreviewAllowed = path.startsWith("/student/lessons/view")
+                || path.startsWith("/student/quizzes/")
+                || path.startsWith("/student/assignments");
+
         if (path.startsWith("/student/") || path.startsWith("/courses/reviews")) {
-            if (!"student".equalsIgnoreCase(role)) {
+            boolean isStaff = "instructor".equalsIgnoreCase(role) || "admin".equalsIgnoreCase(role);
+            if (isPreviewAllowed && isStaff) {
+                // Cho phép Giảng viên và Quản trị viên xem trước bài học, bài tập, quiz
+            } else if (!"student".equalsIgnoreCase(role)) {
                 httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Khu vực này chỉ dành cho Học viên!");
                 return;
             }

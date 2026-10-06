@@ -121,7 +121,7 @@ public class LessonDAO {
             }
 
             stmt.setInt(6, lesson.getOrderIndex());
-            stmt.setString(7, lesson.getDescription());
+            stmt.setString(7, lesson.getDescription() != null ? lesson.getDescription().trim() : null);
 
             int affectedRows = stmt.executeUpdate();
 
@@ -157,7 +157,7 @@ public class LessonDAO {
                 stmt.setNull(4, Types.INTEGER);
             }
 
-            stmt.setString(5, lesson.getDescription());
+            stmt.setString(5, lesson.getDescription() != null ? lesson.getDescription().trim() : null);
             stmt.setInt(6, lesson.getId());
 
             return stmt.executeUpdate() > 0;
@@ -214,7 +214,8 @@ public class LessonDAO {
         lesson.setDurationMinutes(rs.wasNull() ? null : duration);
 
         lesson.setOrderIndex(rs.getInt("order_index"));
-        lesson.setDescription(rs.getString("description"));
+        String desc = rs.getString("description");
+        lesson.setDescription(desc != null ? desc.trim() : null);
         return lesson;
     }
 }

@@ -81,9 +81,20 @@ public class CourseContentServlet extends HttpServlet {
             java.util.List<com.lms.model.Assignment> assignments =
                     new com.lms.service.AssignmentService().listForInstructor(course.getId(), currentUser);
 
+            Integer firstLessonId = null;
+            if (course.getSectionsCache() != null) {
+                for (com.lms.model.Section s : course.getSectionsCache()) {
+                    if (s.getLessons() != null && !s.getLessons().isEmpty()) {
+                        firstLessonId = s.getLessons().get(0).getId();
+                        break;
+                    }
+                }
+            }
+
             request.setAttribute("course", course);
             request.setAttribute("quizzes", quizzes);
             request.setAttribute("assignments", assignments);
+            request.setAttribute("firstLessonId", firstLessonId);
             request.getRequestDispatcher("/WEB-INF/views/instructor/course-manage.jsp")
                     .forward(request, response);
 
@@ -136,6 +147,10 @@ public class CourseContentServlet extends HttpServlet {
                 String documentUrl = request.getParameter("documentUrl");
                 String durationStr = request.getParameter("durationMinutes");
                 String description = request.getParameter("description");
+                if (description != null) {
+                    description = description.trim();
+                    if (description.isEmpty()) description = null;
+                }
 
                 Integer duration = (durationStr != null && !durationStr.isEmpty())
                         ? Integer.parseInt(durationStr) : null;
@@ -151,6 +166,10 @@ public class CourseContentServlet extends HttpServlet {
                 String documentUrl = request.getParameter("documentUrl");
                 String durationStr = request.getParameter("durationMinutes");
                 String description = request.getParameter("description");
+                if (description != null) {
+                    description = description.trim();
+                    if (description.isEmpty()) description = null;
+                }
 
                 Integer duration = (durationStr != null && !durationStr.isEmpty())
                         ? Integer.parseInt(durationStr) : null;

@@ -135,8 +135,16 @@
         </div>
         <% } %>
     </div>
-    <div class="nav-links">
         <a href="<%=request.getContextPath()%>/instructor/courses" class="nav-link">← Danh sách khóa học</a>
+        <c:choose>
+            <c:when test="${not empty firstLessonId}">
+                <a href="<%=request.getContextPath()%>/student/lessons/view?lessonId=${firstLessonId}" class="nav-link"><i class="fa-solid fa-play"></i> Xem bài học</a>
+            </c:when>
+            <c:otherwise>
+                <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link"><i class="fa-solid fa-eye"></i> Xem khóa học</a>
+            </c:otherwise>
+        </c:choose>
+        <a href="<%=request.getContextPath()%>/courses/detail?id=${course.id}" class="nav-link"><i class="fa-solid fa-circle-info"></i> Giới thiệu khóa học</a>
         <a href="<%=request.getContextPath()%>/courses" class="nav-link">Khóa học</a>
         <% if (currentUser != null) { %>
             <% if ("student".equals(role)) { %>
@@ -169,16 +177,35 @@
     </div>
 </nav>
 
-<div class="page-header">
-    <h1><i class="fa-solid fa-folder-open"></i> <c:out value="${course.title}"/></h1>
-    <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
-        <span style="font-size:14px;opacity:.85;">Quản lý nội dung khóa học</span>
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+    <div>
+        <h1><i class="fa-solid fa-folder-open"></i> <c:out value="${course.title}"/></h1>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+            <span style="font-size:14px;opacity:.85;">Quản lý nội dung khóa học</span>
+            <c:choose>
+                <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
+                <c:when test="${course.status == 'published'}"><span class="badge badge-published"><i class="fa-solid fa-circle-check"></i> Published</span></c:when>
+                <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></c:when>
+                <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
+            </c:choose>
+        </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <c:choose>
-            <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
-            <c:when test="${course.status == 'published'}"><span class="badge badge-published"><i class="fa-solid fa-circle-check"></i> Published</span></c:when>
-            <c:when test="${course.status == 'warning'}"><span class="badge badge-rejected" style="background:#fed7d7; color:#9b2c2c;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></c:when>
-            <c:when test="${course.status == 'appealed'}"><span class="badge badge-published" style="background:#bee3f8; color:#2a4365;">📩 Đang kháng cáo</span></c:when>
+            <c:when test="${not empty firstLessonId}">
+                <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${firstLessonId}" class="btn" style="background:#10B981;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+                    <i class="fa-solid fa-play"></i> Xem bài học (Giao diện học viên)
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn" style="background:#10B981;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+                    <i class="fa-solid fa-eye"></i> Xem khóa học
+                </a>
+            </c:otherwise>
         </c:choose>
+        <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn" style="background:rgba(255,255,255,0.18);color:#fff;border:1.5px solid rgba(255,255,255,0.4);border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:all 0.2s;">
+            <i class="fa-solid fa-circle-info"></i> Trang giới thiệu
+        </a>
     </div>
 </div>
 
@@ -264,6 +291,11 @@
                                                      <c:otherwise>N/A</c:otherwise>
                                                 </c:choose>
                                             </span>
+                                            <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
+                                               class="btn-action-sm" style="padding:3px 8px;font-size:11px;background:#0284c7;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+                                               title="Xem bài học này ở giao diện học viên">
+                                                <i class="fa-solid fa-eye"></i> Xem bài học
+                                            </a>
                                             <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;"
                                                     data-id="${lesson.id}"
                                                     data-title="<c:out value="${lesson.title}" escapeXml="true"/>"
@@ -384,6 +416,11 @@
                                 </div>
                             </div>
                             <div style="display:flex;align-items:center;gap:8px;">
+                                <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${quiz.id}" class="btn btn-sm"
+                                   style="background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+                                   title="Xem giao diện làm bài của học viên">
+                                    <i class="fa-solid fa-eye"></i> Xem Quiz
+                                </a>
                                 <a href="${pageContext.request.contextPath}/instructor/quizzes/manage?id=${quiz.id}" class="btn btn-sm quiz-item-btn">
                                     <i class="fa-solid fa-pen-to-square"></i> Quản lý câu hỏi
                                 </a>
@@ -426,6 +463,10 @@
                                 <div class="quiz-item-title"><c:out value="${asg.title}"/></div>
                                 <div class="quiz-item-meta">
                                     <c:choose>
+                                        <c:when test="${asg.sectionId != null}"> (Chương: <c:out value="${asg.sectionTitle}"/>)</c:when>
+                                        <c:otherwise> (Toàn khóa học)</c:otherwise>
+                                    </c:choose>
+                                    · <c:choose>
                                         <c:when test="${not empty asg.dueAt}">Hạn nộp: ${asg.dueAtDisplay}<c:if test="${asg.overdue}"> (đã hết hạn)</c:if></c:when>
                                         <c:otherwise>Không đặt hạn nộp</c:otherwise>
                                     </c:choose>
@@ -434,6 +475,11 @@
                                 </div>
                             </div>
                             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="btn btn-sm"
+                                   style="background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
+                                   title="Xem giao diện nộp bài của học viên">
+                                    <i class="fa-solid fa-eye"></i> Xem Bài tập
+                                </a>
                                 <a href="${pageContext.request.contextPath}/instructor/assignments/submissions?id=${asg.id}" class="btn btn-sm quiz-item-btn">
                                     <i class="fa-solid fa-inbox"></i> Bài nộp (${asg.submissionCount})
                                 </a>
@@ -539,14 +585,14 @@
             document.getElementById('modalEditLessonDuration').value = arg1.dataset.duration || '';
             document.getElementById('modalEditLessonVideo').value = arg1.dataset.video || '';
             document.getElementById('modalEditLessonDoc').value = arg1.dataset.doc || '';
-            document.getElementById('modalEditLessonDesc').value = arg1.dataset.desc || '';
+            document.getElementById('modalEditLessonDesc').value = (arg1.dataset.desc || '').trim();
         } else {
             document.getElementById('modalEditLessonId').value = arg1 || '';
             document.getElementById('modalEditLessonTitle').value = title || '';
             document.getElementById('modalEditLessonDuration').value = duration || '';
             document.getElementById('modalEditLessonVideo').value = videoUrl || '';
             document.getElementById('modalEditLessonDoc').value = docUrl || '';
-            document.getElementById('modalEditLessonDesc').value = desc || '';
+            document.getElementById('modalEditLessonDesc').value = (desc || '').trim();
         }
         document.getElementById('editLessonModal').classList.add('active');
     }

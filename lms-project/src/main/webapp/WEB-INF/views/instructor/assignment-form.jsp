@@ -10,6 +10,26 @@
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=30">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-assignments.css?v=1">
+    <style>
+        .radio-group{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+        .radio-option{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #C6D8E3;border-radius:8px;cursor:pointer;transition:border-color .2s;background:#fff;}
+        .radio-option:hover{border-color:#076FA4;}
+        .radio-option input[type=radio]{margin-top:2px;accent-color:#076FA4;flex-shrink:0;}
+        .radio-option-label{font-size:14px;font-weight:600;color:#093C62;}
+        .radio-option-sub{font-size:13px;color:#5C7688;margin-top:3px;}
+        #sectionIdWrap{margin-top:10px;padding:12px 14px;background:#F0F6FA;border-radius:8px;border:1px solid #C6D8E3;}
+        #sectionIdWrap label{font-size:13px;font-weight:600;color:#093C62;margin-bottom:6px;display:block;}
+        #sectionIdWrap select{width:100%;padding:10px 14px;border:1.5px solid #C6D8E3;border-radius:8px;font-size:14px;outline:none;color:#093C62;background:#fff;}
+        #sectionIdWrap select:focus{border-color:#076FA4;}
+
+        body.dark-theme .radio-option{background:#182535;border-color:#093C62;}
+        body.dark-theme .radio-option:hover{border-color:#076FA4;}
+        body.dark-theme .radio-option-label{color:#F4F8FA;}
+        body.dark-theme .radio-option-sub{color:#9DB9CB;}
+        body.dark-theme #sectionIdWrap{background:#111312;border-color:#093C62;}
+        body.dark-theme #sectionIdWrap label{color:#F4F8FA;}
+        body.dark-theme #sectionIdWrap select{background:#182535;border-color:#093C62;color:#F4F8FA;}
+    </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <%
@@ -77,6 +97,37 @@
                 <div class="asg-hint">💡 Để trống nếu không đặt hạn. Học viên sẽ nhận thông báo trên web trước hạn 24 giờ và không thể nộp sau hạn.</div>
             </div>
 
+            <div class="asg-group">
+                <label>Gắn Bài tập vào *</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="attachType" value="course" ${empty formAttachType || formAttachType == 'course' ? 'checked' : ''} onchange="toggleSectionInput(this.value)" />
+                        <div>
+                            <div class="radio-option-label"><i class="fa-solid fa-book-open"></i> Toàn bộ khóa học</div>
+                            <div class="radio-option-sub">Bài tập chung — hiển thị trong mục bài tập toàn khóa của học viên</div>
+                        </div>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="attachType" value="section" ${formAttachType == 'section' ? 'checked' : ''} onchange="toggleSectionInput(this.value)" />
+                        <div>
+                            <div class="radio-option-label"><i class="fa-solid fa-folder-open"></i> Một chương cụ thể</div>
+                            <div class="radio-option-sub">Bài tập theo chương — gắn liền với 1 chương học cụ thể giống như Quiz</div>
+                        </div>
+                    </label>
+                </div>
+                <div id="sectionIdWrap" style="${formAttachType == 'section' ? 'display:block;' : 'display:none;'}">
+                    <label for="sectionId">Chọn chương muốn gắn *</label>
+                    <select id="sectionId" name="sectionId" ${formAttachType == 'section' ? 'required' : ''}>
+                        <option value="">-- Chọn một chương --</option>
+                        <c:forEach var="section" items="${course.sectionsCache}">
+                            <option value="${section.id}" ${formSectionId == section.id ? 'selected' : ''}>
+                                <c:out value="${section.title}"/>
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+
             <div class="asg-actions">
                 <button type="submit" class="asg-btn">
                     <i class="fa-solid fa-floppy-disk"></i> ${editMode ? 'Lưu thay đổi' : 'Tạo bài tập'}
@@ -86,6 +137,21 @@
         </form>
     </div>
 </div>
+
+<script>
+    function toggleSectionInput(val) {
+        var wrap = document.getElementById('sectionIdWrap');
+        var input = document.getElementById('sectionId');
+        if (val === 'section') {
+            wrap.style.display = 'block';
+            input.required = true;
+        } else {
+            wrap.style.display = 'none';
+            input.required = false;
+            input.value = '';
+        }
+    }
+</script>
 
 </body>
 </html>

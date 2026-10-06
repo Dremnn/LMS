@@ -121,6 +121,13 @@
 </div>
 
 <div class="main">
+    <c:if test="${isPreview}">
+        <div style="background:#E0F2FE;border:1px solid #7DD3FC;color:#0369A1;padding:14px 20px;border-radius:12px;margin-bottom:24px;font-weight:600;display:flex;align-items:center;gap:10px;">
+            <i class="fa-solid fa-circle-info" style="font-size:18px;"></i>
+            <span>Chế độ xem trước bài kiểm tra (Giảng viên / Quản trị viên). Bạn có thể xem nội dung câu hỏi nhưng không thể nộp bài.</span>
+        </div>
+    </c:if>
+
     <c:if test="${not empty error}">
         <div class="alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> <c:out value="${error}"/></div>
     </c:if>
@@ -149,10 +156,10 @@
                         <label class="option-label">
                             <c:choose>
                                 <c:when test="${question.questionType == 'single_choice'}">
-                                    <input type="radio" name="answer_${question.id}" value="${option.id}" />
+                                    <input type="radio" name="answer_${question.id}" value="${option.id}" ${isPreview ? 'disabled' : ''} />
                                 </c:when>
                                 <c:otherwise>
-                                    <input type="checkbox" name="answer_${question.id}" value="${option.id}" />
+                                    <input type="checkbox" name="answer_${question.id}" value="${option.id}" ${isPreview ? 'disabled' : ''} />
                                 </c:otherwise>
                             </c:choose>
                             <c:out value="${option.content}"/>
@@ -166,12 +173,21 @@
             <div class="submit-bar-info">
                 📋 Tổng <strong>${questions.size()}</strong> câu hỏi · Điểm đạt: <strong>${quiz.passScore}/100</strong>
             </div>
-            <button type="submit" class="btn-submit"><i class="fa-solid fa-rocket"></i> Nộp bài</button>
+            <c:choose>
+                <c:when test="${isPreview}">
+                    <button type="button" class="btn-submit" disabled style="opacity:0.65;cursor:not-allowed;background:#64748B;">
+                        <i class="fa-solid fa-lock"></i> Xem trước (Không thể nộp)
+                    </button>
+                </c:when>
+                <c:otherwise>
+                    <button type="submit" class="btn-submit"><i class="fa-solid fa-rocket"></i> Nộp bài</button>
+                </c:otherwise>
+            </c:choose>
         </div>
     </form>
 </div>
 
-<c:if test="${remainingSeconds != null}">
+<c:if test="${remainingSeconds != null && !isPreview}">
 <script>
     // remainingSeconds được server tính sẵn (dựa trên mốc bắt đầu lưu trong session),
     // nên F5 lại trang không làm reset đồng hồ đếm ngược.

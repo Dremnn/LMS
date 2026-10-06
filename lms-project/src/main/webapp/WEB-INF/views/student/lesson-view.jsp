@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -80,6 +81,11 @@
         body.dark-theme .lesson-desc-header{color:#F4F8FA;}
         body.dark-theme .lesson-desc-header i{color:#38BDF8;}
         body.dark-theme .lesson-desc-body{color:#9DB9CB;}
+        body.dark-theme .resource-card{background:#182535 !important;border-color:#093C62 !important;}
+        body.dark-theme .resource-card div > div:first-child{color:#F4F8FA !important;}
+        body.dark-theme .resource-card div > div:last-child{color:#9DB9CB !important;}
+        body.dark-theme .activities-box{background:#182535 !important;border-color:#093C62 !important;}
+        body.dark-theme .activities-box > div:first-child{color:#F4F8FA !important;}
         body.dark-theme .complete-card{background:#182535;border-color:#093C62;box-shadow:0 4px 20px rgba(0,0,0,.3);}
         body.dark-theme .complete-card h3{color:#F4F8FA;}
         body.dark-theme .form-check-label{color:#9DB9CB;}
@@ -194,6 +200,27 @@
                             </a>
                         </c:if>
                     </c:forEach>
+
+                    <%-- Bài tập cho chương này --%>
+                    <c:forEach var="asg" items="${assignments}">
+                        <c:if test="${asg.sectionId == section.id}">
+                            <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="lesson-link quiz-link">
+                                <span class="dot" style="border-color:#0d9488; ${asg.submittedByMe ? 'background:#0d9488;' : 'background:#ccfbf1;'} border-radius:3px;"></span>
+                                <span>
+                                    <i class="fa-solid fa-paperclip" style="color:#0d9488; margin-right:4px;"></i> <c:out value="${asg.title}"/>
+                                    <c:if test="${not empty asg.dueAt}">
+                                        <span style="display:block;font-size:11px;font-weight:400;opacity:.8;color:#134e4a;">
+                                            <c:choose>
+                                                <c:when test="${asg.submittedByMe}">Đã nộp</c:when>
+                                                <c:when test="${asg.overdue}">Quá hạn</c:when>
+                                                <c:otherwise>Hạn: ${asg.dueAtDisplay}</c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                    </c:if>
+                                </span>
+                            </a>
+                        </c:if>
+                    </c:forEach>
                 </div>
             </c:forEach>
 
@@ -218,26 +245,34 @@
                 </div>
             </c:if>
 
-            <%-- Bài tập của khóa học (chỉ hiển thị cho học viên đã đăng ký) --%>
-            <c:if test="${not empty enrollment && not empty assignments}">
+            <%-- Bài tập toàn khóa học --%>
+            <c:set var="hasCourseAssignment" value="false"/>
+            <c:forEach var="asg" items="${assignments}">
+                <c:if test="${asg.sectionId == null}">
+                    <c:set var="hasCourseAssignment" value="true"/>
+                </c:if>
+            </c:forEach>
+            <c:if test="${hasCourseAssignment}">
                 <div class="section-group" style="border-bottom:none;">
-                    <div class="section-title" style="background:#E6FFFA; color:#234E52; border-bottom:1px solid #B2F5EA;"><i class="fa-solid fa-paperclip" style="color:#319795;"></i> Bài tập</div>
+                    <div class="section-title" style="background:#CCFBF1; color:#115E59; border-bottom:1px solid #99F6E4;"><i class="fa-solid fa-paperclip" style="color:#0D9488;"></i> Bài Tập Toàn Khóa</div>
                     <c:forEach var="asg" items="${assignments}">
-                        <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="lesson-link">
-                            <span class="dot" style="border-color:#319795; ${asg.submittedByMe ? 'background:#319795;' : ''} border-radius:3px;"></span>
-                            <span>
-                                <c:out value="${asg.title}"/>
-                                <c:if test="${not empty asg.dueAt}">
-                                    <span style="display:block;font-size:11px;font-weight:400;opacity:.75;">
-                                        <c:choose>
-                                            <c:when test="${asg.submittedByMe}">Đã nộp</c:when>
-                                            <c:when test="${asg.overdue}">Quá hạn</c:when>
-                                            <c:otherwise>Hạn: ${asg.dueAtDisplay}</c:otherwise>
-                                        </c:choose>
-                                    </span>
-                                </c:if>
-                            </span>
-                        </a>
+                        <c:if test="${asg.sectionId == null}">
+                            <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="lesson-link quiz-link" style="background:#F0FDFA;">
+                                <span class="dot" style="border-color:#0D9488; ${asg.submittedByMe ? 'background:#0D9488;' : 'background:#CCFBF1;'} border-radius:3px;"></span>
+                                <span>
+                                    <span style="font-weight:700; color:#0F766E;"><i class="fa-solid fa-paperclip" style="color:#0D9488; margin-right:4px;"></i> <c:out value="${asg.title}"/></span>
+                                    <c:if test="${not empty asg.dueAt}">
+                                        <span style="display:block;font-size:11px;font-weight:400;opacity:.8;color:#134e4a;">
+                                            <c:choose>
+                                                <c:when test="${asg.submittedByMe}">Đã nộp</c:when>
+                                                <c:when test="${asg.overdue}">Quá hạn</c:when>
+                                                <c:otherwise>Hạn: ${asg.dueAtDisplay}</c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                    </c:if>
+                                </span>
+                            </a>
+                        </c:if>
                     </c:forEach>
                 </div>
             </c:if>
@@ -285,11 +320,22 @@
             </c:otherwise>
         </c:choose>
 
-        <%-- Tài liệu đính kèm --%>
+        <%-- Tài liệu đính kèm bài học --%>
         <c:if test="${not empty currentLesson.documentUrl}">
-            <a href="${currentLesson.documentUrl}" target="_blank" class="doc-link">
-                📄 Tải/Mở tài liệu bài học
-            </a>
+            <div class="resource-card" style="background:#FFFFFF;border:1px solid #C6D8E3;border-radius:14px;padding:18px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 16px rgba(9,60,98,.04);">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:44px;height:44px;border-radius:10px;background:#E0F2FE;color:#0284C7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:#093C62;">Tài liệu bài học</div>
+                        <div style="font-size:12.5px;color:#64748B;">Tài liệu / Giáo trình đính kèm cho bài học này</div>
+                    </div>
+                </div>
+                <a href="${currentLesson.documentUrl}" target="_blank" class="btn btn-outline" style="padding:10px 18px;font-size:13px;font-weight:700;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tài liệu
+                </a>
+            </div>
         </c:if>
 
         <%-- Mô tả nội dung bài học (luôn hiển thị nếu có) --%>
@@ -298,32 +344,117 @@
                 <div class="lesson-desc-header">
                     <i class="fa-solid fa-circle-info"></i> Mô tả bài học
                 </div>
-                <div class="lesson-desc-body">
-                    <c:out value="${currentLesson.description}"/>
+                <div class="lesson-desc-body"><c:out value="${fn:trim(currentLesson.description)}"/></div>
+            </div>
+        </c:if>
+
+        <%-- Danh sách Bài kiểm tra & Bài tập liên quan đến chương hoặc khóa học --%>
+        <c:set var="hasRelatedQuiz" value="false" />
+        <c:forEach var="q" items="${quizzes}">
+            <c:if test="${q.sectionId == currentLesson.sectionId || q.courseId != null}">
+                <c:set var="hasRelatedQuiz" value="true" />
+            </c:if>
+        </c:forEach>
+
+        <c:set var="hasRelatedAssignment" value="false" />
+        <c:forEach var="asg" items="${assignments}">
+            <c:if test="${asg.sectionId == currentLesson.sectionId || asg.sectionId == null}">
+                <c:set var="hasRelatedAssignment" value="true" />
+            </c:if>
+        </c:forEach>
+
+        <c:if test="${hasRelatedQuiz || hasRelatedAssignment}">
+            <div class="activities-box" style="margin-top:28px;background:#FFFFFF;border:1px solid #C6D8E3;border-radius:16px;padding:22px 26px;box-shadow:0 4px 20px rgba(9,60,98,.05);">
+                <div style="font-size:16px;font-weight:700;color:#093C62;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                    <i class="fa-solid fa-list-check" style="color:#076FA4;"></i> Bài kiểm tra & Bài tập liên quan
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;">
+                    <%-- Quizzes --%>
+                    <c:forEach var="q" items="${quizzes}">
+                        <c:if test="${q.sectionId == currentLesson.sectionId || q.courseId != null}">
+                            <div style="border:1px solid #FDE68A;background:#FFFBEB;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+                                <div>
+                                    <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#B45309;text-transform:uppercase;">
+                                        <i class="fa-solid fa-file-lines"></i> ${q.courseId != null ? 'Quiz Tổng Kết Khóa' : 'Quiz Chương'}
+                                    </div>
+                                    <div style="font-size:15px;font-weight:700;color:#92400E;margin-top:6px;"><c:out value="${q.title}"/></div>
+                                    <div style="font-size:12.5px;color:#78350F;margin-top:4px;">
+                                        Điểm đạt: <strong>${q.passScore}/100</strong>
+                                        <c:if test="${q.timeLimitMinutes != null}"> · Thời gian: <strong>${q.timeLimitMinutes} phút</strong></c:if>
+                                    </div>
+                                </div>
+                                <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${q.id}&lessonId=${currentLesson.id}" class="btn" style="background:#D97706;color:#fff;font-size:13px;font-weight:700;padding:9px 14px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;">
+                                    <i class="fa-solid fa-eye"></i> Xem bài kiểm tra
+                                </a>
+                            </div>
+                        </c:if>
+                    </c:forEach>
+
+                    <%-- Assignments --%>
+                    <c:forEach var="asg" items="${assignments}">
+                        <c:if test="${asg.sectionId == currentLesson.sectionId || asg.sectionId == null}">
+                            <div style="border:1px solid #B2F5EA;background:#E6FFFA;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+                                <div>
+                                    <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#234E52;text-transform:uppercase;">
+                                        <i class="fa-solid fa-paperclip"></i> ${asg.sectionId == null ? 'Bài Tập Toàn Khóa' : 'Bài Tập Chương'}
+                                    </div>
+                                    <div style="font-size:15px;font-weight:700;color:#234E52;margin-top:6px;"><c:out value="${asg.title}"/></div>
+                                    <c:if test="${not empty asg.dueAt}">
+                                        <div style="font-size:12.5px;color:#285E61;margin-top:4px;">
+                                            Hạn nộp: <strong>${asg.dueAtDisplay}</strong>
+                                        </div>
+                                    </c:if>
+                                </div>
+                                <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="btn" style="background:#319795;color:#fff;font-size:13px;font-weight:700;padding:9px 14px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;">
+                                    <i class="fa-solid fa-eye"></i> Xem bài tập
+                                </a>
+                            </div>
+                        </c:if>
+                    </c:forEach>
                 </div>
             </div>
         </c:if>
 
         <hr class="divider">
 
-        <%-- Form đánh dấu hoàn thành (chỉ hiện cho Student đã enroll) --%>
-        <c:if test="${enrollment != null}">
-            <div class="complete-card">
-                <h3><i class="fa-solid fa-circle-check"></i> Tiến độ bài học</h3>
-                <form action="${pageContext.request.contextPath}/student/lessons/complete" method="post">
-                    <input type="hidden" name="lessonId" value="${currentLesson.id}" />
-                    <input type="hidden" name="courseId" value="${course.id}" />
-                    <div class="form-check">
-                        <input type="checkbox" name="completed" id="completedCheck"
-                               <c:if test="${completedLessonIds.contains(currentLesson.id)}">checked</c:if> />
-                        <label class="form-check-label" for="completedCheck">
-                            Đánh dấu bài học này đã hoàn thành
+        <%-- Form đánh dấu hoàn thành --%>
+        <c:choose>
+            <c:when test="${enrollment != null}">
+                <div class="complete-card">
+                    <h3><i class="fa-solid fa-circle-check"></i> Tiến độ bài học</h3>
+                    <form action="${pageContext.request.contextPath}/student/lessons/complete" method="post">
+                        <input type="hidden" name="lessonId" value="${currentLesson.id}" />
+                        <input type="hidden" name="courseId" value="${course.id}" />
+                        <div class="form-check">
+                            <input type="checkbox" name="completed" id="completedCheck"
+                                   <c:if test="${completedLessonIds.contains(currentLesson.id)}">checked</c:if> />
+                            <label class="form-check-label" for="completedCheck">
+                                Đánh dấu bài học này đã hoàn thành
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-success">💾 Lưu tiến độ</button>
+                    </form>
+                </div>
+            </c:when>
+            <c:when test="${isPreview}">
+                <div class="complete-card" style="border-left: 4px solid #076FA4; background: #F0F9FF;">
+                    <h3 style="color:#0369A1; margin-bottom:12px;"><i class="fa-solid fa-eye" style="color:#076FA4;"></i> Tiến độ bài học (Chế độ xem trước)</h3>
+                    <div class="form-check" style="margin-bottom:12px; opacity:0.75;">
+                        <input type="checkbox" id="previewCompletedCheck" disabled />
+                        <label class="form-check-label" for="previewCompletedCheck" style="cursor:not-allowed; color:#64748B;">
+                            Đánh dấu bài học này đã hoàn thành (Khóa trong chế độ xem trước)
                         </label>
                     </div>
-                    <button type="submit" class="btn btn-success">💾 Lưu tiến độ</button>
-                </form>
-            </div>
-        </c:if>
+                    <button type="button" class="btn btn-success" disabled style="opacity:0.6; cursor:not-allowed; background:#94A3B8; box-shadow:none;">
+                        <i class="fa-solid fa-lock"></i> Chỉ xem nội dung (Không thể tick tiến độ)
+                    </button>
+                    <p style="font-size:13px; color:#64748B; margin-top:12px; margin-bottom:0;">
+                        <i class="fa-solid fa-circle-info"></i> Bạn đang xem giao diện học viên với tư cách Giảng viên / Quản trị viên (chỉ xem, không thể thao tác lưu tiến độ).
+                    </p>
+                </div>
+            </c:when>
+        </c:choose>
     </main>
 </div>
 

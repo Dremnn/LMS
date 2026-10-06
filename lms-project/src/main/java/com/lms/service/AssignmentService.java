@@ -95,12 +95,13 @@ public class AssignmentService {
      * Tạo bài tập. description và file đính kèm đều TÙY CHỌN (có thể để trống hoàn toàn).
      * fileBytes == null (hoặc rỗng) nghĩa là không đính kèm file.
      */
-    public int create(int courseId, User user, String title, String description, LocalDateTime dueAt,
+    public int create(int courseId, Integer sectionId, User user, String title, String description, LocalDateTime dueAt,
                       String fileName, byte[] fileBytes) {
         requireCourseOwner(courseId, user);
 
         Assignment a = new Assignment();
         a.setCourseId(courseId);
+        a.setSectionId(sectionId);
         a.setTitle(validateTitle(title));
         a.setDescription(cleanDescription(description));
         if (dueAt != null && !dueAt.isAfter(LocalDateTime.now())) {
@@ -127,10 +128,11 @@ public class AssignmentService {
      * Sửa bài tập. attachMode: "keep" | "remove" | "replace".
      * "replace" bắt buộc phải có file mới.
      */
-    public void update(int assignmentId, User user, String title, String description, LocalDateTime dueAt,
+    public void update(int assignmentId, Integer sectionId, User user, String title, String description, LocalDateTime dueAt,
                        String attachMode, String fileName, byte[] fileBytes) {
         Assignment existing = requireAssignmentOwner(assignmentId, user);
 
+        existing.setSectionId(sectionId);
         existing.setTitle(validateTitle(title));
         existing.setDescription(cleanDescription(description));
 
@@ -173,6 +175,18 @@ public class AssignmentService {
 
     public FileData getAttachmentForInstructor(int assignmentId, User user) {
         requireAssignmentOwner(assignmentId, user);
+        return requireFile(assignmentDAO.getAttachment(assignmentId));
+    }
+
+    public Assignment getForPreview(int assignmentId) {
+        Assignment a = assignmentDAO.findById(assignmentId);
+        if (a == null) {
+            throw new IllegalArgumentException("Bài tập không tồn tại!");
+        }
+        return a;
+    }
+
+    public FileData getAttachmentForPreview(int assignmentId) {
         return requireFile(assignmentDAO.getAttachment(assignmentId));
     }
 

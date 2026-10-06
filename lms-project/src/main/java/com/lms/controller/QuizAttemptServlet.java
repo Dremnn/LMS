@@ -82,24 +82,35 @@ public class QuizAttemptServlet extends HttpServlet {
         int quizId = Integer.parseInt(request.getParameter("id"));
         Quiz quiz = quizService.getQuizById(quizId);
         
-        // Ensure student is enrolled
+        boolean isPreview = currentUser != null && ("admin".equals(currentUser.getRole()) || "instructor".equals(currentUser.getRole()));
+
+        // Ensure student is enrolled (if not in preview mode)
         com.lms.model.Course course = null;
         if (quiz.getCourseId() != null) {
             course = new com.lms.service.CourseService().getCourseDetail(quiz.getCourseId());
-            new com.lms.service.EnrollmentService().getEnrollmentOrThrow(currentUser.getId(), quiz.getCourseId());
+            if (!isPreview) {
+                new com.lms.service.EnrollmentService().getEnrollmentOrThrow(currentUser.getId(), quiz.getCourseId());
+            }
         } else {
             com.lms.model.Section sec = new com.lms.dao.SectionDAO().findById(quiz.getSectionId());
             course = new com.lms.service.CourseService().getCourseDetail(sec.getCourseId());
-            new com.lms.service.EnrollmentService().getEnrollmentOrThrow(currentUser.getId(), sec.getCourseId());
+            if (!isPreview) {
+                new com.lms.service.EnrollmentService().getEnrollmentOrThrow(currentUser.getId(), sec.getCourseId());
+            }
         }
 
-        int attemptsUsed = quizAttemptDAO.countAttempts(currentUser.getId(), quizId);
-        java.math.BigDecimal highestScore = quizAttemptDAO.getHighestScore(currentUser.getId(), quizId);
+        int attemptsUsed = 0;
+        java.math.BigDecimal highestScore = null;
+        if (!isPreview) {
+            attemptsUsed = quizAttemptDAO.countAttempts(currentUser.getId(), quizId);
+            highestScore = quizAttemptDAO.getHighestScore(currentUser.getId(), quizId);
+        }
 
         request.setAttribute("quiz", quiz);
         request.setAttribute("course", course);
         request.setAttribute("attemptsUsed", attemptsUsed);
         request.setAttribute("highestScore", highestScore);
+        request.setAttribute("isPreview", isPreview);
         
         request.getRequestDispatcher("/WEB-INF/views/student/quiz-intro.jsp")
                 .forward(request, response);
@@ -109,16 +120,17 @@ public class QuizAttemptServlet extends HttpServlet {
             throws ServletException, IOException {
 
         int quizId = Integer.parseInt(request.getParameter("id"));
+        boolean isPreview = currentUser != null && ("admin".equals(currentUser.getRole()) || "instructor".equals(currentUser.getRole()));
 
         Quiz quiz = quizService.getQuizById(quizId);
-        // getQuestionsForAttempt() đã tự kiểm tra: đã enroll chưa, quiz có đang mở không,
+        // getQuestionsForAttempt() đã tự kiểm tra: đã enroll chưa (nếu là student), quiz có đang mở không,
         // còn lượt làm bài không, và ĐÃ ẨN SẴN đáp án đúng trước khi trả về (xử lý trong QuizService)
-        List<Question> questions = quizService.getQuestionsForAttempt(currentUser.getId(), quizId);
+        List<Question> questions = quizService.getQuestionsForAttempt(currentUser, quizId);
 
         // Ghi nhận thời điểm bắt đầu làm bài vào session (chỉ set 1 lần, F5 lại không bị reset đồng hồ)
         // dùng để: (1) tính remainingSeconds cho JS đếm ngược, (2) server-side kiểm tra hết giờ khi submit
         Long remainingSeconds = null;
-        if (quiz.getTimeLimitMinutes() != null) {
+        if (quiz.getTimeLimitMinutes() != null && !isPreview) {
             HttpSession session = request.getSession();
             String startKey = "quizAttemptStart_" + quizId;
             Long startMillis = (Long) session.getAttribute(startKey);
@@ -134,6 +146,7 @@ public class QuizAttemptServlet extends HttpServlet {
         request.setAttribute("quiz", quiz);
         request.setAttribute("questions", questions);
         request.setAttribute("remainingSeconds", remainingSeconds);
+        request.setAttribute("isPreview", isPreview);
         request.getRequestDispatcher("/WEB-INF/views/student/quiz-attempt.jsp")
                 .forward(request, response);
     }
@@ -164,6 +177,12 @@ public class QuizAttemptServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
         User currentUser = getCurrentUser(request);
+
+        boolean isPreview = currentUser != null && ("admin".equals(currentUser.getRole()) || "instructor".equals(currentUser.getRole()));
+        if (isPreview) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Chế độ xem trước không thể nộp bài!");
+            return;
+        }
 
         int quizId = -1;
 

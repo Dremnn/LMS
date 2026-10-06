@@ -262,26 +262,29 @@ public class QuizService {
     // =========================================================================
     // 4. STUDENT: LẤY QUIZ ĐỂ LÀM BÀI — ẨN ĐÁP ÁN ĐÚNG (điểm bảo mật quan trọng)
     // =========================================================================
-    public List<Question> getQuestionsForAttempt(int studentId, int quizId) {
+    public List<Question> getQuestionsForAttempt(User user, int quizId) {
         Quiz quiz = quizDAO.findById(quizId);
         if (quiz == null) {
             throw new IllegalArgumentException("Quiz không tồn tại!");
         }
 
-        int courseId = resolveCourseId(quiz);
+        boolean isPreview = user != null && ("admin".equals(user.getRole()) || "instructor".equals(user.getRole()));
 
-        // Bắt buộc phải đã đăng ký khóa học chứa quiz này mới được làm bài
-        enrollmentService.getEnrollmentOrThrow(studentId, courseId);
+        if (!isPreview) {
+            int courseId = resolveCourseId(quiz);
+            // Bắt buộc phải đã đăng ký khóa học chứa quiz này mới được làm bài
+            enrollmentService.getEnrollmentOrThrow(user.getId(), courseId);
 
-        // Kiểm tra cửa sổ thời gian mở/đóng của quiz
-        checkQuizWindow(quiz);
+            // Kiểm tra cửa sổ thời gian mở/đóng của quiz
+            checkQuizWindow(quiz);
 
-        // Kiểm tra giới hạn số lần làm bài (nếu Instructor có set max_attempts)
-        if (quiz.getMaxAttempts() != null) {
-            int attemptsUsed = quizAttemptDAO.countAttempts(studentId, quizId);
-            if (attemptsUsed >= quiz.getMaxAttempts()) {
-                throw new IllegalStateException(
-                    "Bạn đã hết lượt làm bài (tối đa " + quiz.getMaxAttempts() + " lần)!");
+            // Kiểm tra giới hạn số lần làm bài (nếu Instructor có set max_attempts)
+            if (quiz.getMaxAttempts() != null) {
+                int attemptsUsed = quizAttemptDAO.countAttempts(user.getId(), quizId);
+                if (attemptsUsed >= quiz.getMaxAttempts()) {
+                    throw new IllegalStateException(
+                        "Bạn đã hết lượt làm bài (tối đa " + quiz.getMaxAttempts() + " lần)!");
+                }
             }
         }
 
@@ -306,6 +309,13 @@ public class QuizService {
         }
 
         return sanitized;
+    }
+
+    public List<Question> getQuestionsForAttempt(int studentId, int quizId) {
+        User u = new User();
+        u.setId(studentId);
+        u.setRole("student");
+        return getQuestionsForAttempt(u, quizId);
     }
 
     // =========================================================================

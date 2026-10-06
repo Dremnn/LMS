@@ -11,33 +11,47 @@ import java.util.List;
 
 public class AssignmentDAO {
 
+    static {
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate("ALTER TABLE assignments ADD COLUMN IF NOT EXISTS section_id INT REFERENCES sections(id) ON DELETE SET NULL");
+        } catch (Exception e) {
+            System.err.println("AssignmentDAO auto migration: " + e.getMessage());
+        }
+    }
+
     // Các cột metadata - CỐ Ý không SELECT attach_data để danh sách không phải kéo file nặng
     private static final String META_COLUMNS =
-            "a.id, a.course_id, a.title, a.description, a.due_at, a.attach_name, a.attach_type, " +
+            "a.id, a.course_id, a.section_id, a.title, a.description, a.due_at, a.attach_name, a.attach_type, " +
             "a.attach_size, a.notified_deadline, a.created_at";
 
     // 1. Tạo bài tập mới - trả về id, hoặc -1 nếu lỗi
     public int insert(Assignment a, byte[] attachData) {
         String sql = "INSERT INTO assignments " +
-                "(course_id, title, description, due_at, attach_name, attach_type, attach_size, attach_data) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                "(course_id, section_id, title, description, due_at, attach_name, attach_type, attach_size, attach_data) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, a.getCourseId());
-            stmt.setString(2, a.getTitle());
-            stmt.setString(3, a.getDescription());
-            setTimestamp(stmt, 4, a.getDueAt());
-            if (attachData != null) {
-                stmt.setString(5, a.getAttachName());
-                stmt.setString(6, a.getAttachType());
-                stmt.setInt(7, attachData.length);
-                stmt.setBytes(8, attachData);
+            if (a.getSectionId() != null) {
+                stmt.setInt(2, a.getSectionId());
             } else {
-                stmt.setNull(5, Types.VARCHAR);
+                stmt.setNull(2, Types.INTEGER);
+            }
+            stmt.setString(3, a.getTitle());
+            stmt.setString(4, a.getDescription());
+            setTimestamp(stmt, 5, a.getDueAt());
+            if (attachData != null) {
+                stmt.setString(6, a.getAttachName());
+                stmt.setString(7, a.getAttachType());
+                stmt.setInt(8, attachData.length);
+                stmt.setBytes(9, attachData);
+            } else {
                 stmt.setNull(6, Types.VARCHAR);
-                stmt.setNull(7, Types.INTEGER);
-                stmt.setNull(8, Types.BINARY);
+                stmt.setNull(7, Types.VARCHAR);
+                stmt.setNull(8, Types.INTEGER);
+                stmt.setNull(9, Types.BINARY);
             }
 
             if (stmt.executeUpdate() > 0) {
@@ -56,7 +70,7 @@ public class AssignmentDAO {
     //    Nếu hạn nộp thay đổi -> reset notified_deadline để hệ thống nhắc lại theo hạn mới.
     public boolean update(Assignment a, String attachMode, byte[] newData) {
         StringBuilder sql = new StringBuilder(
-                "UPDATE assignments SET title = ?, description = ?, " +
+                "UPDATE assignments SET section_id = ?, title = ?, description = ?, " +
                 "notified_deadline = CASE WHEN due_at IS DISTINCT FROM ? THEN FALSE ELSE notified_deadline END, " +
                 "due_at = ?");
         if ("remove".equals(attachMode)) {
@@ -70,6 +84,11 @@ public class AssignmentDAO {
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
             int i = 1;
+            if (a.getSectionId() != null) {
+                stmt.setInt(i++, a.getSectionId());
+            } else {
+                stmt.setNull(i++, Types.INTEGER);
+            }
             stmt.setString(i++, a.getTitle());
             stmt.setString(i++, a.getDescription());
             setTimestamp(stmt, i++, a.getDueAt());
@@ -101,10 +120,13 @@ public class AssignmentDAO {
         return false;
     }
 
-    // 4. Lấy 1 bài tập (kèm tên khóa học) - không kèm nội dung file
+    // 4. Lấy 1 bài tập (kèm tên khóa học và tên chương nếu có) - không kèm nội dung file
     public Assignment findById(int id) {
-        String sql = "SELECT " + META_COLUMNS + ", c.title AS course_title " +
-                "FROM assignments a INNER JOIN courses c ON c.id = a.course_id WHERE a.id = ?";
+        String sql = "SELECT " + META_COLUMNS + ", c.title AS course_title, sec.title AS section_title " +
+                "FROM assignments a " +
+                "INNER JOIN courses c ON c.id = a.course_id " +
+                "LEFT JOIN sections sec ON sec.id = a.section_id " +
+                "WHERE a.id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
@@ -112,6 +134,7 @@ public class AssignmentDAO {
                 if (rs.next()) {
                     Assignment a = map(rs);
                     a.setCourseTitle(rs.getString("course_title"));
+                    a.setSectionTitle(rs.getString("section_title"));
                     return a;
                 }
             }
@@ -123,10 +146,12 @@ public class AssignmentDAO {
 
     // 5. Giảng viên: danh sách bài tập của khóa + số bài đã nộp / tổng học viên
     public List<Assignment> findByCourseForInstructor(int courseId) {
-        String sql = "SELECT " + META_COLUMNS + ", " +
+        String sql = "SELECT " + META_COLUMNS + ", sec.title AS section_title, " +
                 "(SELECT COUNT(*) FROM assignment_submissions s WHERE s.assignment_id = a.id) AS submission_count, " +
                 "(SELECT COUNT(*) FROM enrollments e WHERE e.course_id = a.course_id) AS enrolled_count " +
-                "FROM assignments a WHERE a.course_id = ? " +
+                "FROM assignments a " +
+                "LEFT JOIN sections sec ON sec.id = a.section_id " +
+                "WHERE a.course_id = ? " +
                 "ORDER BY a.due_at ASC NULLS LAST, a.created_at DESC";
         List<Assignment> list = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
@@ -135,6 +160,7 @@ public class AssignmentDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Assignment a = map(rs);
+                    a.setSectionTitle(rs.getString("section_title"));
                     a.setSubmissionCount(rs.getInt("submission_count"));
                     a.setEnrolledCount(rs.getInt("enrolled_count"));
                     list.add(a);
@@ -148,8 +174,9 @@ public class AssignmentDAO {
 
     // 6. Học viên: danh sách bài tập của khóa + trạng thái đã nộp của chính học viên đó
     public List<Assignment> findByCourseForStudent(int courseId, int studentId) {
-        String sql = "SELECT " + META_COLUMNS + ", s.id AS my_submission_id, s.submitted_at AS my_submitted_at " +
+        String sql = "SELECT " + META_COLUMNS + ", sec.title AS section_title, s.id AS my_submission_id, s.submitted_at AS my_submitted_at " +
                 "FROM assignments a " +
+                "LEFT JOIN sections sec ON sec.id = a.section_id " +
                 "LEFT JOIN assignment_submissions s ON s.assignment_id = a.id AND s.student_id = ? " +
                 "WHERE a.course_id = ? " +
                 "ORDER BY a.due_at ASC NULLS LAST, a.created_at DESC";
@@ -161,6 +188,7 @@ public class AssignmentDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Assignment a = map(rs);
+                    a.setSectionTitle(rs.getString("section_title"));
                     int subId = rs.getInt("my_submission_id");
                     if (!rs.wasNull()) {
                         a.setMySubmissionId(subId);
@@ -169,6 +197,21 @@ public class AssignmentDAO {
                     }
                     list.add(a);
                 }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Assignment> findBySectionId(int sectionId) {
+        String sql = "SELECT " + META_COLUMNS + " FROM assignments a WHERE a.section_id = ? ORDER BY a.due_at ASC NULLS LAST, a.created_at DESC";
+        List<Assignment> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, sectionId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -235,6 +278,8 @@ public class AssignmentDAO {
         Assignment a = new Assignment();
         a.setId(rs.getInt("id"));
         a.setCourseId(rs.getInt("course_id"));
+        int secId = rs.getInt("section_id");
+        a.setSectionId(rs.wasNull() ? null : secId);
         a.setTitle(rs.getString("title"));
         a.setDescription(rs.getString("description"));
         Timestamp due = rs.getTimestamp("due_at");

@@ -45,6 +45,7 @@
         .lesson-name a{color:#1E293B;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:color .15s;}
         .lesson-name a:hover{color:#076FA4;}
         .lesson-duration{font-size:13px;color:#94A3B8;white-space:nowrap;font-weight:500;}
+        .lesson-desc-content{padding:12px 24px 16px 24px;font-size:13.5px;color:#475569;background:#F8FAFC;border-top:1px solid #F1F5F9;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
         .empty-lessons{padding:18px 24px;color:#94A3B8;font-size:14px;font-style:italic;}
         .empty-state{text-align:center;padding:70px 20px;color:#94A3B8;background:#fff;border-radius:16px;border:1px solid #E2E8F0;}
         .progress-box{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px 20px;margin-bottom:20px;}
@@ -299,11 +300,13 @@
                                 <i class="fa-solid fa-lock"></i>
                                 <%= "instructor".equals(role) ? "Tài khoản giảng viên không thể đăng ký khóa học." : "Tài khoản quản trị viên không thể đăng ký khóa học." %>
                             </div>
-                            <c:if test="${sessionScope.currentUser.role == 'admin' || sessionScope.currentUser.id == course.instructorId}">
-                                <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn-enroll" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
-                                    <i class="fa-solid fa-pen-to-square"></i> Quản lý nội dung khóa học
-                                </a>
-                            </c:if>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <c:if test="${sessionScope.currentUser.role == 'admin' || sessionScope.currentUser.id == course.instructorId}">
+                                    <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;font-size:15px;font-weight:700;border-radius:12px;background:#093C62;color:#fff;">
+                                        <i class="fa-solid fa-pen-to-square"></i> Quản lý nội dung
+                                    </a>
+                                </c:if>
+                            </div>
                         </div>
                     <% } else { %>
                         <%-- Chưa đăng ký: hiện form đăng ký --%>
@@ -357,7 +360,7 @@
                                                     </button>
                                                 </c:if>
                                                 <c:choose>
-                                                    <c:when test="${not empty enrollment}">
+                                                    <c:when test="${not empty enrollment || sessionScope.currentUser.role == 'admin' || (sessionScope.currentUser.role == 'instructor' && sessionScope.currentUser.id == course.instructorId)}">
                                                         <%-- Đã đăng ký: tên bài là link dẫn vào xem nội dung --%>
                                                         <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
                                                            style="color:#076FA4;text-decoration:none;font-weight:600;"
@@ -380,9 +383,7 @@
                                             </span>
                                         </div>
                                         <c:if test="${not empty lesson.description}">
-                                            <div id="lesson-desc-${lesson.id}" class="lesson-desc-content" style="display:none;padding:10px 24px 14px 44px;font-size:13.5px;color:#475569;background:#f8fafc;border-top:1px dashed #e2e8f0;line-height:1.6;white-space:pre-wrap;">
-                                                <i class="fa-solid fa-circle-info" style="color:#076FA4;margin-right:4px;"></i> <c:out value="${lesson.description}"/>
-                                            </div>
+                                            <div id="lesson-desc-${lesson.id}" class="lesson-desc-content" style="display:none;"><c:out value="${fn:trim(lesson.description)}"/></div>
                                         </c:if>
                                     </div>
                                 </c:forEach>

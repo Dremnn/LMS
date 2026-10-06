@@ -13,6 +13,7 @@ public class Assignment implements Serializable {
 
     private int id;
     private int courseId;
+    private Integer sectionId;            // null = toàn bộ khóa học; khác null = gắn vào 1 chương cụ thể
     private String title;
     private String description;
     private LocalDateTime dueAt;          // null = không có hạn nộp
@@ -24,6 +25,7 @@ public class Assignment implements Serializable {
 
     // Trường bổ sung từ JOIN (không map trực tiếp 1-1 với cột)
     private String courseTitle;
+    private String sectionTitle;
     private int submissionCount;          // dành cho giảng viên: số bài đã nộp
     private int enrolledCount;            // dành cho giảng viên: tổng số học viên trong khóa
     private Integer mySubmissionId;       // dành cho học viên: id bài nộp của mình (null = chưa nộp)
@@ -61,6 +63,10 @@ public class Assignment implements Serializable {
     public void setId(int id) { this.id = id; }
     public int getCourseId() { return courseId; }
     public void setCourseId(int courseId) { this.courseId = courseId; }
+    public Integer getSectionId() { return sectionId; }
+    public void setSectionId(Integer sectionId) { this.sectionId = sectionId; }
+    public String getSectionTitle() { return sectionTitle; }
+    public void setSectionTitle(String sectionTitle) { this.sectionTitle = sectionTitle; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }
