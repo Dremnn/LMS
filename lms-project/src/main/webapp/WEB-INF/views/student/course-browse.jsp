@@ -105,11 +105,16 @@
     </div>
 </div>
 
-<!-- SEARCH -->
+<!-- ========================================================================= -->
+<!-- KHỐI TÌM KIẾM & BỘ LỌC (SEARCH & FILTER) -->
+<!-- Gửi GET request về /courses (CourseBrowseServlet -> CourseService.searchCourses) -->
+<!-- ========================================================================= -->
 <div class="search-section">
     <form action="${pageContext.request.contextPath}/courses" method="get" class="search-form">
+        <!-- Ô nhập từ khóa tìm kiếm theo tên/mô tả khóa học (param: keyword) -->
         <input type="text" name="keyword" class="search-input"
                placeholder="Tìm kiếm khóa học..." value="<c:out value='${keyword}' default=''/>">
+        <!-- Dropdown lọc theo Danh mục lấy từ categoryDAO.findAll() (param: categoryId) -->
         <select name="categoryId" class="search-select">
             <option value="">Tất cả danh mục</option>
             <c:forEach var="cat" items="${categories}">
@@ -118,16 +123,21 @@
                 </option>
             </c:forEach>
         </select>
+        <!-- Dropdown sắp xếp: newest (Mới nhất), popular (Lượt mua), rating (Sao) (param: sortBy) -->
         <select name="sortBy" class="search-select">
             <option value="newest" <c:if test="${sortBy == 'newest' || empty sortBy}">selected</c:if>>Mới nhất</option>
             <option value="popular" <c:if test="${sortBy == 'popular'}">selected</c:if>>Phổ biến nhất</option>
             <option value="rating" <c:if test="${sortBy == 'rating'}">selected</c:if>>Đánh giá cao nhất</option>
         </select>
+        <!-- Nút Submit thực hiện tìm kiếm -->
         <button type="submit" class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
     </form>
 </div>
 
-<!-- MAIN -->
+<!-- ========================================================================= -->
+<!-- KHỐI DANH SÁCH KHÓA HỌC HIỂN THỊ (MAIN CONTENT) -->
+<!-- Duyệt qua danh sách ${courses} trả về từ CourseBrowseServlet -->
+<!-- ========================================================================= -->
 <div class="lms-main">
     <p class="result-info">
         <c:choose>
@@ -139,6 +149,7 @@
     <c:choose>
         <c:when test="${not empty courses}">
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;">
+                <!-- Vòng lặp hiển thị từng thẻ khóa học (Course Card) -->
                 <c:forEach var="course" items="${courses}" varStatus="vs">
                     <div class="course-card reveal reveal-d${(vs.index % 3) + 1}">
                         <div class="course-img-wrap">

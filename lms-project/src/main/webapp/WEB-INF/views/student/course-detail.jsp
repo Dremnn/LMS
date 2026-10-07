@@ -236,15 +236,21 @@
     </div>
 </nav>
 
+<!-- ========================================================================= -->
+<!-- KHỐI BANNER CHÍNH KHÓA HỌC (HERO SECTION) -->
+<!-- Lấy thông tin từ đối tượng ${course} (CourseService.getCourseDetail) -->
+<!-- ========================================================================= -->
 <div class="hero-section">
     <div class="hero-inner">
         <div class="hero-info">
             <a href="${pageContext.request.contextPath}/courses" class="back-link"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách</a>
             <c:if test="${not empty course.categoryName}">
+                <!-- Danh mục khóa học -->
                 <span style="font-size:13px;color:#076FA4;background:rgba(157, 185, 203, 0.25);padding:4px 12px;border-radius:20px;font-weight:700;display:inline-block;margin-bottom:12px;">
                     <i class="fa-solid fa-folder-open"></i> <c:out value="${course.categoryName}"/>
                 </span>
             </c:if>
+            <!-- Tiêu đề khóa học -->
             <h1><c:out value="${course.title}"/></h1>
             <c:if test="${not empty success}">
                 <div style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:16px;">
@@ -261,13 +267,16 @@
                     <i class="fa-solid fa-triangle-exclamation"></i> <strong>Khóa học này đang bị cảnh cáo</strong> — Nội dung đang được xem xét bởi quản trị viên.
                 </div>
             </c:if>
+            <!-- Mô tả khóa học -->
             <p class="desc"><c:out value="${course.description}"/></p>
+            <!-- Thông số: Tên giảng viên, Điểm sao đánh giá, Số học viên, Số bài học -->
             <div class="hero-meta">
                 <span class="instructor-tag"><i class="fa-solid fa-chalkboard-user"></i> <c:out value="${course.instructorName}"/></span>
                 <span class="rating-tag"><a href="#reviews-section" style="color:inherit;text-decoration:none;"><i class="fa-solid fa-star"></i> ${course.avgRating} / 5 (${reviews != null ? reviews.size() : 0} đánh giá)</a></span>
                 <span><i class="fa-solid fa-users"></i> ${course.totalStudents} học viên</span>
                 <span><i class="fa-solid fa-book-open"></i> ${course.totalLessons} bài học</span>
             </div>
+            <!-- Giá khóa học (Miễn phí hoặc số tiền) -->
             <div class="hero-price">
                 <c:choose>
                     <c:when test="${course.price == 0 || course.price == null}">
@@ -278,23 +287,30 @@
                     </c:otherwise>
                 </c:choose>
             </div>
+            <!-- ========================================================================= -->
+            <!-- KHỐI HÀNH ĐỘNG: KIỂM TRA TRẠNG THÁI HỌC VIÊN ĐÃ ĐĂNG KÝ HAY CHƯA -->
+            <!-- Dựa vào đối tượng ${enrollment} do CourseBrowseServlet truyền sang -->
+            <!-- ========================================================================= -->
             <c:choose>
                 <c:when test="${not empty enrollment}">
-                    <%-- Đã đăng ký: hiện tiến độ + nút vào học --%>
+                    <%-- TRƯỜNG HỢP 1: ĐÃ ĐĂNG KÝ KHÓA HỌC --%>
+                    <!-- Hiển thị thanh tiến độ học tập (Progress Bar) -->
                     <div class="progress-box">
                         <div style="font-size:14px;color:#1E293B;display:flex;justify-content:space-between;font-weight:600;">
                             <span><i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Đã đăng ký khóa học</span>
                             <span>Tiến độ: <strong>${enrollment.progressPercent}%</strong></span>
                         </div>
                         <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" style="width:${enrollment.progressPercent}%;"></div>
+                            <div class="progress-bar-fill" data-progress="${enrollment.progressPercent}"></div>
                         </div>
                     </div>
                     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                        <!-- Nút Tiếp tục học: dẫn vào bài học đầu tiên -->
                         <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${course.sectionsCache[0].lessons[0].id}" class="btn-enroll">
                             <i class="fa-solid fa-play"></i> Tiếp tục học
                         </a>
                         <% if (canRefund) { %>
+                            <!-- Form Hoàn tiền & Hủy đăng ký (POST về /enrollments/refund, trong vòng 30 phút) -->
                             <form action="<%=request.getContextPath()%>/enrollments/refund" method="post" style="display:inline;"
                                   onsubmit="return confirm('Hủy đăng ký và hoàn lại tiền vào ví của bạn? Số tiền sẽ được hoàn ngay lập tức, mọi tiến độ học tập sẽ bị xóa.')">
                                 <input type="hidden" name="courseId" value="${course.id}" />
@@ -306,8 +322,10 @@
                                 <i class="fa-solid fa-clock"></i> Còn <%=minutesLeftForRefund%> phút để được hoàn tiền
                             </span>
                         <% } else { %>
+                            <!-- Form Hủy khóa học khi đã quá hạn hoàn tiền (POST về /enrollments/cancel) -->
                             <form action="<%=request.getContextPath()%>/enrollments/cancel" method="post" style="display:inline;"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn hủy khóa học này không? <%=isPaidCourseFlag ? "Khóa học này ĐÃ QUÁ HẠN HOÀN TIỀN nên sẽ KHÔNG được hoàn lại tiền. " : ""%>Mọi tiến độ học tập sẽ bị xóa.')">
+                                  onsubmit="return confirm(this.dataset.confirmMessage)"
+                                  data-confirm-message="Bạn có chắc chắn muốn hủy khóa học này không? <% if (isPaidCourseFlag) { %>Khóa học này ĐÃ QUÁ HẠN HOÀN TIỀN nên sẽ KHÔNG được hoàn lại tiền. <% } %>Mọi tiến độ học tập sẽ bị xóa.">
                                 <input type="hidden" name="courseId" value="${course.id}" />
                                 <button type="submit" class="btn" style="background:#FEE2E2;color:#991B1B;padding:12px 20px;border-radius:12px;font-weight:600;border:none;cursor:pointer;">
                                     <i class="fa-solid fa-xmark"></i> Hủy khóa học
@@ -320,8 +338,9 @@
                     </div>
                 </c:when>
                 <c:otherwise>
+                    <%-- TRƯỜNG HỢP 2: CHƯA ĐĂNG KÝ --%>
                     <% if ("instructor".equals(role) || "admin".equals(role)) { %>
-                        <%-- Instructor/Admin không được đăng ký khóa học --%>
+                        <%-- Giảng viên / Admin không được phép đăng ký học --%>
                         <div style="display:flex;flex-direction:column;gap:12px;">
                             <div style="background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:14px 18px;border-radius:12px;font-size:14px;font-weight:600;">
                                 <i class="fa-solid fa-lock"></i>
@@ -336,7 +355,7 @@
                             </div>
                         </div>
                     <% } else { %>
-                        <%-- Chưa đăng ký: hiện form đăng ký --%>
+                        <!-- Form ĐĂNG KÝ HỌC NGAY (POST về /enrollments/new -> EnrollmentServlet -> EnrollmentService.enroll) -->
                         <form action="${pageContext.request.contextPath}/enrollments/new" method="post" style="display:inline;">
                             <input type="hidden" name="courseId" value="${course.id}" />
                             <button type="submit" class="btn-enroll"><i class="fa-solid fa-rocket"></i> Đăng ký học ngay</button>
@@ -345,11 +364,13 @@
                 </c:otherwise>
             </c:choose>
         </div>
+        <!-- Hình ảnh đại diện Thumbnail khóa học -->
         <div class="hero-img">
             <c:choose>
                 <c:when test="${not empty course.thumbnailUrl}">
                     <img src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>"
-                         onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/images/default-course.svg';">
+                         data-fallback="${pageContext.request.contextPath}/assets/images/default-course.svg"
+                         onerror="this.onerror=null;this.src=this.dataset.fallback;">
                 </c:when>
                 <c:otherwise>
                     <img src="${pageContext.request.contextPath}/assets/images/default-course.svg" alt="Course Thumbnail">
@@ -359,10 +380,15 @@
     </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- KHỐI CHƯƠNG TRÌNH HỌC (CURRICULUM: SECTION -> LESSON) -->
+<!-- Duyệt cây 2 cấp lồng nhau từ ${course.sectionsCache} -->
+<!-- ========================================================================= -->
 <div class="main">
     <div class="curriculum-title"><i class="fa-solid fa-list-check"></i> Chương trình học</div>
     <c:choose>
         <c:when test="${not empty course.sectionsCache}">
+            <!-- Vòng lặp cấp 1: Duyệt từng Chương (Section) -->
             <c:forEach var="section" items="${course.sectionsCache}" varStatus="st">
                 <div class="section-card">
                     <div class="section-header">
@@ -377,6 +403,7 @@
                     <div class="section-body">
                         <c:choose>
                             <c:when test="${not empty section.lessons}">
+                                <!-- Vòng lặp cấp 2: Duyệt từng Bài học (Lesson) trong Section -->
                                 <c:forEach var="lesson" items="${section.lessons}">
                                     <div class="lesson-wrapper" style="border-top:1px solid #F1F5F9;">
                                         <div class="lesson-item" style="border-top:none;">
@@ -626,6 +653,10 @@
 </div>
 
 <script>
+    document.querySelectorAll('.progress-bar-fill[data-progress]').forEach(function (fill) {
+        fill.style.width = fill.dataset.progress + '%';
+    });
+
     function toggleLessonDesc(lessonId, btn) {
         const el = document.getElementById('lesson-desc-' + lessonId);
         if (!el) return;
@@ -647,8 +678,6 @@
 
 </body>
 </html>
-
-
 
 
 

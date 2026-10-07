@@ -257,18 +257,23 @@
 
     <%-- Removed readonly-notice because instructor can now edit at any time --%>
 
-    <%-- Danh sách chương + bài học --%>
+    <!-- ========================================================================= -->
+    <!-- DANH SÁCH CHƯƠNG & BÀI HỌC (SECTIONS & LESSONS) -->
+    <!-- Dữ liệu lấy từ CourseService.getCourseDetail(courseId) (sectionsCache) -->
+    <!-- ========================================================================= -->
     <c:choose>
         <c:when test="${not empty course.sectionsCache}">
+            <!-- Vòng lặp duyệt qua từng Chương (Section) của khóa học -->
             <c:forEach var="section" items="${course.sectionsCache}" varStatus="st">
                 <div class="section-block">
+                    <!-- HEADER CỦA CHƯƠNG: Tên chương, Số lượng bài, và Các nút quản lý chương -->
                     <div class="section-head">
                         <div>
                             <h3><i class="fa-solid fa-book-open"></i> Chương ${st.index + 1}: <c:out value="${section.title}"/></h3>
                             <span style="font-size:12px;color:#a0aec0;">${section.lessons.size()} bài học</span>
                         </div>
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <%-- Đổi thứ tự chương (tự động dồn các chương khác) --%>
+                            <!-- Form ĐỔI THỨ TỰ CHƯƠNG: POST về /instructor/courses/sections/reorder -> CourseService.reorderSection -->
                             <form action="${pageContext.request.contextPath}/instructor/courses/sections/reorder" method="post" style="display:inline-flex;align-items:center;gap:4px;">
                                 <input type="hidden" name="courseId" value="${course.id}">
                                 <input type="hidden" name="sectionId" value="${section.id}">
@@ -280,12 +285,12 @@
                                 </select>
                             </form>
 
-                            <%-- Đổi tên chương --%>
+                            <!-- Nút mở Modal ĐỔI TÊN CHƯƠNG: submit modal sẽ POST về /instructor/courses/sections/rename -> CourseService.updateSection -->
                             <button type="button" class="btn-action-sm" data-id="${section.id}" data-title="<c:out value="${section.title}" escapeXml="true"/>" onclick="openEditSectionModal(this)">
                                 <i class="fa-solid fa-pen-to-square"></i> Đổi tên
                             </button>
 
-                            <%-- Xóa chương --%>
+                            <!-- Form XÓA CHƯƠNG: POST về /instructor/courses/sections/delete -> CourseService.deleteSection -->
                             <form action="${pageContext.request.contextPath}/instructor/courses/sections/delete" method="post" style="display:inline;"
                                   onsubmit="return confirm('Bạn có chắc chắn muốn xóa Chương ${st.index + 1}: ${section.title}? Tất cả bài học trong chương này sẽ bị xóa và các chương sau sẽ tự động dồn số thứ tự!');">
                                 <input type="hidden" name="courseId" value="${course.id}">
@@ -296,21 +301,24 @@
                             </form>
                         </div>
                     </div>
+                    <!-- DANH SÁCH CÁC BÀI HỌC THUỘC CHƯƠNG -->
                     <div class="lesson-list">
                         <c:choose>
                             <c:when test="${not empty section.lessons}">
+                                <!-- Vòng lặp duyệt qua từng Bài học (Lesson) -->
                                 <c:forEach var="lesson" items="${section.lessons}">
                                     <div class="lesson-row">
+                                        <!-- Tên bài học & thời lượng -->
                                         <span class="lesson-info"><i class="fa-solid fa-play"></i> 
-                                            <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}" style="color:inherit; text-decoration:underline; font-weight:600;">
-                                                <c:out value="${lesson.title}"/>
-                                            </a>
-                                            <c:if test="${not empty lesson.description}">
-                                                <span title="<c:out value="${lesson.description}"/>" style="font-size:11px;color:#6b7280;margin-left:8px;font-weight:normal;background:#edf2f7;padding:2px 6px;border-radius:4px;">
-                                                    <i class="fa-solid fa-align-left"></i> Có mô tả
-                                                </span>
-                                            </c:if>
-                                        </span>
+                                             <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}" style="color:inherit; text-decoration:underline; font-weight:600;">
+                                                 <c:out value="${lesson.title}"/>
+                                             </a>
+                                             <c:if test="${not empty lesson.description}">
+                                                 <span title="<c:out value="${lesson.description}"/>" style="font-size:11px;color:#6b7280;margin-left:8px;font-weight:normal;background:#edf2f7;padding:2px 6px;border-radius:4px;">
+                                                     <i class="fa-solid fa-align-left"></i> Có mô tả
+                                                 </span>
+                                             </c:if>
+                                         </span>
                                         <div style="display:flex;align-items:center;gap:8px;">
                                             <span class="lesson-dur">
                                                 <c:choose>
@@ -318,11 +326,13 @@
                                                      <c:otherwise>N/A</c:otherwise>
                                                 </c:choose>
                                             </span>
+                                            <!-- Nút Xem trước bài học trên giao diện học viên -->
                                             <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
                                                class="btn-action-sm" style="padding:3px 8px;font-size:11px;background:#0284c7;color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"
                                                title="Xem bài học này ở giao diện học viên">
                                                 <i class="fa-solid fa-eye"></i> Xem bài học
                                             </a>
+                                            <!-- Nút SỬA BÀI HỌC: Mở Modal (POST về /instructor/courses/lessons/edit -> CourseService.updateLesson) -->
                                             <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;"
                                                     data-id="${lesson.id}"
                                                     data-title="<c:out value="${lesson.title}" escapeXml="true"/>"
@@ -331,8 +341,17 @@
                                                     data-doc="<c:out value="${lesson.documentUrl}" escapeXml="true"/>"
                                                     data-desc="<c:out value="${lesson.description}" escapeXml="true"/>"
                                                     onclick="openEditLessonModal(this)">
-                                                
-                                              <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;background:#6366f1;color:#fff;border-color:#6366f1;" onclick="openCodingExerciseModal(${lesson.id}, '<c:out value="${lesson.title}" escapeXml="true"/>')" title="Thiết lập bài tập code & test case cho bài học này"><i class="fa-solid fa-code"></i> Bài tập Code</button>
+                                                <i class="fa-solid fa-pen"></i> Sửa bài học
+                                            </button>
+                                            <!-- Nút Cấu hình bài tập code -->
+                                            <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;background:#6366f1;color:#fff;border-color:#6366f1;"
+                                                    data-id="${lesson.id}"
+                                                    data-title="<c:out value="${lesson.title}" escapeXml="true"/>"
+                                                    onclick="openCodingExerciseModal(this)"
+                                                    title="Thiết lập bài tập code &amp; test case cho bài học này">
+                                                <i class="fa-solid fa-code"></i> Bài tập Code
+                                            </button>
+                                            <!-- Form XÓA BÀI HỌC: POST về /instructor/courses/lessons/delete -> CourseService.deleteLesson -->
                                             <form action="${pageContext.request.contextPath}/instructor/courses/lessons/delete" method="post" style="display:inline;"
                                                   onsubmit="return confirm('Bạn có chắc muốn xóa bài học: ${lesson.title}?');">
                                                 <input type="hidden" name="courseId" value="${course.id}">
@@ -350,7 +369,10 @@
                             </c:otherwise>
                         </c:choose>
                     </div>
-                    <%-- Form thêm bài học --%>
+                    <!-- ========================================================================= -->
+                    <!-- FORM THÊM BÀI HỌC MỚI VÀO CHƯƠNG -->
+                    <!-- Gửi POST về /instructor/courses/lessons/add -> CourseService.addLesson -->
+                    <!-- ========================================================================= -->
                     <div class="add-lesson-form">
                         <h4>➕ Thêm bài học mới vào chương này</h4>
                         <form action="${pageContext.request.contextPath}/instructor/courses/lessons/add" method="post">
@@ -411,7 +433,10 @@
         </c:otherwise>
     </c:choose>
 
-    <%-- Form thêm chương mới --%>
+    <!-- ========================================================================= -->
+    <!-- FORM THÊM CHƯƠNG MỚI (ADD SECTION) -->
+    <!-- Gửi POST về /instructor/courses/sections/add -> CourseService.addSection -->
+    <!-- ========================================================================= -->
     <div class="add-section-card">
         <h3>📌 Thêm chương mới</h3>
         <form action="${pageContext.request.contextPath}/instructor/courses/sections/add" method="post">
@@ -428,6 +453,11 @@
         </form>
     </div>
 
+    <!-- ========================================================================= -->
+    <!-- NÚT XUẤT BẢN / ĐĂNG KHÓA HỌC (PUBLISH COURSE) -->
+    <!-- Chỉ hiển thị khi khóa học còn ở trạng thái Draft và đã có chương -->
+    <!-- Gửi POST về /instructor/courses/submit -> CourseService.publishCourse -->
+    <!-- ========================================================================= -->
     <c:if test="${not empty course.sectionsCache && course.status == 'draft'}">
         <div class="submit-section">
             <p><i class="fa-solid fa-circle-check"></i> Khóa học đã có nội dung. Đăng khóa học để học viên có thể vào học ngay?</p>
@@ -827,7 +857,13 @@
                 select.innerHTML = '<option value="">Lỗi tải câu hỏi: ' + err + '</option>';
             });
     }
-    function openCodingExerciseModal(lessonId, lessonTitle) {
+    function openCodingExerciseModal(lessonOrButton, lessonTitle) {
+        const lessonId = typeof lessonOrButton === 'object'
+            ? lessonOrButton.dataset.id
+            : lessonOrButton;
+        lessonTitle = typeof lessonOrButton === 'object'
+            ? lessonOrButton.dataset.title
+            : lessonTitle;
         document.getElementById('ceLessonId').value = lessonId;
         document.getElementById('ceModalLessonTitle').innerText = lessonTitle;
         document.getElementById('ceExerciseId').value = '';
@@ -1072,7 +1108,6 @@
 </script>
 </body>
 </html>
-
 
 
 

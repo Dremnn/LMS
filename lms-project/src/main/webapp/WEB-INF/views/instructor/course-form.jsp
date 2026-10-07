@@ -148,6 +148,11 @@
     </p>
 </div>
 
+<!-- ========================================================================= -->
+<!-- FORM TẠO MỚI HOẶC CHỈNH SỬA KHÓA HỌC -->
+<!-- - Tạo mới: POST về /instructor/courses/new -> CourseService.createCourse -->
+<!-- - Sửa:     POST về /instructor/courses/edit -> CourseService.updateCourse -->
+<!-- ========================================================================= -->
 <div class="main">
     <div class="card">
         <c:if test="${not empty error}">
@@ -156,14 +161,17 @@
 
         <c:choose>
             <c:when test="${empty course}">
+                <!-- Form TẠO MỚI (không có id khóa học) -->
                 <form action="${pageContext.request.contextPath}/instructor/courses/new" method="post">
             </c:when>
             <c:otherwise>
+                <!-- Form CHỈNH SỬA (có hidden input lưu id khóa học) -->
                 <form action="${pageContext.request.contextPath}/instructor/courses/edit" method="post">
                     <input type="hidden" name="id" value="${course.id}">
             </c:otherwise>
         </c:choose>
 
+            <!-- Tên khóa học (bắt buộc, tối thiểu 5 ký tự) -->
             <div class="form-group">
                 <label for="title">Tên khóa học <span class="required">*</span></label>
                 <input type="text" id="title" name="title" class="form-control"
@@ -171,12 +179,14 @@
                        value="<c:out value='${course.title}' default=''/>" required>
             </div>
 
+            <!-- Mô tả tóm tắt nội dung khóa học -->
             <div class="form-group">
                 <label for="description">Mô tả khóa học</label>
                 <textarea id="description" name="description" class="form-control"
                           placeholder="Giới thiệu ngắn gọn về khóa học, nội dung sẽ học và đối tượng phù hợp..."><c:out value="${course.description}" default=""/></textarea>
             </div>
 
+            <!-- Lựa chọn Danh mục môn học (categoryId) -->
             <div class="form-group">
                 <label for="categoryId">Danh mục</label>
                 <select id="categoryId" name="categoryId" class="form-control">
@@ -189,6 +199,7 @@
                 </select>
             </div>
 
+            <!-- Giá tiền khóa học (price >= 0) -->
             <div class="form-group">
                 <label for="price">Giá khóa học (đ)</label>
                 <input type="number" id="price" name="price" class="form-control"
@@ -197,6 +208,7 @@
                 <p class="form-hint">Nhập 0 nếu muốn khóa học miễn phí.</p>
             </div>
 
+            <!-- URL Ảnh thu nhỏ đại diện (Thumbnail URL) -->
             <div class="form-group">
                 <label for="thumbnailUrl"><i class="fa-solid fa-image" style="color:#076FA4;"></i> Ảnh thu nhỏ khóa học (Thumbnail URL)</label>
                 <input type="text" id="thumbnailUrl" name="thumbnailUrl" class="form-control"
@@ -205,12 +217,14 @@
                        oninput="previewThumbnail(this.value)">
                 <p class="form-hint">Dán link hình ảnh minh họa cho khóa học (khuyến nghị tỷ lệ 16:9). Xem trước hiển thị bên dưới:</p>
                 
+                <!-- Khung xem trước ảnh thu nhỏ khi gõ link -->
                 <div id="thumbnailPreviewContainer" style="margin-top:12px; max-width:380px; border-radius:12px; overflow:hidden; border:1.5px dashed #CBD5E1; background:#F8FAFC; padding:10px; text-align:center;">
-                    <img id="thumbnailPreviewImg" src="${not empty course.thumbnailUrl ? course.thumbnailUrl : ''}" 
+                    <img id="thumbnailPreviewImg" src="${not empty course.thumbnailUrl ? course.thumbnailUrl : ''}"
+                         data-has-thumbnail="${not empty course.thumbnailUrl}"
                          alt="Thumbnail Preview" 
-                         style="max-width:100%; height:180px; width:100%; object-fit:cover; border-radius:8px; display:${not empty course.thumbnailUrl ? 'block' : 'none'};"
+                         style="max-width:100%; height:180px; width:100%; object-fit:cover; border-radius:8px; display:none;"
                          onerror="handleImageError()">
-                    <div id="thumbnailPlaceholder" style="padding:28px 12px; color:#94A3B8; font-size:13px; display:${not empty course.thumbnailUrl ? 'none' : 'block'};">
+                    <div id="thumbnailPlaceholder" style="padding:28px 12px; color:#94A3B8; font-size:13px; display:block;">
                         <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px; margin-bottom:8px; display:block; color:#CBD5E1;"></i>
                         <span>Chưa có ảnh thu nhỏ. Nhập URL ở trên để xem trước.</span>
                     </div>
@@ -219,6 +233,7 @@
 
             <hr class="divider">
 
+            <!-- Nút Lưu / Tạo / Cập nhật -->
             <button type="submit" class="btn-submit">
                 <c:choose>
                     <c:when test="${empty course}"><i class="fa-solid fa-rocket"></i> Tạo khóa học</c:when>
@@ -230,6 +245,12 @@
 </div>
 
 <script>
+var initialThumbnail = document.getElementById('thumbnailPreviewImg');
+if (initialThumbnail && initialThumbnail.dataset.hasThumbnail === 'true') {
+    initialThumbnail.style.display = 'block';
+    document.getElementById('thumbnailPlaceholder').style.display = 'none';
+}
+
 function previewThumbnail(url) {
     var img = document.getElementById('thumbnailPreviewImg');
     var placeholder = document.getElementById('thumbnailPlaceholder');
@@ -265,7 +286,6 @@ function handleImageError() {
 
 </body>
 </html>
-
 
 
 

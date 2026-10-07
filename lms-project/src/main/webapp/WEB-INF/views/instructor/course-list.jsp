@@ -145,6 +145,10 @@
     </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- BẢNG DANH SÁCH KHÓA HỌC CỦA GIẢNG VIÊN -->
+<!-- Dữ liệu ${courses} lấy từ InstructorCourseServlet -> CourseService.getMyCoursesAsInstructor -->
+<!-- ========================================================================= -->
 <div class="main">
     <c:if test="${not empty successMessage}">
         <div style="background:#c6f6d5;color:#22543d;border:1px solid #9ae6b4;padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:18px;"><i class="fa-solid fa-circle-check"></i> ${successMessage}</div>
@@ -168,6 +172,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Duyệt từng khóa học thuộc sở hữu của Giảng viên -->
                     <c:forEach var="course" items="${courses}">
                         <tr>
                             <td>
@@ -211,6 +216,7 @@
                                 </c:choose>
                             </td>
                             <td>
+                                <!-- Hiển thị Badge trạng thái (Draft, Published, Warning, Appealed, Rejected) -->
                                 <c:choose>
                                     <c:when test="${course.status == 'draft'}"><span class="badge badge-draft">Draft</span></c:when>
                                     <c:when test="${course.status == 'published'}"><span class="badge badge-published"><i class="fa-solid fa-circle-check"></i> Published</span></c:when>
@@ -222,10 +228,14 @@
                             <td>${course.totalStudents}</td>
                             <td>${course.createdAtFormatted}</td>
                             <td>
+                                <!-- Các nút hành động thao tác với từng khóa học -->
                                 <div class="actions">
+                                    <!-- Nút Sửa thông tin chung: chuyển sang /instructor/courses/edit -->
                                     <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>
+                                    <!-- Nút Quản lý nội dung (Thêm/Sửa/Xóa Chương & Bài học): chuyển sang /instructor/courses/manage -->
                                     <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info"><i class="fa-solid fa-folder-open"></i> Nội dung</a>
                                     
+                                    <!-- Nút ĐĂNG KHÓA HỌC (Submit): POST về /instructor/courses/submit -> CourseService.publishCourse -->
                                     <c:if test="${course.status == 'draft'}">
                                         <form action="${pageContext.request.contextPath}/instructor/courses/submit" method="post">
                                             <input type="hidden" name="id" value="${course.id}">
@@ -233,7 +243,7 @@
                                         </form>
                                     </c:if>
                                     
-                                    <%-- Nút kháng cáo: chỉ hiện khi status = warning --%>
+                                    <!-- Form KHÁNG CÁO: Chỉ hiện khi bị warning -> POST về /instructor/courses/appeal -> CourseService.appealCourse -->
                                     <c:if test="${course.status == 'warning'}">
                                         <form action="${pageContext.request.contextPath}/instructor/courses/appeal" method="post"
                                               style="display:flex; gap:6px; align-items:center;">
@@ -244,6 +254,7 @@
                                         </form>
                                     </c:if>
                                     
+                                    <!-- Nút XÓA KHÓA HỌC: Chỉ xóa khi còn là draft -> POST về /instructor/courses/delete -> CourseService.deleteCourse -->
                                     <c:if test="${course.status == 'draft'}">
                                         <form action="${pageContext.request.contextPath}/instructor/courses/delete" method="post"
                                               onsubmit="return confirm('Bạn chắc chắn muốn xóa khóa học này? Hành động này không thể hoàn tác!')">

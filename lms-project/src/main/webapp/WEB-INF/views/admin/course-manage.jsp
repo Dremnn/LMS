@@ -168,6 +168,10 @@
     </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- MÀN HÌNH QUẢN TRỊ VIÊN DUYỆT & CẢNH CÁO KHÓA HỌC (ADMIN) -->
+<!-- Dữ liệu ${courses} lấy từ AdminCourseServlet -> CourseService.getAllCourses -->
+<!-- ========================================================================= -->
 <div class="main">
 
     <%-- Flash messages --%>
@@ -185,6 +189,7 @@
                 Hệ thống có <strong style="color:#1a202c;">${courses.size()}</strong> khóa học
             </p>
 
+            <!-- Lặp qua danh sách tất cả các khóa học trên toàn hệ thống -->
             <c:forEach var="course" items="${courses}">
                 <div class="course-card">
 
@@ -217,6 +222,7 @@
                             </div>
                         </div>
                         <div class="card-header-right">
+                            <!-- Hiển thị Badge trạng thái khóa học -->
                             <c:choose>
                                 <c:when test="${course.status == 'published'}">
                                     <span class="badge badge-published"><i class="fa-solid fa-circle-check"></i> Published</span>
@@ -253,11 +259,11 @@
                         </c:if>
 
                         <div class="actions-row">
-                            <%-- Link xem chi tiết --%>
+                            <!-- Link Xem nội dung (chương trình học) -->
                             <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}"
                                class="btn btn-ghost" target="_blank" style="margin-right:auto;">👁 Xem nội dung</a>
 
-                            <%-- Nút Approve/Reject kháng cáo (chỉ khi status = appealed) --%>
+                            <!-- DUYỆT KHÁNG CÁO: Chỉ khi status = appealed -> POST về /admin/courses/approve-appeal hoặc reject-appeal -->
                             <c:if test="${course.status == 'appealed'}">
                                 <form action="${pageContext.request.contextPath}/admin/courses/approve-appeal"
                                       method="post" style="display:inline;">
@@ -273,7 +279,7 @@
                             </c:if>
 
                             <c:if test="${course.status == 'published'}">
-                                <%-- Form CẢNH CÁO (có ô nhập lý do) --%>
+                                <!-- Form CẢNH CÁO KHÓA HỌC: POST về /admin/courses/warn -> CourseService.warnCourse -->
                                 <form action="${pageContext.request.contextPath}/admin/courses/warn"
                                       method="post" class="reject-form" style="display:flex; gap:8px; align-items:center;">
                                     <input type="hidden" name="courseId" value="${course.id}" />
@@ -283,7 +289,7 @@
                                 </form>
                             </c:if>
 
-                            <%-- Nút Xóa Khóa Học --%>
+                            <!-- Form XÓA KHÓA HỌC VĨNH VIỄN: POST về /admin/courses/delete -> CourseDAO.delete -->
                             <form action="${pageContext.request.contextPath}/admin/courses/delete"
                                   method="post" style="display:inline;"
                                   onsubmit="return confirm('CẢNH BÁO: Xác nhận XÓA vĩnh viễn khóa học \'${course.title}\'? Dữ liệu không thể khôi phục!')">
