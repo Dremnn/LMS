@@ -18,10 +18,56 @@
         .score-circle.passed{border-color:#10B981;color:#047857;background:#ECFDF5;}
         .score-circle.failed{border-color:#EF4444;color:#B91C1C;background:#FEF2F2;}
         .score-unit{font-size:16px;font-weight:600;margin-top:2px;}
-        .quiz-name{font-size:20px;font-weight:700;color:#093C62;margin-bottom:8px;}
-        .alert{padding:14px 20px;border-radius:10px;font-size:15px;font-weight:600;margin:0 36px 28px;}
-        .alert-success{background:#ECFDF5;color:#047857;border:1px solid #A7F3D0;}
-        .alert-danger-soft{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;}
+        .quiz-name{font-size:22px;font-weight:700;color:#093C62;margin-bottom:16px;}
+        
+        /* Modern Result Feedback Banner */
+        .result-feedback {
+            margin: 0 36px 28px;
+            padding: 16px 20px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+        .result-feedback.passed {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            color: #065F46;
+        }
+        .result-feedback.failed {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            color: #991B1B;
+        }
+        .feedback-icon {
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .result-feedback.passed .feedback-icon { color: #10B981; }
+        .result-feedback.failed .feedback-icon { color: #EF4444; }
+        .feedback-content { flex: 1; min-width: 0; }
+        .feedback-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .result-feedback.passed .feedback-title { color: #047857; }
+        .result-feedback.failed .feedback-title { color: #B91C1C; }
+        .feedback-desc {
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 500;
+            display: block;
+        }
+        .feedback-desc strong { font-weight: 700; }
+        .result-feedback.passed .feedback-desc strong { color: #047857; }
+        .result-feedback.failed .feedback-desc strong { color: #B91C1C; }
         .result-meta{background:#F0F6FA;padding:20px 36px;display:flex;flex-direction:column;gap:10px;border-top:1px solid #E2EEF5;}
         .meta-row{display:flex;justify-content:space-between;font-size:14px;}
         .meta-row .label{color:#5C7688;}
@@ -66,6 +112,22 @@
         body.dark-theme .review-explanation{background:rgba(7,111,164,.15);border-left-color:#38bdf8;}
         body.dark-theme .explanation-badge{color:#38bdf8;}
         body.dark-theme .explanation-body{color:#F4F8FA;}
+        body.dark-theme .score-circle.passed{background:rgba(16,185,129,0.15);color:#34D399;border-color:#10B981;}
+        body.dark-theme .score-circle.failed{background:rgba(239,68,68,0.15);color:#F87171;border-color:#EF4444;}
+        body.dark-theme .result-feedback.passed {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #A7F3D0;
+        }
+        body.dark-theme .result-feedback.passed .feedback-title { color: #34D399; }
+        body.dark-theme .result-feedback.passed .feedback-desc strong { color: #6EE7B7; }
+        body.dark-theme .result-feedback.failed {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #FECACA;
+        }
+        body.dark-theme .result-feedback.failed .feedback-title { color: #F87171; }
+        body.dark-theme .result-feedback.failed .feedback-desc strong { color: #FCA5A5; }
         body.dark-theme .result-meta{background:#111312;border-top-color:#093C62;}
         body.dark-theme .meta-row .label{color:#9DB9CB;}
         body.dark-theme .meta-row .value{color:#F4F8FA;}
@@ -167,16 +229,26 @@
             <div class="quiz-name"><c:out value="${quiz.title}"/></div>
 
             <%-- Thông báo đạt / không đạt --%>
-            <c:choose>
-                <c:when test="${attempt.passed}">
-                    <div class="alert alert-success">🎉 Chúc mừng! Bạn đã ĐẠT bài kiểm tra này.</div>
-                </c:when>
-                <c:otherwise>
-                    <div class="alert alert-danger-soft">
-                        Rất tiếc, bạn chưa đạt điểm yêu cầu (<strong>${quiz.passScore} điểm</strong>). Hãy thử lại nếu còn lượt làm bài!
+            <div class="result-feedback ${attempt.passed ? 'passed' : 'failed'}">
+                <div class="feedback-icon">
+                    <i class="fa-solid ${attempt.passed ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+                </div>
+                <div class="feedback-content">
+                    <div class="feedback-title">
+                        ${attempt.passed ? 'Chúc mừng! Bạn đã ĐẠT bài kiểm tra' : 'Chưa đạt điểm yêu cầu'}
                     </div>
-                </c:otherwise>
-            </c:choose>
+                    <div class="feedback-desc">
+                        <c:choose>
+                            <c:when test="${attempt.passed}">
+                                Chúc mừng bạn đã hoàn thành xuất sắc bài kiểm tra với điểm số đạt yêu cầu (tối thiểu <strong>${quiz.passScore} điểm</strong>).
+                            </c:when>
+                            <c:otherwise>
+                                Rất tiếc, bạn chưa đạt điểm yêu cầu (tối thiểu <strong>${quiz.passScore} điểm</strong>). Hãy ôn tập lại và thử lại nếu còn lượt làm bài!
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <%-- Thông tin chi tiết --%>
