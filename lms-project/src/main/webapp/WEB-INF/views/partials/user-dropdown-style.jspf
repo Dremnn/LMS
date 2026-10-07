@@ -105,4 +105,62 @@ body.dark-theme .user-dropdown-chevron {
 body.dark-theme .user-dropdown:hover .user-dropdown-chevron {
     color: #38BDF8 !important;
 }
+
+/* Wallet Badge on Navbar */
+.wallet-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    padding: 6px 14px !important;
+    border-radius: 50px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+}
+.wallet-badge i {
+    font-size: 14px !important;
+    color: #10B981 !important;
+}
+.wallet-badge:hover {
+    background: rgba(16, 185, 129, 0.18) !important;
+    border-color: #10B981 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+    color: #047857 !important;
+}
+body.dark-theme .wallet-badge {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #34D399 !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+}
+body.dark-theme .wallet-badge:hover {
+    background: rgba(16, 185, 129, 0.25) !important;
+    color: #6EE7B7 !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Wallet Item inside Dropdown */
+.wallet-dropdown-item {
+    border-bottom: 1px solid rgba(198, 216, 227, 0.6) !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 4px !important;
+}
+.wallet-dropdown-balance {
+    margin-left: auto !important;
+    color: #10B981 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+body.dark-theme .wallet-dropdown-item {
+    border-bottom-color: rgba(9, 60, 98, 0.6) !important;
+}
+body.dark-theme .wallet-dropdown-balance {
+    color: #34D399 !important;
+}
 </style>

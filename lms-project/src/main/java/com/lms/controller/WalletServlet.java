@@ -21,7 +21,7 @@ import java.math.BigDecimal;
  * quét QR, bấm "Tôi đã chuyển khoản" -> số dư được cộng ngay lập tức.
  * (Chưa tích hợp cổng thanh toán/webhook ngân hàng thật.)
  */
-@WebServlet("/wallet/topup")
+@WebServlet({"/wallet/topup", "/student/wallet", "/wallet"})
 public class WalletServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 

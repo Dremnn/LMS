@@ -71,6 +71,10 @@
             <% } else { %>
 
                 <%@ include file="/WEB-INF/views/partials/user-dropdown-style.jspf" %>
+                            <a href="<%= "student".equals(role) ? (request.getContextPath() + "/wallet/topup") : (request.getContextPath() + "/profile") %>" class="wallet-badge" title="Số dư ví - Bấm để nạp tiền/quản lý ví">
+                <i class="fa-solid fa-wallet"></i>
+                <span><%= (currentUser.getBalance() != null ? String.format(java.util.Locale.US, "%,dđ", currentUser.getBalance().longValue()) : "0đ") %></span>
+            </a>
                 <div class="user-dropdown">
                     <div class="user-badge">
                         <% if (currentUser.getAvatarUrl() != null && !currentUser.getAvatarUrl().trim().isEmpty()) { %>
@@ -83,6 +87,11 @@
                         <i class="fa-solid fa-chevron-down user-dropdown-chevron"></i>
                     </div>
                     <div class="user-dropdown-menu" style="display: none;">
+                    <a href="<%= "student".equals(role) ? (request.getContextPath() + "/wallet/topup") : (request.getContextPath() + "/profile") %>" class="user-dropdown-item wallet-dropdown-item">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>Ví cá nhân</span>
+                        <strong class="wallet-dropdown-balance"><%= (currentUser.getBalance() != null ? String.format(java.util.Locale.US, "%,dđ", currentUser.getBalance().longValue()) : "0đ") %></strong>
+                    </a>
                     <% if ("student".equals(role)) { %>
                         <a href="${pageContext.request.contextPath}/dashboard" class="user-dropdown-item">
                             <i class="fa-solid fa-table-columns"></i> Bảng điều khiển
