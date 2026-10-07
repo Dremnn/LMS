@@ -100,6 +100,24 @@
         .yt-progress-bg { background: rgba(255,255,255,0.2); height: 6px; border-radius: 4px; overflow: hidden; position: relative; }
         .yt-progress-fill { background: #10B981; height: 100%; width: 0%; border-radius: 4px; transition: width 0.1s linear; }
     </style>
+    <!-- CodeMirror & Compiler Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <style>
+        .compiler-section { margin-top: 32px; border-radius: 12px; overflow: hidden; border: 1px solid #334155; background: #1e293b; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; display: none; }
+        .compiler-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #0f172a; border-bottom: 1px solid #334155; }
+        .compiler-toolbar select { background: #334155; color: #fff; border: 1px solid #475569; padding: 6px 12px; border-radius: 6px; outline: none; }
+        .btn-run-code { background: #10b981; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .btn-run-code:hover { background: #059669; }
+        .btn-run-code:disabled { background: #64748b; cursor: not-allowed; }
+        .CodeMirror { height: 350px; font-size: 15px; font-family: 'Consolas', 'Courier New', monospace; }
+        .compiler-console { height: 180px; background: #000; padding: 16px; overflow-y: auto; font-family: 'Consolas', 'Courier New', monospace; font-size: 14px; color: #a7f3d0; border-top: 1px solid #334155; white-space: pre-wrap; }
+        .toggle-compiler-btn { background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-left: 12px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .toggle-compiler-btn:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+    </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <% 
@@ -325,6 +343,27 @@
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowfullscreen>
                     </iframe>
+                    <%-- IN-VIDEO INTERACTIVE QUIZ OVERLAY (H5P / COURSERA STYLE) --%>
+                    <div id="inVideoQuizOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.92); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
+                        <div style="max-width:580px; width:95%; background:#1e293b; border:1.5px solid #3b82f6; border-radius:14px; padding:22px 26px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:left;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <span style="background:#2563eb; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px;">
+                                    <i class="fa-solid fa-lightbulb"></i> CÂU HỎI TƯƠNG TÁC GIỮA VIDEO
+                                </span>
+                                <span style="font-size:11.5px; color:#94a3b8;"><i class="fa-solid fa-lock"></i> Video đã tạm dừng</span>
+                            </div>
+                            <h3 id="ivqContent" style="margin:0 0 16px 0; font-size:15.5px; color:#f8fafc; font-weight:600; line-height:1.5;">...</h3>
+                            <div id="ivqOptionsList" style="display:flex; flex-direction:column; gap:9px; margin-bottom:16px;">
+                                <!-- Radio options -->
+                            </div>
+                            <div id="ivqMessage" style="font-size:13px; margin-bottom:14px; display:none; padding:10px 14px; border-radius:8px;"></div>
+                            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                                <button type="button" id="ivqSubmitBtn" class="btn" style="background:#3b82f6; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:8px; border:none; cursor:pointer;" onclick="verifyInVideoQuiz()">
+                                    Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <%-- Custom Video Controls --%>
                 <div class="custom-yt-controls" id="customControls">
@@ -337,15 +376,49 @@
                     </div>
                     <button id="ytMuteBtn" class="yt-control-btn"><i class="fa-solid fa-volume-high"></i></button>
                 </div>
+                <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
+                <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                        <div style="display:flex; align-items:center; gap:14px;">
+                            <div style="width:42px; height:42px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">
+                                <i class="fa-solid fa-circle-pause"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; color:#92400E; font-size:15px;"><i class="fa-solid fa-lock"></i> ĐIỂM DỪNG VIDEO (INTERACTIVE CHECKPOINT)</div>
+                                <div style="font-size:13px; color:#B45309;" id="checkpointNoticeMsg">Video đã tự động tạm dừng tại mốc thời gian bài học. Bạn cần thực hành và <strong>Nộp bài ĐẠT (Pass 100% Test cases)</strong> để mở khóa xem tiếp!</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn" style="background:#D97706; color:#fff; font-weight:700; font-size:13px; padding:10px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="focusOnExercise()">
+                            <i class="fa-solid fa-code"></i> Thực Hành Ngay <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                    </div>
+                </div>
             </c:when>
 
             <%-- Trường hợp 2: Link video file trực tiếp (.mp4...) -> dùng thẻ video như cũ --%>
             <c:when test="${not empty currentLesson.videoUrl}">
                 <div class="video-wrap">
-                    <video controls width="100%" preload="metadata">
+                    <video id="html5-video" controls width="100%" preload="metadata">
                         <source src="${currentLesson.videoUrl}" type="video/mp4" />
                         Trình duyệt của bạn không hỗ trợ thẻ video.
                     </video>
+                </div>
+                <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
+                <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                        <div style="display:flex; align-items:center; gap:14px;">
+                            <div style="width:42px; height:42px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">
+                                <i class="fa-solid fa-circle-pause"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; color:#92400E; font-size:15px;"><i class="fa-solid fa-lock"></i> ĐIỂM DỪNG VIDEO (INTERACTIVE CHECKPOINT)</div>
+                                <div style="font-size:13px; color:#B45309;" id="checkpointNoticeMsg">Video đã tự động tạm dừng tại mốc thời gian bài học. Bạn cần thực hành và <strong>Nộp bài ĐẠT (Pass 100% Test cases)</strong> để mở khóa xem tiếp!</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn" style="background:#D97706; color:#fff; font-weight:700; font-size:13px; padding:10px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="focusOnExercise()">
+                            <i class="fa-solid fa-code"></i> Thực Hành Ngay <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                    </div>
                 </div>
             </c:when>
 
@@ -357,6 +430,112 @@
                 </div>
             </c:otherwise>
         </c:choose>
+
+        <%-- KHUNG THỰC HÀNH CODE (ONLINE COMPILER IDE) --%>
+        <div class="resource-card" style="background:#FFFFFF;border:1px solid #C6D8E3;border-radius:14px;padding:18px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 4px 16px rgba(9,60,98,.04);">
+            <div style="display:flex;align-items:center;gap:14px;">
+                <div style="width:44px;height:44px;border-radius:10px;background:#EEF2FF;color:#4F46E5;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:#093C62;">Trình biên dịch &amp; Thực hành Code Online</div>
+                    <div style="font-size:12.5px;color:#64748B;">Lập trình, chạy thử code Java / Python / C++ trực tiếp ngay dưới bài học</div>
+                </div>
+            </div>
+            <button type="button" onclick="toggleCompiler()" class="btn" style="background:#4F46E5;color:#fff;padding:10px 18px;font-size:13px;font-weight:700;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(79,70,229,0.3);">
+                <i class="fa-solid fa-laptop-code"></i> <span id="compilerBtnText">Bật Trình Viết Code</span>
+            </button>
+        </div>
+
+                <%-- KHOANG ONLINE COMPILER & BÀI TẬP TEST CASES --%>
+        <div id="compiler-section" class="compiler-section" style="margin-bottom: 24px; display: none;">
+            
+            <%-- KHUNG HIỂN THỊ ĐỀ BÀI (NẾU CÓ BÀI TẬP) --%>
+            <div id="exercise-box" style="display:none; padding: 20px 24px; background: #0f172a; border-bottom: 2px solid #334155;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
+                    <div>
+                        <span style="display:inline-block; font-size:11px; font-weight:700; text-transform:uppercase; background:#4338ca; color:#e0e7ff; padding:3px 10px; border-radius:20px; margin-bottom:6px;">
+                            <i class="fa-solid fa-file-code"></i> BÀI TẬP THỰC HÀNH CỦA BÀI HỌC
+                        </span>
+                        <h3 id="ex-title" style="margin:0; font-size:19px; color:#f8fafc; font-weight:700;"></h3>
+                    </div>
+                    <div id="ex-status-badge" style="padding:6px 14px; border-radius:20px; font-size:12.5px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <!-- Badge status -->
+                    </div>
+                </div>
+                <div id="ex-desc" style="font-size:14px; color:#cbd5e1; line-height:1.6; white-space:pre-wrap; background:#1e293b; padding:14px 18px; border-radius:8px; border:1px solid #334155;"></div>
+            </div>
+
+            <%-- TOOLBAR TRÌNH SOẠN THẢO --%>
+            <div class="compiler-toolbar" style="padding: 12px 20px;">
+                <div style="font-weight: 600; font-size: 15px; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-terminal" style="color:#10b981;"></i> 
+                    <span id="compiler-mode-title">Online Multi-Language Compiler &amp; Sandbox</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items:center;">
+                    <select id="compiler-lang" onchange="changeLang()">
+                        <option value="cpp">C++ (GCC)</option>
+                        <option value="c">C (GCC)</option>
+                        <option value="java">Java (OpenJDK 21)</option>
+                        <option value="python">Python (3.12)</option>
+                        <option value="javascript">JavaScript (Node.js 20)</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="go">Golang (1.23)</option>
+                        <option value="php">PHP (8.3)</option>
+                        <option value="rust">Rust (1.82)</option>
+                        <option value="csharp">C# (Mono)</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="sql">SQL (SQLite 3)</option>
+                    </select>
+
+                    <%-- Nút Chạy tự do --%>
+                    <button id="btn-run" class="btn-run-code" style="background:#3b82f6;" onclick="runCode()">
+                        <i class="fa-solid fa-play"></i> Run Code
+                    </button>
+
+                    <%-- Nút Chạy Test Case (chỉ hiện khi có bài tập) --%>
+                    <button id="btn-test" class="btn-run-code" style="background:#10b981; display:none;" onclick="testCode()">
+                        <i class="fa-solid fa-vial-circle-check"></i> Chạy Test Cases
+                    </button>
+
+                    <%-- Nút Nộp Bài Xác Thực (chỉ hiện khi có bài tập) --%>
+                    <button id="btn-submit" class="btn-run-code" style="background:#6366f1; display:none;" onclick="submitCode()">
+                        <i class="fa-solid fa-paper-plane"></i> Nộp Bài Chấm Điểm
+                    </button>
+                </div>
+            </div>
+
+            <div id="editor-wrapper">
+                <textarea id="code-editor"></textarea>
+            </div>
+
+            <%-- BẢNG KẾT QUẢ KIỂM THỬ TEST CASES (NẾU CÓ BÀI TẬP) --%>
+            <div id="testcases-result-box" style="display:none; background:#0f172a; padding:16px 20px; border-top:1px solid #334155;">
+                <div style="font-weight:700; font-size:13.5px; color:#94a3b8; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span><i class="fa-solid fa-list-check" style="color:#38bdf8;"></i> KẾT QUẢ KIỂM THỬ TỰ ĐỘNG (TEST CASES)</span>
+                    <span id="testcase-summary-score" style="font-size:13px; font-weight:700;"></span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:13px; font-family:Consolas, monospace;" id="testcases-table">
+                        <thead>
+                            <tr style="background:#1e293b; color:#94a3b8; text-align:left;">
+                                <th style="padding:8px 12px; width:70px;">Test</th>
+                                <th style="padding:8px 12px;">Đầu vào (Input)</th>
+                                <th style="padding:8px 12px;">Kết quả mong đợi</th>
+                                <th style="padding:8px 12px;">Kết quả chạy của bạn</th>
+                                <th style="padding:8px 12px; width:120px; text-align:center;">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testcases-body">
+                            <!-- Dynamic test cases -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <%-- CONSOLE OUTPUT --%>
+            <div class="compiler-console" id="compiler-console">Ready. Chọn ngôn ngữ, viết code và bấm Run Code để chạy thử.</div>
+        </div>
 
         <%-- Tài liệu đính kèm bài học --%>
         <c:if test="${not empty currentLesson.documentUrl}">
@@ -454,11 +633,16 @@
             </div>
         </c:if>
 
-        <%-- Nút vào không gian Nhóm (Chỉ hiện cho Student đã enroll) --%>
-        <c:if test="${enrollment != null}">
+                <%-- Nút vào không gian Nhóm (Chỉ hiện cho Student đã enroll và Giáo viên) --%>
+        <c:if test="${enrollment != null || isPreview}">
             <a href="${pageContext.request.contextPath}/student/my-group?courseId=${course.id}" class="doc-link" style="background:#0ea5e9; color:#fff; border-color:#0ea5e9; margin-left: ${empty currentLesson.documentUrl ? '0' : '12px'};">
                 <i class="fa-solid fa-users"></i> Xem Nhóm Của Tôi & Nộp Bài
             </a>
+            
+            <%-- Nút Bật giao diện Code (Tính năng mới) --%>
+            <button onclick="toggleCompiler()" class="toggle-compiler-btn" style="margin-left: 12px; margin-top: 12px;">
+                <i class="fa-solid fa-code"></i> Thực hành Code
+            </button>
         </c:if>
 
         <hr class="divider">
@@ -481,6 +665,23 @@
                         <button type="submit" class="btn btn-success">💾 Lưu tiến độ</button>
                     </form>
                 </div>
+                <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
+                <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                        <div style="display:flex; align-items:center; gap:14px;">
+                            <div style="width:42px; height:42px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">
+                                <i class="fa-solid fa-circle-pause"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; color:#92400E; font-size:15px;"><i class="fa-solid fa-lock"></i> ĐIỂM DỪNG VIDEO (INTERACTIVE CHECKPOINT)</div>
+                                <div style="font-size:13px; color:#B45309;" id="checkpointNoticeMsg">Video đã tự động tạm dừng tại mốc thời gian bài học. Bạn cần thực hành và <strong>Nộp bài ĐẠT (Pass 100% Test cases)</strong> để mở khóa xem tiếp!</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn" style="background:#D97706; color:#fff; font-weight:700; font-size:13px; padding:10px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="focusOnExercise()">
+                            <i class="fa-solid fa-code"></i> Thực Hành Ngay <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                    </div>
+                </div>
             </c:when>
             <c:when test="${isPreview}">
                 <div class="complete-card" style="border-left: 4px solid #076FA4; background: #F0F9FF;">
@@ -498,9 +699,542 @@
                         <i class="fa-solid fa-circle-info"></i> Bạn đang xem giao diện học viên với tư cách Giảng viên / Quản trị viên (chỉ xem, không thể thao tác lưu tiến độ).
                     </p>
                 </div>
+                <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
+                <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                        <div style="display:flex; align-items:center; gap:14px;">
+                            <div style="width:42px; height:42px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">
+                                <i class="fa-solid fa-circle-pause"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700; color:#92400E; font-size:15px;"><i class="fa-solid fa-lock"></i> ĐIỂM DỪNG VIDEO (INTERACTIVE CHECKPOINT)</div>
+                                <div style="font-size:13px; color:#B45309;" id="checkpointNoticeMsg">Video đã tự động tạm dừng tại mốc thời gian bài học. Bạn cần thực hành và <strong>Nộp bài ĐẠT (Pass 100% Test cases)</strong> để mở khóa xem tiếp!</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn" style="background:#D97706; color:#fff; font-weight:700; font-size:13px; padding:10px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="focusOnExercise()">
+                            <i class="fa-solid fa-code"></i> Thực Hành Ngay <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                    </div>
+                </div>
             </c:when>
         </c:choose>
     </main>
+<script>
+    let codeEditor = null;
+    let isCompilerVisible = false;
+
+    function toggleCompiler() {
+        const section = document.getElementById('compiler-section');
+        isCompilerVisible = !isCompilerVisible;
+        
+        if(isCompilerVisible) {
+            section.style.display = 'block';
+            if(!codeEditor) {
+                const lang = document.getElementById('compiler-lang').value || 'java';
+                codeEditor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+                    mode: modes[lang] || 'text/x-java',
+                    theme: 'dracula',
+                    lineNumbers: true,
+                    indentUnit: 4,
+                    matchBrackets: true
+                });
+                if(cachedExercise && (cachedExercise.initialCode || cachedExercise.starterCode)) {
+                    codeEditor.setValue(cachedExercise.initialCode || cachedExercise.starterCode);
+                    if(modes[cachedExercise.language]) {
+                        codeEditor.setOption('mode', modes[cachedExercise.language]);
+                    }
+                } else {
+                    changeLang();
+                }
+            }
+            // Cuộn trang xuống chỗ compiler mượt mà
+            setTimeout(() => {
+                section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        } else {
+            section.style.display = 'none';
+        }
+    }
+
+    const boilerplates = {
+        'java': "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello LMS Compiler!\");\n    }\n}",
+        'python': "print(\"Hello LMS Compiler!\")\n",
+        'cpp': "#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello LMS Compiler!\" << endl;\n    return 0;\n}"
+    };
+
+    const modes = {
+        'java': 'text/x-java',
+        'python': 'text/x-python',
+        'cpp': 'text/x-c++src'
+    };
+
+    function changeLang() {
+        if(!codeEditor) return;
+        const lang = document.getElementById('compiler-lang').value;
+        codeEditor.setOption('mode', modes[lang]);
+        if(codeEditor.getValue().trim() === '' || codeEditor.getValue().includes("Hello LMS")) {
+            codeEditor.setValue(boilerplates[lang]);
+        }
+    }
+
+    function runCode() {
+        if(!codeEditor) return;
+        if(currentExerciseId) {
+            testCode();
+            return;
+        }
+        const code = codeEditor.getValue();
+        const lang = document.getElementById('compiler-lang').value;
+        const consoleEl = document.getElementById('compiler-console');
+        const btnRun = document.getElementById('btn-run');
+        
+        consoleEl.innerHTML = '<span style="color:#fbbf24;">[Chạy code...] Đang biên dịch và thực thi trên Sandbox...</span>';
+        btnRun.disabled = true;
+        btnRun.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running...';
+
+        fetch('${pageContext.request.contextPath}/api/compiler/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ language: lang, code: code, stdin: '' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btnRun.disabled = false;
+            btnRun.innerHTML = '<i class="fa-solid fa-play"></i> Run Code';
+            
+            if(data.success) {
+                consoleEl.innerHTML = '<span style="color:#a7f3d0;">[Thành công] Output:</span>\n' + escapeHtml(data.output);
+            } else {
+                consoleEl.innerHTML = '<span style="color:#f87171;">[Lỗi]</span>\n' + escapeHtml(data.output);
+            }
+        })
+        .catch(err => {
+            btnRun.disabled = false;
+            btnRun.innerHTML = '<i class="fa-solid fa-play"></i> Run Code';
+            consoleEl.innerHTML = '<span style="color:#f87171;">[Lỗi Hệ Thống] Không thể kết nối tới Server. Chi tiết: ' + err + '</span>';
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    let currentExerciseId = null;
+    let checkpointData = null;
+    let checkpointPassed = false;
+    let checkpointTriggered = false;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        loadLessonExercise();
+        loadLessonCheckpoint();
+
+        const html5Vid = document.getElementById('html5-video');
+        if(html5Vid) {
+            html5Vid.addEventListener('timeupdate', function() {
+                checkVideoCheckpoint(html5Vid.currentTime);
+            });
+        }
+    });
+
+    let cachedExercise = null;
+
+    function loadLessonExercise() {
+        fetch('${pageContext.request.contextPath}/api/compiler/exercise?lessonId=${currentLesson.id}')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success && data.hasExercise) {
+                    const ex = data.exercise || data;
+                    cachedExercise = ex;
+                    currentExerciseId = ex.exerciseId || ex.id;
+                    const exBox = document.getElementById('exercise-box');
+                    if(exBox) exBox.style.display = 'block';
+                    const exTitle = document.getElementById('ex-title');
+                    if(exTitle) exTitle.innerText = ex.title || 'Bài tập thực hành';
+                    const exDesc = document.getElementById('ex-desc');
+                    if(exDesc) exDesc.innerText = ex.description || '';
+
+                    const statusBadge = document.getElementById('ex-status-badge');
+                    if(statusBadge) {
+                        if(data.isPassed || data.passed) {
+                            checkpointPassed = true;
+                            statusBadge.style.background = '#065f46';
+                            statusBadge.style.color = '#34d399';
+                            statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> ĐÃ HOÀN THÀNH (ĐẠT 100%)';
+                        } else {
+                            statusBadge.style.background = '#78350f';
+                            statusBadge.style.color = '#fde68a';
+                            statusBadge.innerHTML = '<i class="fa-solid fa-clock"></i> CHƯA ĐẠT (CẦN NỘP BÀI)';
+                        }
+                    }
+
+                    if(ex.language) {
+                        const langSelect = document.getElementById('compiler-lang');
+                        if(langSelect) {
+                            langSelect.value = ex.language;
+                        }
+                        const initialCode = ex.initialCode || ex.starterCode;
+                        if(initialCode) {
+                            boilerplates[ex.language] = initialCode;
+                            if(codeEditor) {
+                                codeEditor.setValue(initialCode);
+                                if(modes[ex.language]) codeEditor.setOption('mode', modes[ex.language]);
+                            }
+                        }
+                    }
+
+                    const btnTest = document.getElementById('btn-test');
+                    if(btnTest) btnTest.style.display = 'inline-flex';
+                    const btnSub = document.getElementById('btn-submit');
+                    if(btnSub) btnSub.style.display = 'inline-flex';
+
+                    const tcases = ex.testCases || [];
+                    if(tcases.length > 0) {
+                        renderInitialTestCases(tcases);
+                    }
+                }
+            })
+            .catch(err => console.error("Error loading exercise:", err));
+    }
+
+    function renderInitialTestCases(testCases) {
+        const tbody = document.getElementById('testcases-body');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        const summaryScore = document.getElementById('testcase-summary-score');
+        if(summaryScore) {
+            summaryScore.style.color = '#94a3b8';
+            summaryScore.innerText = 'Tổng số: ' + testCases.length + ' Test Cases';
+        }
+        testCases.forEach((tc, idx) => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #1e293b';
+            const inText = tc.isHidden ? '<span style="color:#64748b; font-style:italic;">(Test case ẩn)</span>' : escapeHtml(tc.inputData || tc.input || '(None)');
+            const outText = tc.isHidden ? '<span style="color:#64748b; font-style:italic;">(Test case ẩn)</span>' : escapeHtml(tc.expectedOutput || tc.expected || '');
+            tr.innerHTML = '<td style="padding:10px 12px; color:#94a3b8; font-weight:700;">#' + (idx + 1) + '</td>' +
+                '<td style="padding:10px 12px; color:#e2e8f0; font-family:monospace;">' + inText + '</td>' +
+                '<td style="padding:10px 12px; color:#38bdf8; font-family:monospace;">' + outText + '</td>' +
+                '<td style="padding:10px 12px; color:#94a3b8; font-style:italic;">Chưa chạy</td>' +
+                '<td style="padding:10px 12px; text-align:center;">' +
+                    '<span style="background:#334155; color:#94a3b8; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700;">CHƯA CHẠY</span>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+        const resBox = document.getElementById('testcases-result-box');
+        if(resBox) resBox.style.display = 'block';
+    }
+
+    function loadLessonCheckpoint() {
+        fetch('${pageContext.request.contextPath}/api/checkpoint?lessonId=${currentLesson.id}')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success && data.hasCheckpoint) {
+                    checkpointData = data;
+                    if(data.isPassed) {
+                        checkpointPassed = true;
+                    }
+                }
+            })
+            .catch(err => console.error("Error loading checkpoint:", err));
+    }
+
+    function checkVideoCheckpoint(currentTime) {
+        if(!checkpointData || !checkpointData.hasCheckpoint || checkpointPassed || checkpointTriggered) return;
+        if(!checkpointData.checkpointSeconds || checkpointData.checkpointSeconds <= 0) return;
+        if(typeof currentTime !== 'number' || isNaN(currentTime) || currentTime < 1) return;
+        if(currentTime >= checkpointData.checkpointSeconds) {
+            checkpointTriggered = true;
+            if(player && player.pauseVideo) {
+                player.pauseVideo();
+            }
+            const html5Vid = document.getElementById('html5-video');
+            if(html5Vid) {
+                html5Vid.pause();
+            }
+
+            if(checkpointData.checkpointType === 'quiz') {
+                showInVideoQuizOverlay();
+            } else if(checkpointData.checkpointType === 'code') {
+                showCodeCheckpointNotice();
+            }
+        }
+    }
+
+    function showInVideoQuizOverlay() {
+        const overlay = document.getElementById('inVideoQuizOverlay');
+        if(!overlay || !checkpointData || !checkpointData.quiz) return;
+        const qContent = document.getElementById('ivqContent');
+        if(qContent) qContent.innerText = checkpointData.quiz.content;
+        const listEl = document.getElementById('ivqOptionsList');
+        if(!listEl) return;
+        listEl.innerHTML = '';
+        checkpointData.quiz.options.forEach((opt) => {
+            const label = document.createElement('label');
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.gap = '10px';
+            label.style.padding = '10px 14px';
+            label.style.background = '#0f172a';
+            label.style.borderRadius = '8px';
+            label.style.cursor = 'pointer';
+            label.style.border = '1px solid #334155';
+            label.style.transition = 'all 0.2s';
+            label.innerHTML = '<input type="radio" name="ivqOption" value="' + opt.id + '" style="accent-color:#3b82f6; width:16px; height:16px; cursor:pointer;" />' +
+                '<span style="font-size:14px; color:#e2e8f0;">' + escapeHtml(opt.content) + '</span>';
+            listEl.appendChild(label);
+        });
+
+        const msgEl = document.getElementById('ivqMessage');
+        if(msgEl) {
+            msgEl.style.display = 'none';
+            msgEl.innerText = '';
+        }
+        overlay.style.setProperty('display', 'flex', 'important');
+    }
+
+    function verifyInVideoQuiz() {
+        const selected = document.querySelector('input[name="ivqOption"]:checked');
+        const msgEl = document.getElementById('ivqMessage');
+        const btn = document.getElementById('ivqSubmitBtn');
+
+        if(!selected) {
+            if(msgEl) {
+                msgEl.style.display = 'block';
+                msgEl.style.background = '#7f1d1d';
+                msgEl.style.color = '#fca5a5';
+                msgEl.innerText = 'Vui lòng chọn 1 câu trả lời trước khi kiểm tra!';
+            }
+            return;
+        }
+
+        if(btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang kiểm tra...';
+        }
+
+        fetch('${pageContext.request.contextPath}/api/checkpoint/verify-quiz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                questionId: checkpointData.quiz.questionId,
+                selectedOptionId: parseInt(selected.value)
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>';
+            }
+
+            if(data.success && data.isCorrect) {
+                if(msgEl) {
+                    msgEl.style.display = 'block';
+                    msgEl.style.background = '#065f46';
+                    msgEl.style.color = '#a7f3d0';
+                    msgEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + (data.explanation || 'Chính xác! Bạn đã trả lời đúng.');
+                }
+                checkpointPassed = true;
+
+                setTimeout(() => {
+                    const ov = document.getElementById('inVideoQuizOverlay');
+                    if(ov) ov.style.setProperty('display', 'none', 'important');
+                    if(player && player.playVideo) {
+                        player.playVideo();
+                    }
+                    const html5Vid = document.getElementById('html5-video');
+                    if(html5Vid) {
+                        html5Vid.play();
+                    }
+                }, 1600);
+            } else {
+                if(msgEl) {
+                    msgEl.style.display = 'block';
+                    msgEl.style.background = '#7f1d1d';
+                    msgEl.style.color = '#fca5a5';
+                    msgEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ' + (data.message || 'Đáp án chưa chính xác. Vui lòng suy nghĩ và chọn lại!');
+                }
+            }
+        })
+        .catch(err => {
+            if(btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>';
+            }
+            if(msgEl) {
+                msgEl.style.display = 'block';
+                msgEl.style.background = '#7f1d1d';
+                msgEl.style.color = '#fca5a5';
+                msgEl.innerText = 'Lỗi kết nối máy chủ: ' + err;
+            }
+        });
+    }
+
+    function showCodeCheckpointNotice() {
+        const notices = document.querySelectorAll('#videoCheckpointNotice');
+        notices.forEach(n => n.style.display = 'block');
+        if(!isCompilerVisible) {
+            toggleCompiler();
+        }
+    }
+
+    function focusOnExercise() {
+        if(!isCompilerVisible) {
+            toggleCompiler();
+        }
+        const box = document.getElementById('exercise-box') || document.getElementById('compiler-section');
+        if(box) {
+            box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function testCode() {
+        if(!codeEditor || !currentExerciseId) return;
+        const code = codeEditor.getValue();
+        const lang = document.getElementById('compiler-lang').value;
+        const btnTest = document.getElementById('btn-test');
+        const consoleEl = document.getElementById('compiler-console');
+
+        btnTest.disabled = true;
+        btnTest.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang test...';
+        consoleEl.innerHTML = '<span style="color:#fbbf24;">[Kiểm thử] Đang chạy code qua các Test Cases...</span>';
+
+        fetch('${pageContext.request.contextPath}/api/compiler/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ exerciseId: currentExerciseId, language: lang, code: code })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btnTest.disabled = false;
+            btnTest.innerHTML = '<i class="fa-solid fa-vial-circle-check"></i> Chạy Test Cases';
+
+            if(data.success) {
+                const results = data.details || data.testResults;
+                const passed = data.passedTests !== undefined ? data.passedTests : (data.passedCases || 0);
+                const total = data.totalTests !== undefined ? data.totalTests : (data.totalCases || 0);
+                renderTestCasesResult(results, passed, total, false);
+                consoleEl.innerHTML = '<span style="color:#a7f3d0;">[Kết quả kiểm thử]</span> Đạt ' + passed + '/' + total + ' test cases.';
+            } else {
+                consoleEl.innerHTML = '<span style="color:#f87171;">[Lỗi Kiểm Thử]</span> ' + escapeHtml(data.output || data.message || 'Lỗi không xác định');
+            }
+        })
+        .catch(err => {
+            btnTest.disabled = false;
+            btnTest.innerHTML = '<i class="fa-solid fa-vial-circle-check"></i> Chạy Test Cases';
+            consoleEl.innerHTML = '<span style="color:#f87171;">[Lỗi Hệ Thống] ' + err + '</span>';
+        });
+    }
+
+    function submitCode() {
+        if(!codeEditor || !currentExerciseId) return;
+        const code = codeEditor.getValue();
+        const lang = document.getElementById('compiler-lang').value;
+        const btnSubmit = document.getElementById('btn-submit');
+        const consoleEl = document.getElementById('compiler-console');
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang chấm...';
+        consoleEl.innerHTML = '<span style="color:#6366f1;">[Nộp bài] Đang chấm điểm và xác thực bài nộp với toàn bộ Test Cases (kể cả ẩn)...</span>';
+
+        fetch('${pageContext.request.contextPath}/api/compiler/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ exerciseId: currentExerciseId, language: lang, code: code })
+        })
+        .then(res => res.json())
+        .then(data => {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Nộp Bài Chấm Điểm';
+
+            if(data.success) {
+                const results = data.details || data.testResults;
+                const passed = data.passedTests !== undefined ? data.passedTests : (data.passedCases || 0);
+                const total = data.totalTests !== undefined ? data.totalTests : (data.totalCases || 0);
+                renderTestCasesResult(results, passed, total, true);
+                const statusBadge = document.getElementById('ex-status-badge');
+                if(data.status === 'PASSED' || data.allPassed) {
+                    checkpointPassed = true;
+                    if(statusBadge) {
+                        statusBadge.style.background = '#065f46';
+                        statusBadge.style.color = '#34d399';
+                        statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> ĐÃ HOÀN THÀNH (ĐẠT 100%)';
+                    }
+
+                    consoleEl.innerHTML = '<span style="color:#34d399; font-weight:bold;">🎉 CHÚC MỪNG! Bạn đã xuất sắc vượt qua toàn bộ Test Cases (' + passed + '/' + total + ').</span>';
+                    
+                    const notices = document.querySelectorAll('#videoCheckpointNotice');
+                    notices.forEach(n => n.style.display = 'none');
+                    if(player && player.playVideo) {
+                        player.playVideo();
+                    }
+                    const html5Vid = document.getElementById('html5-video');
+                    if(html5Vid) {
+                        html5Vid.play();
+                    }
+                } else {
+                    if(statusBadge) {
+                        statusBadge.style.background = '#7f1d1d';
+                        statusBadge.style.color = '#fca5a5';
+                        statusBadge.innerHTML = '<i class="fa-solid fa-xmark"></i> CHƯA ĐẠT (' + passed + '/' + total + ' TESTS)';
+                    }
+                    consoleEl.innerHTML = '<span style="color:#f87171;">[Chưa Đạt]</span> Kết quả chấm: ' + passed + '/' + total + ' test cases passed. Hãy kiểm tra lại logic và nộp lại nhé!';
+                }
+            } else {
+                consoleEl.innerHTML = '<span style="color:#f87171;">[Lỗi Chấm Bài]</span> ' + escapeHtml(data.output || data.message || 'Lỗi không xác định');
+            }
+        })
+        .catch(err => {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Nộp Bài Chấm Điểm';
+            consoleEl.innerHTML = '<span style="color:#f87171;">[Lỗi Hệ Thống] ' + err + '</span>';
+        });
+    }
+
+    function renderTestCasesResult(results, passed, total, isFinalSubmit) {
+        if(!results) return;
+        const tbody = document.getElementById('testcases-body');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        const summaryScore = document.getElementById('testcase-summary-score');
+        
+        if(summaryScore) {
+            if(passed === total && total > 0) {
+                summaryScore.style.color = '#34d399';
+                summaryScore.innerText = 'ĐẠT: ' + passed + ' / ' + total + ' Test Cases (100%)';
+            } else {
+                summaryScore.style.color = '#f87171';
+                summaryScore.innerText = 'CHƯA ĐẠT: ' + passed + ' / ' + total + ' Test Cases';
+            }
+        }
+
+        results.forEach((r, idx) => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #1e293b';
+            const isPass = r.passed;
+            const badgeBg = isPass ? '#065f46' : '#7f1d1d';
+            const badgeColor = isPass ? '#a7f3d0' : '#fca5a5';
+            const badgeText = isPass ? 'PASSED' : 'FAILED';
+
+            const inputTxt = r.isHidden ? '<span style="color:#64748b; font-style:italic;">(Test case ẩn)</span>' : escapeHtml(r.input || '(None)');
+            const expTxt = r.isHidden ? '<span style="color:#64748b; font-style:italic;">(Test case ẩn)</span>' : escapeHtml(r.expected || '');
+            const actTxt = r.isHidden ? '<span style="color:' + (isPass ? '#34d399' : '#f87171') + '; font-weight:bold;">' + (r.message || (isPass ? 'ĐẠT' : 'KHÔNG ĐẠT')) + '</span>' : escapeHtml(r.actual || '(Trống)');
+
+            tr.innerHTML = '<td style="padding:10px 12px; color:#94a3b8; font-weight:700;">#' + (idx + 1) + '</td>' +
+                '<td style="padding:10px 12px; color:#e2e8f0; font-family:monospace;">' + inputTxt + '</td>' +
+                '<td style="padding:10px 12px; color:#38bdf8; font-family:monospace;">' + expTxt + '</td>' +
+                '<td style="padding:10px 12px; color:' + (isPass ? '#a7f3d0' : '#fca5a5') + '; font-family:monospace;">' + actTxt + '</td>' +
+                '<td style="padding:10px 12px; text-align:center;">' +
+                    '<span style="background:' + badgeBg + '; color:' + badgeColor + '; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:700;">' + badgeText + '</span>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+
+        const resBox = document.getElementById('testcases-result-box');
+        if(resBox) resBox.style.display = 'block';
+    }
+
+</script>
 </div>
 
 <!-- Dynamic Island Theme Toggle -->
@@ -571,6 +1305,7 @@
     }
 
     function updateTimeDisplay() {
+        if(player && player.getCurrentTime) { checkVideoCheckpoint(player.getCurrentTime()); }
         if(player && player.getCurrentTime) {
             var current = player.getCurrentTime();
             var duration = player.getDuration();
@@ -595,6 +1330,7 @@
 
 </body>
 </html>
+
 
 
 

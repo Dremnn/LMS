@@ -1,4 +1,4 @@
-DROP TRIGGER IF EXISTS trg_lesson_update_total_lessons ON lessons;
+﻿DROP TRIGGER IF EXISTS trg_lesson_update_total_lessons ON lessons;
 CREATE TRIGGER trg_lesson_update_total_lessons
 AFTER INSERT OR DELETE OR UPDATE OF section_id ON lessons
 FOR EACH ROW EXECUTE FUNCTION trg_lesson_update_total_lessons_fn();
@@ -157,6 +157,9 @@ CREATE TABLE lessons (
     video_url           VARCHAR(255),
     document_url        VARCHAR(255),
     duration_minutes    INTEGER,
+    video_checkpoint_seconds INTEGER,
+    checkpoint_type     VARCHAR(20),
+    checkpoint_ref_id   INTEGER,
     order_index         INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT fk_lessons_section
@@ -547,5 +550,37 @@ CREATE TABLE group_submissions (
     file_url TEXT NOT NULL,
     score DECIMAL(5,2),
     feedback TEXT,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- ONLINE COMPILER & CODING EXERCISES TABLES
+-- ==========================================
+
+CREATE TABLE coding_exercises (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200),
+    lesson_id INT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    description TEXT,
+    language VARCHAR(50) NOT NULL,
+    initial_code TEXT
+);
+
+CREATE TABLE exercise_test_cases (
+    id SERIAL PRIMARY KEY,
+    exercise_id INT NOT NULL REFERENCES coding_exercises(id) ON DELETE CASCADE,
+    input_data TEXT,
+    expected_output TEXT NOT NULL,
+    is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
+    points INT DEFAULT 10
+);
+
+CREATE TABLE student_code_submissions (
+    id SERIAL PRIMARY KEY,
+    student_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    exercise_id INT NOT NULL REFERENCES coding_exercises(id) ON DELETE CASCADE,
+    submitted_code TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    output_message TEXT,
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

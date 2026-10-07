@@ -98,7 +98,9 @@ public class AuthFilter implements Filter {
                                path.equals("/report-issue.html") ||
                                path.equals("/report-issue.jsp") ||
                                path.equals("/report-issue") ||
-                               path.startsWith("/api/report-issue");
+                               path.startsWith("/api/report-issue") ||
+                               path.startsWith("/api/compiler") ||
+                               path.startsWith("/api/checkpoint");
 
         if (isPublicPage) {
             // Cho phép đi tiếp không cần kiểm tra phân quyền

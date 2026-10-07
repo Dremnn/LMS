@@ -61,6 +61,10 @@ public class DBUtil {
         emf = factory;
     }
 
+    public static jakarta.persistence.EntityManager getEntityManager() {
+        return emf != null ? emf.createEntityManager() : null;
+    }
+
     public static EntityManagerFactory getEmFactory() {
         return emf;
     }
