@@ -42,6 +42,18 @@
         
         .alert-success { background: #d1fae5; color: #065f46; padding: 12px; border-radius: 6px; margin-bottom: 24px; }
         .alert-danger { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 24px; }
+
+        [data-theme="dark"] body { background: #0f172a; color: #f8fafc; }
+        [data-theme="dark"] .card { background: #1e293b; color: #f8fafc; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        [data-theme="dark"] .member-item { background: #1e293b; border-color: #334155; color: #f8fafc; }
+        [data-theme="dark"] .member-item.me { background: rgba(16, 185, 129, 0.15); }
+        [data-theme="dark"] .submit-section { background: #0f172a; border-color: #475569; }
+        [data-theme="dark"] .form-control { background: #1e293b; border-color: #475569; color: #f8fafc; }
+        [data-theme="dark"] .role-member { background: #334155; color: #cbd5e1; }
+        [data-theme="dark"] .status-submitted { background: rgba(16, 185, 129, 0.15); }
+        [data-theme="dark"] .status-graded { background: rgba(59, 130, 246, 0.15); }
+        [data-theme="dark"] .back-link { color: #94a3b8 !important; }
+        [data-theme="dark"] .back-link:hover { color: #38bdf8 !important; }
     </style>
 </head>
 <body>
@@ -130,8 +142,16 @@
         </c:otherwise>
     </c:choose>
     
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="${pageContext.request.contextPath}/student/courses" style="color: #64748b; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Về danh sách khóa học</a>
+    <div style="text-align: center; margin-top: 24px; display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <c:if test="${not empty course}">
+            <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="back-link" style="color: #0ea5e9; text-decoration: none; font-weight: 500;">
+                <i class="fa-solid fa-graduation-cap"></i> Xem chi tiết khóa học
+            </a>
+            <span style="color: #cbd5e1;">|</span>
+        </c:if>
+        <a href="${pageContext.request.contextPath}/student/my-courses" class="back-link" style="color: #64748b; text-decoration: none; font-weight: 500;">
+            <i class="fa-solid fa-arrow-left"></i> Về danh sách khóa học
+        </a>
     </div>
 </div>
 

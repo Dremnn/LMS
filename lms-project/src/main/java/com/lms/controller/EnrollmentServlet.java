@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/enrollments/new", "/enrollments/cancel", "/enrollments/refund", "/student/my-courses"})
+@WebServlet(urlPatterns = {"/enrollments/new", "/enrollments/cancel", "/enrollments/refund", "/student/my-courses", "/student/courses"})
 public class EnrollmentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
