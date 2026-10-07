@@ -322,8 +322,8 @@
                                                     data-doc="<c:out value="${lesson.documentUrl}" escapeXml="true"/>"
                                                     data-desc="<c:out value="${lesson.description}" escapeXml="true"/>"
                                                     onclick="openEditLessonModal(this)">
-                                                <i class="fa-solid fa-pen"></i> Sửa
-                                            </button>
+                                                
+                                              <button type="button" class="btn-action-sm" style="padding:3px 8px;font-size:11px;background:#6366f1;color:#fff;border-color:#6366f1;" onclick="openCodingExerciseModal(${lesson.id}, '<c:out value="${lesson.title}" escapeXml="true"/>')" title="Thiết lập bài tập code & test case cho bài học này"><i class="fa-solid fa-code"></i> Bài tập Code</button>
                                             <form action="${pageContext.request.contextPath}/instructor/courses/lessons/delete" method="post" style="display:inline;"
                                                   onsubmit="return confirm('Bạn có chắc muốn xóa bài học: ${lesson.title}?');">
                                                 <input type="hidden" name="courseId" value="${course.id}">
@@ -368,6 +368,26 @@
                             <div class="form-group" style="margin-top:10px;">
                                 <label>Mô tả nội dung bài học (tùy chọn)</label>
                                 <textarea name="description" class="form-control" rows="2" placeholder="Tóm tắt ngắn gọn nội dung bài học, mục tiêu học tập..."></textarea>
+                            </div>
+                            <div class="form-row" style="margin-top:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; display:flex; gap:12px; align-items:flex-end;">
+                                <div class="form-group" style="flex:1;">
+                                    <label style="font-weight:700; color:#475569; font-size:12px;"><i class="fa-solid fa-flag-checkered"></i> Điểm dừng Video (giây)</label>
+                                    <input type="number" name="videoCheckpointSeconds" class="form-control" placeholder="Ví dụ: 30" min="1" style="font-size:12.5px;">
+                                </div>
+                                <div class="form-group" style="flex:1.5;">
+                                    <label style="font-weight:700; color:#475569; font-size:12px;"><i class="fa-solid fa-layer-group"></i> Loại Điểm Dừng</label>
+                                    <select name="checkpointType" class="form-control add-cp-type" onchange="toggleAddCpType(this)" style="font-size:12.5px;">
+                                        <option value="">-- Không có điểm dừng --</option>
+                                        <option value="quiz">Trả lời câu hỏi Quiz trắc nghiệm</option>
+                                        <option value="code">Làm bài tập Code thực hành</option>
+                                    </select>
+                                </div>
+                                <div class="form-group add-cp-quiz-group" style="flex:2; display:none;">
+                                    <label style="font-weight:700; color:#475569; font-size:12px;"><i class="fa-solid fa-circle-question"></i> Chọn câu hỏi Quiz</label>
+                                    <select name="checkpointRefId" class="form-control add-cp-quiz-select" style="font-size:12.5px;">
+                                        <option value="">-- Chọn câu hỏi trắc nghiệm --</option>
+                                    </select>
+                                </div>
                             </div>
                             <div style="margin-top:12px;">
                                 <button type="submit" class="btn btn-primary btn-sm">➕ Thêm bài học</button>
@@ -574,6 +594,31 @@
                 <label>Mô tả nội dung bài học</label>
                 <textarea name="description" id="modalEditLessonDesc" class="form-control" rows="3" placeholder="Tóm tắt nội dung bài học..." style="margin-top:4px;"></textarea>
             </div>
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+                <div style="font-weight:700; color:#334155; font-size:13px; margin-bottom:8px;">
+                    <i class="fa-solid fa-flag-checkered" style="color:#6366f1;"></i> Điểm Dừng Video (Interactive Checkpoint)
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:10px;">
+                    <div class="form-group">
+                        <label style="font-size:12px;">Điểm dừng Video (giây)</label>
+                        <input type="number" name="videoCheckpointSeconds" id="modalEditLessonCpSeconds" class="form-control" placeholder="Ví dụ: 30" min="1" style="margin-top:4px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:12px;">Loại điểm dừng</label>
+                        <select name="checkpointType" id="modalEditLessonCpType" class="form-control" onchange="toggleEditCpType()" style="margin-top:4px;">
+                            <option value="">-- Không có điểm dừng --</option>
+                            <option value="quiz">Trả lời câu hỏi Quiz trắc nghiệm</option>
+                            <option value="code">Làm bài tập Code thực hành</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="modalEditLessonCpQuizGroup" style="display:none;">
+                    <label style="font-size:12px;">Chọn câu hỏi trắc nghiệm</label>
+                    <select name="checkpointRefId" id="modalEditLessonCpRefId" class="form-control" style="margin-top:4px;">
+                        <option value="">-- Chọn câu hỏi --</option>
+                    </select>
+                </div>
+            </div>
             <div style="display:flex;justify-content:flex-end;gap:10px;">
                 <button type="button" class="btn btn-outline btn-sm" onclick="closeEditLessonModal()">Hủy</button>
                 <button type="submit" class="btn btn-primary btn-sm">💾 Lưu thay đổi</button>
@@ -628,6 +673,394 @@
 
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
 
+
+<!-- MODAL QUẢN LÝ BÀI TẬP CODE & TEST CASE -->
+<div class="modal-overlay" id="codingExerciseModal" onclick="if(event.target===this)closeCodingExerciseModal()">
+    <div class="modal-card" style="max-width: 820px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background:#4f46e5; color:#fff; border-radius: 12px 12px 0 0; padding: 14px 20px;">
+            <h3 style="color:#fff; margin:0; font-size:17px;"><i class="fa-solid fa-code"></i> Thiết Lập Bài Tập Code &amp; Test Cases: <span id="ceModalLessonTitle" style="color:#c7d2fe; font-weight:normal;"></span></h3>
+            <button type="button" class="btn-close" style="color:#fff; filter: brightness(2);" onclick="closeCodingExerciseModal()">&times;</button>
+        </div>
+        <div style="padding: 20px; overflow-y: auto; flex: 1;">
+            <input type="hidden" id="ceLessonId">
+            <input type="hidden" id="ceExerciseId">
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <div class="form-group">
+                    <label style="font-weight: 700; font-size: 13px;">Tiêu đề bài tập *</label>
+                    <input type="text" id="ceTitle" class="form-control" placeholder="VD: Tính tổng 2 số nguyên, Thuật toán sắp xếp..." required style="margin-top: 4px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: 700; font-size: 13px;">Ngôn ngữ lập trình mặc định</label>
+                    <select id="ceLanguage" class="form-control" style="margin-top: 4px;">
+                        <option value="cpp">C++ (GCC)</option>
+                        <option value="c">C (GCC)</option>
+                        <option value="java">Java (OpenJDK 21)</option>
+                        <option value="python">Python (3.12)</option>
+                        <option value="javascript">JavaScript (Node.js 20)</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="go">Golang (1.23)</option>
+                        <option value="php">PHP (8.3)</option>
+                        <option value="rust">Rust (1.82)</option>
+                        <option value="csharp">C# (Mono)</option>
+                        <option value="sql">SQL (SQLite 3)</option>
+                    </select>
+                </div>
+            </div>
+
+                        <div class="form-group" style="margin-bottom: 14px; background: #f8fafc; border: 1.5px dashed #818cf8; border-radius: 10px; padding: 14px 18px;">
+                <label style="font-weight: 700; font-size: 13.5px; color: #4338ca;"><i class="fa-solid fa-circle-pause"></i> Điểm Dừng Video Tương Tác (Interactive Video Checkpoint)</label>
+                <div style="display: grid; grid-template-columns: 180px 1fr; gap: 14px; margin-top: 8px; align-items: center;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; color: #64748b;">Dừng tại giây thứ:</label>
+                        <input type="number" id="ceCheckpointSeconds" class="form-control" placeholder="VD: 45 hoặc 90" min="1" style="font-size: 13px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; color: #64748b;">Loại tương tác khi dừng video:</label>
+                        <select id="ceCheckpointType" class="form-control" style="font-size: 13px;" onchange="toggleCheckpointTypeFields()">
+                            <option value="code">💻 Thực hành Viết Code &amp; Test Cases</option>
+                            <option value="quiz">❓ Câu hỏi Quiz Trắc Nghiệm (In-Video Quiz)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="ceQuizQuestionContainer" style="display:none; margin-top: 10px; background: #eef2ff; padding: 10px 14px; border-radius: 8px;">
+                    <label style="font-size: 12px; font-weight: 700; color: #3730a3;">Chọn câu hỏi trắc nghiệm tương tác:</label>
+                    <select id="ceQuizQuestionSelect" class="form-control" style="font-size: 12.5px; margin-top: 4px;">
+                        <option value="">-- Đang tải danh sách câu hỏi... --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label style="font-weight: 700; font-size: 13px;">Đề bài / Yêu cầu chi tiết</label>
+                <textarea id="ceDescription" class="form-control" rows="4" placeholder="Mô tả đề bài, ràng buộc đầu vào (Input), định dạng đầu ra (Output), ví dụ..." style="margin-top: 4px; font-family: inherit;"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label style="font-weight: 700; font-size: 13px;">Mã nguồn mẫu / Khởi tạo cho học viên (Starter Code)</label>
+                <textarea id="ceInitialCode" class="form-control" rows="5" placeholder="// Nhập khung code gợi ý sẵn cho học sinh..." style="margin-top: 4px; font-family: Consolas, monospace; font-size: 13px; background: #0f172a; color: #f8fafc;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="font-weight: 700; font-size: 14px; color: #0f172a;"><i class="fa-solid fa-vial-circle-check" style="color: #10b981;"></i> Danh Sách Test Cases (Kiểm thử tự động)</label>
+                    <button type="button" class="btn btn-sm" style="background:#10b981; color:#fff; font-size:12px;" onclick="addTestCaseRow('', '', false, 10)">
+                        <i class="fa-solid fa-plus"></i> Thêm Test Case
+                    </button>
+                </div>
+                <div style="max-height: 240px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;" id="ceTestCasesTable">
+                        <thead>
+                            <tr style="background: #f1f5f9; text-align: left; color: #475569;">
+                                <th style="padding: 8px 10px; width: 40px;">#</th>
+                                <th style="padding: 8px 10px;">Đầu vào (Input / Stdin)</th>
+                                <th style="padding: 8px 10px;">Kết quả mong đợi (Expected Output) *</th>
+                                <th style="padding: 8px 10px; width: 100px; text-align: center;">Ẩn với HS?</th>
+                                <th style="padding: 8px 10px; width: 70px;">Điểm</th>
+                                <th style="padding: 8px 10px; width: 50px;">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ceTestCasesBody">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-radius: 0 0 12px 12px;">
+            <button type="button" id="ceBtnDelete" class="btn btn-danger-sm" style="display:none;" onclick="deleteCodingExercise()">
+                <i class="fa-solid fa-trash"></i> Xóa Bài Tập Này
+            </button>
+            <div style="display: flex; gap: 10px; margin-left: auto;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeCodingExerciseModal()">Hủy</button>
+                <button type="button" class="btn btn-primary btn-sm" style="background:#4f46e5; border-color:#4f46e5;" onclick="saveCodingExercise()">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu Bài Tập &amp; Test Cases
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        function toggleCheckpointTypeFields() {
+        const type = document.getElementById('ceCheckpointType').value;
+        const quizContainer = document.getElementById('ceQuizQuestionContainer');
+        if (type === 'quiz') {
+            quizContainer.style.display = 'block';
+            loadCourseQuizQuestions();
+        } else {
+            quizContainer.style.display = 'none';
+        }
+    }
+
+    function loadCourseQuizQuestions(selectedQId) {
+        const select = document.getElementById('ceQuizQuestionSelect');
+        fetch('${pageContext.request.contextPath}/api/checkpoint/questions?courseId=${course.id}')
+            .then(res => res.json())
+            .then(questions => {
+                select.innerHTML = '';
+                if (!questions || questions.length === 0) {
+                    select.innerHTML = '<option value="">(Khóa học chưa có Quiz nào để chọn)</option>';
+                    return;
+                }
+                questions.forEach(q => {
+                    const opt = document.createElement('option');
+                    opt.value = q.id;
+                    opt.innerText = '[' + q.quizTitle + '] ' + q.content;
+                    if (selectedQId && q.id == selectedQId) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+            })
+            .catch(err => {
+                select.innerHTML = '<option value="">Lỗi tải câu hỏi: ' + err + '</option>';
+            });
+    }
+    function openCodingExerciseModal(lessonId, lessonTitle) {
+        document.getElementById('ceLessonId').value = lessonId;
+        document.getElementById('ceModalLessonTitle').innerText = lessonTitle;
+        document.getElementById('ceExerciseId').value = '';
+        document.getElementById('ceTitle').value = '';
+        document.getElementById('ceDescription').value = '';
+        document.getElementById('ceInitialCode').value = '';
+        document.getElementById('ceCheckpointSeconds').value = '';
+        document.getElementById('ceTestCasesBody').innerHTML = '';
+        document.getElementById('ceBtnDelete').style.display = 'none';
+
+        // Fetch existing exercise info
+        fetch('${pageContext.request.contextPath}/instructor/courses/lessons/exercise?lessonId=' + lessonId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.videoCheckpointSeconds) {
+                        document.getElementById('ceCheckpointSeconds').value = data.videoCheckpointSeconds;
+                    }
+                    if (data.checkpointType) {
+                        document.getElementById('ceCheckpointType').value = data.checkpointType;
+                    } else {
+                        document.getElementById('ceCheckpointType').value = 'code';
+                    }
+                    toggleCheckpointTypeFields();
+                    if (data.checkpointRefId && data.checkpointType === 'quiz') {
+                        loadCourseQuizQuestions(data.checkpointRefId);
+                    }
+                    if (data.hasExercise) {
+                        document.getElementById('ceExerciseId').value = data.exerciseId;
+                        document.getElementById('ceTitle').value = data.title || '';
+                        document.getElementById('ceDescription').value = data.description || '';
+                        document.getElementById('ceLanguage').value = data.language || 'cpp';
+                        document.getElementById('ceInitialCode').value = data.initialCode || '';
+                        document.getElementById('ceBtnDelete').style.display = 'inline-block';
+
+                        if (data.testCases && data.testCases.length > 0) {
+                            data.testCases.forEach(tc => {
+                                addTestCaseRow(tc.inputData, tc.expectedOutput, tc.isHidden, tc.points);
+                            });
+                        } else {
+                            addTestCaseRow('', '', false, 10);
+                        }
+                    } else {
+                        // Tạo sẵn 2 dòng mẫu
+                        addTestCaseRow('1 2', '3', false, 10);
+                        addTestCaseRow('10 20', '30', true, 10);
+                    }
+                }
+                document.getElementById('codingExerciseModal').classList.add('active');
+            })
+            .catch(err => {
+                alert('Lỗi tải thông tin bài tập: ' + err);
+            });
+    }
+
+    function closeCodingExerciseModal() {
+        document.getElementById('codingExerciseModal').classList.remove('active');
+    }
+
+    function addTestCaseRow(input, expected, isHidden, points) {
+        const tbody = document.getElementById('ceTestCasesBody');
+        const rowIndex = tbody.children.length + 1;
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid #f1f5f9';
+        tr.innerHTML = 
+            '<td style="padding: 8px 10px; font-weight: bold; color: #64748b;">' + rowIndex + '</td>' +
+            '<td style="padding: 8px 10px;">' +
+                '<input type="text" class="form-control tc-input" value="' + (input || '').replace(/"/g, '&quot;') + '" placeholder="Đầu vào stdin..." style="font-size:12px; font-family:monospace; padding:4px 8px;">' +
+            '</td>' +
+            '<td style="padding: 8px 10px;">' +
+                '<input type="text" class="form-control tc-expected" value="' + (expected || '').replace(/"/g, '&quot;') + '" placeholder="Kết quả stdout mong đợi..." required style="font-size:12px; font-family:monospace; padding:4px 8px;">' +
+            '</td>' +
+            '<td style="padding: 8px 10px; text-align: center;">' +
+                '<input type="checkbox" class="tc-hidden" ' + (isHidden ? 'checked' : '') + ' title="Tích chọn để ẩn input/output này với học sinh">' +
+            '</td>' +
+            '<td style="padding: 8px 10px;">' +
+                '<input type="number" class="form-control tc-points" value="' + (points || 10) + '" min="1" style="font-size:12px; padding:4px 6px; width:60px;">' +
+            '</td>' +
+            '<td style="padding: 8px 10px; text-align: center;">' +
+                '<button type="button" class="btn-danger-sm" style="padding:2px 6px; font-size:11px;" onclick="this.closest(\'tr\').remove()">&times;</button>' +
+            '</td>';
+        tbody.appendChild(tr);
+    }
+
+    function saveCodingExercise() {
+        const lessonId = document.getElementById('ceLessonId').value;
+        const title = document.getElementById('ceTitle').value.trim();
+        const description = document.getElementById('ceDescription').value.trim();
+        const language = document.getElementById('ceLanguage').value;
+        const initialCode = document.getElementById('ceInitialCode').value;
+        const videoCheckpointSeconds = document.getElementById('ceCheckpointSeconds').value.trim();
+
+        if (!title) {
+            alert('Vui lòng nhập tiêu đề bài tập!');
+            return;
+        }
+
+        const rows = document.querySelectorAll('#ceTestCasesBody tr');
+        const testCases = [];
+        for (let row of rows) {
+            const inputData = row.querySelector('.tc-input').value;
+            const expectedOutput = row.querySelector('.tc-expected').value.trim();
+            const isHidden = row.querySelector('.tc-hidden').checked;
+            const points = parseInt(row.querySelector('.tc-points').value) || 10;
+
+            if (!expectedOutput) {
+                alert('Vui lòng nhập kết quả mong đợi (Expected Output) cho tất cả các test case!');
+                return;
+            }
+            testCases.push({ inputData, expectedOutput, isHidden, points });
+        }
+
+        if (testCases.length === 0) {
+            alert('Vui lòng thêm ít nhất 1 Test Case để hệ thống kiểm thử!');
+            return;
+        }
+
+        const checkpointType = document.getElementById('ceCheckpointType').value;
+        const checkpointRefId = document.getElementById('ceQuizQuestionSelect').value;
+
+        const payload = {
+            lessonId: parseInt(lessonId),
+            title,
+            description,
+            language,
+            initialCode,
+            videoCheckpointSeconds: videoCheckpointSeconds ? parseInt(videoCheckpointSeconds) : null,
+            checkpointType: checkpointType,
+            checkpointRefId: checkpointRefId ? parseInt(checkpointRefId) : null,
+            testCases
+        };
+
+        fetch('${pageContext.request.contextPath}/instructor/courses/lessons/exercise/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã lưu bài tập code & test cases thành công!');
+                closeCodingExerciseModal();
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(err => alert('Lỗi kết nối máy chủ: ' + err));
+    }
+
+
+    let cachedCourseQuestions = null;
+
+    function loadAllCourseQuestionsForDropdowns() {
+        fetch('${pageContext.request.contextPath}/api/checkpoint/questions?courseId=${course.id}')
+            .then(res => res.json())
+            .then(questions => {
+                cachedCourseQuestions = questions || [];
+                populateQuestionDropdowns();
+            })
+            .catch(err => console.error('Error fetching questions:', err));
+    }
+
+    function populateQuestionDropdowns() {
+        if (!cachedCourseQuestions) return;
+        const selects = document.querySelectorAll('.add-cp-quiz-select, #modalEditLessonCpRefId, #ceQuizQuestionSelect');
+        selects.forEach(sel => {
+            const currentVal = sel.value;
+            sel.innerHTML = '<option value="">-- Chọn câu hỏi trắc nghiệm --</option>';
+            if (cachedCourseQuestions.length === 0) {
+                sel.innerHTML = '<option value="">(Khóa học chưa có câu hỏi Quiz nào)</option>';
+                return;
+            }
+            cachedCourseQuestions.forEach(q => {
+                const opt = document.createElement('option');
+                opt.value = q.id;
+                opt.innerText = '[' + (q.quizTitle || 'Quiz') + '] ' + q.content;
+                if (currentVal && q.id == currentVal) {
+                    opt.selected = true;
+                }
+                sel.appendChild(opt);
+            });
+        });
+    }
+
+    function toggleAddCpType(selectEl) {
+        const form = selectEl.closest('form');
+        const quizGroup = form.querySelector('.add-cp-quiz-group');
+        if (selectEl.value === 'quiz') {
+            quizGroup.style.display = 'block';
+            if (cachedCourseQuestions && cachedCourseQuestions.length > 0) {
+                populateQuestionDropdowns();
+            } else {
+                loadAllCourseQuestionsForDropdowns();
+            }
+        } else {
+            quizGroup.style.display = 'none';
+        }
+    }
+
+    function toggleEditCpType() {
+        const typeSelect = document.getElementById('modalEditLessonCpType');
+        const quizGroup = document.getElementById('modalEditLessonCpQuizGroup');
+        if (typeSelect.value === 'quiz') {
+            quizGroup.style.display = 'block';
+            if (cachedCourseQuestions && cachedCourseQuestions.length > 0) {
+                populateQuestionDropdowns();
+            } else {
+                loadAllCourseQuestionsForDropdowns();
+            }
+        } else {
+            quizGroup.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAllCourseQuestionsForDropdowns();
+    });
+
+    function deleteCodingExercise() {
+        if (!confirm('Bạn có chắc chắn muốn xóa bài tập code này?')) return;
+        const lessonId = document.getElementById('ceLessonId').value;
+        const exerciseId = document.getElementById('ceExerciseId').value;
+
+        fetch('${pageContext.request.contextPath}/instructor/courses/lessons/exercise/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lessonId: parseInt(lessonId), exerciseId: parseInt(exerciseId) })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã xóa bài tập code thành công!');
+                closeCodingExerciseModal();
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(err => alert('Lỗi kết nối máy chủ: ' + err));
+    }
+</script>
 </body>
 </html>
 

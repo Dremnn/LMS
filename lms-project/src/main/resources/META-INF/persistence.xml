@@ -22,6 +22,11 @@
         <class>com.lms.model.LessonProgress</class>
         <class>com.lms.model.WalletTransaction</class>
         <class>com.lms.model.Notification</class>
+        
+        <!-- Coding Compiler Entities -->
+        <class>com.lms.model.CodingExercise</class>
+        <class>com.lms.model.ExerciseTestCase</class>
+        <class>com.lms.model.StudentCodeSubmission</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" />

@@ -31,8 +31,17 @@ public class Lesson implements Serializable {
     @Column(name = "duration_minutes")
     private Integer durationMinutes;
 
-    @Column(name = "order_index", nullable = false)
+        @Column(name = "order_index", nullable = false)
     private int orderIndex;
+
+    @Column(name = "video_checkpoint_seconds")
+    private Integer videoCheckpointSeconds;
+
+    @Column(name = "checkpoint_type")
+    private String checkpointType; // "quiz" hoac "code"
+
+    @Column(name = "checkpoint_ref_id")
+    private Integer checkpointRefId;
 
     // Quan hệ ORM
     @ManyToOne(fetch = FetchType.LAZY)
@@ -88,4 +97,12 @@ public class Lesson implements Serializable {
 
     public Section getSection() { return section; }
     public void setSection(Section section) { this.section = section; }
+    public Integer getVideoCheckpointSeconds() { return videoCheckpointSeconds; }
+    public void setVideoCheckpointSeconds(Integer videoCheckpointSeconds) { this.videoCheckpointSeconds = videoCheckpointSeconds; }
+
+    public String getCheckpointType() { return checkpointType; }
+    public void setCheckpointType(String checkpointType) { this.checkpointType = checkpointType; }
+
+    public Integer getCheckpointRefId() { return checkpointRefId; }
+    public void setCheckpointRefId(Integer checkpointRefId) { this.checkpointRefId = checkpointRefId; }
 }

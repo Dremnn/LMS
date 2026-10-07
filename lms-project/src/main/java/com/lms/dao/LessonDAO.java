@@ -13,7 +13,7 @@ public class LessonDAO {
     public List<Lesson> findBySectionId(int sectionId) {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT id, section_id, title, video_url, document_url, " +
-                     "duration_minutes, order_index, description FROM lessons " +
+                     "duration_minutes, order_index, description, video_checkpoint_seconds, checkpoint_type, checkpoint_ref_id FROM lessons " +
                      "WHERE section_id = ? ORDER BY order_index ASC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -37,7 +37,7 @@ public class LessonDAO {
     public List<Lesson> findByCourseId(int courseId) {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT l.id, l.section_id, l.title, l.video_url, l.document_url, " +
-                     "l.duration_minutes, l.order_index, l.description " +
+                     "l.duration_minutes, l.order_index, l.description, l.video_checkpoint_seconds, l.checkpoint_type, l.checkpoint_ref_id " +
                      "FROM lessons l INNER JOIN sections s ON l.section_id = s.id " +
                      "WHERE s.course_id = ? ORDER BY s.order_index ASC, l.order_index ASC";
 
@@ -60,7 +60,7 @@ public class LessonDAO {
     // 3. Tìm 1 bài học theo ID
     public Lesson findById(int id) {
         String sql = "SELECT id, section_id, title, video_url, document_url, " +
-                     "duration_minutes, order_index, description FROM lessons WHERE id = ?";
+                     "duration_minutes, order_index, description, video_checkpoint_seconds, checkpoint_type, checkpoint_ref_id FROM lessons WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -216,6 +216,36 @@ public class LessonDAO {
         lesson.setOrderIndex(rs.getInt("order_index"));
         String desc = rs.getString("description");
         lesson.setDescription(desc != null ? desc.trim() : null);
+
+        try {
+            int cpSec = rs.getInt("video_checkpoint_seconds");
+            lesson.setVideoCheckpointSeconds(rs.wasNull() ? null : cpSec);
+        } catch (SQLException ignored) {}
+
+        try {
+            lesson.setCheckpointType(rs.getString("checkpoint_type"));
+        } catch (SQLException ignored) {}
+
+        try {
+            int cpRef = rs.getInt("checkpoint_ref_id");
+            lesson.setCheckpointRefId(rs.wasNull() ? null : cpRef);
+        } catch (SQLException ignored) {}
+
         return lesson;
+    }
+
+    public boolean updateCheckpoint(int lessonId, Integer checkpointSeconds, String checkpointType, Integer checkpointRefId) {
+        String sql = "UPDATE lessons SET video_checkpoint_seconds = ?, checkpoint_type = ?, checkpoint_ref_id = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            if (checkpointSeconds != null) stmt.setInt(1, checkpointSeconds); else stmt.setNull(1, Types.INTEGER);
+            if (checkpointType != null) stmt.setString(2, checkpointType); else stmt.setNull(2, Types.VARCHAR);
+            if (checkpointRefId != null) stmt.setInt(3, checkpointRefId); else stmt.setNull(3, Types.INTEGER);
+            stmt.setInt(4, lessonId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

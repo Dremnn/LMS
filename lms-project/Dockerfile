@@ -1,5 +1,5 @@
-# Stage 1: Build the Maven application with JDK 21
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+# Stage 1: Build the Maven application with JDK 25
+FROM maven:3.9.15-eclipse-temurin-25 AS build
 WORKDIR /app
 
 # Cache dependencies
@@ -10,8 +10,8 @@ RUN mvn dependency:go-offline -B || true
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime on Tomcat 11 with JDK 21
-FROM tomcat:11.0-jdk21-temurin
+# Stage 2: Runtime on Tomcat 11 with JDK 25
+FROM tomcat:11.0-jdk25-temurin
 WORKDIR /usr/local/tomcat
 
 # Remove default sample apps
