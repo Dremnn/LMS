@@ -373,6 +373,21 @@
                             </div>
                         </div>
                     </div>
+                    <%-- IN-VIDEO CODE CHECKPOINT LOCK OVERLAY --%>
+                    <div id="inVideoCodeLockOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.94); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
+                        <div style="max-width:540px; width:95%; background:#1e293b; border:1.5px solid #f59e0b; border-radius:14px; padding:24px 28px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:center;">
+                            <div style="width:52px; height:52px; border-radius:50%; background:#78350f; color:#fde68a; display:inline-flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px;">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <h3 style="margin:0 0 10px 0; font-size:18px; color:#fef3c7; font-weight:700;">ĐIỂM DỪNG BÀI HỌC (CHECKPOINT CODE)</h3>
+                            <p style="margin:0 0 18px 0; font-size:13.5px; color:#cbd5e1; line-height:1.6;">
+                                Video đã bị tạm dừng tại mốc thời gian này. Bạn cần làm bài tập thực hành ở khung bên dưới và <strong>Nộp bài ĐẠT (Pass 100% Test Cases)</strong> để mở khóa xem tiếp video!
+                            </p>
+                            <button type="button" class="btn" style="background:#d97706; color:#fff; font-weight:700; font-size:14px; padding:11px 24px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="focusOnExercise()">
+                                <i class="fa-solid fa-code"></i> Thực Hành Viết Code Ngay <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <%-- Custom Video Controls --%>
                 <div class="custom-yt-controls" id="customControls">
@@ -406,11 +421,47 @@
 
             <%-- Trường hợp 2: Link video file trực tiếp (.mp4...) -> dùng thẻ video như cũ --%>
             <c:when test="${not empty currentLesson.videoUrl}">
-                <div class="video-wrap">
+                <div class="video-wrap" style="position:relative;">
                     <video id="html5-video" controls width="100%" preload="metadata">
                         <source src="${currentLesson.videoUrl}" type="video/mp4" />
                         Trình duyệt của bạn không hỗ trợ thẻ video.
                     </video>
+                    <%-- IN-VIDEO INTERACTIVE QUIZ OVERLAY FOR HTML5 VIDEO --%>
+                    <div id="inVideoQuizOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.92); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
+                        <div style="max-width:580px; width:95%; background:#1e293b; border:1.5px solid #3b82f6; border-radius:14px; padding:22px 26px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:left;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <span style="background:#2563eb; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px;">
+                                    <i class="fa-solid fa-lightbulb"></i> CÂU HỎI TƯƠNG TÁC GIỮA VIDEO
+                                </span>
+                                <span style="font-size:11.5px; color:#f87171; font-weight:600;"><i class="fa-solid fa-lock"></i> Video đã bị khóa</span>
+                            </div>
+                            <h3 id="ivqContent" style="margin:0 0 16px 0; font-size:15.5px; color:#f8fafc; font-weight:600; line-height:1.5;">...</h3>
+                            <div id="ivqOptionsList" style="display:flex; flex-direction:column; gap:9px; margin-bottom:16px;">
+                                <!-- Radio options -->
+                            </div>
+                            <div id="ivqMessage" style="font-size:13px; margin-bottom:14px; display:none; padding:10px 14px; border-radius:8px;"></div>
+                            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                                <button type="button" id="ivqSubmitBtn" class="btn" style="background:#3b82f6; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:8px; border:none; cursor:pointer;" onclick="verifyInVideoQuiz()">
+                                    Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <%-- IN-VIDEO CODE CHECKPOINT LOCK OVERLAY FOR HTML5 VIDEO --%>
+                    <div id="inVideoCodeLockOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.94); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
+                        <div style="max-width:540px; width:95%; background:#1e293b; border:1.5px solid #f59e0b; border-radius:14px; padding:24px 28px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:center;">
+                            <div style="width:52px; height:52px; border-radius:50%; background:#78350f; color:#fde68a; display:inline-flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px;">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <h3 style="margin:0 0 10px 0; font-size:18px; color:#fef3c7; font-weight:700;">ĐIỂM DỪNG BÀI HỌC (CHECKPOINT CODE)</h3>
+                            <p style="margin:0 0 18px 0; font-size:13.5px; color:#cbd5e1; line-height:1.6;">
+                                Video đã bị tạm dừng tại mốc thời gian này. Bạn cần làm bài tập thực hành ở khung bên dưới và <strong>Nộp bài ĐẠT (Pass 100% Test Cases)</strong> để mở khóa xem tiếp video!
+                            </p>
+                            <button type="button" class="btn" style="background:#d97706; color:#fff; font-weight:700; font-size:14px; padding:11px 24px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="focusOnExercise()">
+                                <i class="fa-solid fa-code"></i> Thực Hành Viết Code Ngay <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
                 <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
@@ -843,6 +894,20 @@
             html5Vid.addEventListener('timeupdate', function() {
                 checkVideoCheckpoint(html5Vid.currentTime);
             });
+            html5Vid.addEventListener('play', function() {
+                if(isCheckpointBlocked(html5Vid.currentTime)) {
+                    html5Vid.pause();
+                    html5Vid.currentTime = checkpointData.checkpointSeconds;
+                    lockVideoAtCheckpoint();
+                }
+            });
+            html5Vid.addEventListener('seeking', function() {
+                if(isCheckpointBlocked(html5Vid.currentTime)) {
+                    html5Vid.pause();
+                    html5Vid.currentTime = checkpointData.checkpointSeconds;
+                    lockVideoAtCheckpoint();
+                }
+            });
         }
     });
 
@@ -947,25 +1012,40 @@
             .catch(err => console.error("Error loading checkpoint:", err));
     }
 
-    function checkVideoCheckpoint(currentTime) {
-        if(!checkpointData || !checkpointData.hasCheckpoint || checkpointPassed || checkpointTriggered) return;
-        if(!checkpointData.checkpointSeconds || checkpointData.checkpointSeconds <= 0) return;
-        if(typeof currentTime !== 'number' || isNaN(currentTime) || currentTime < 1) return;
-        if(currentTime >= checkpointData.checkpointSeconds) {
-            checkpointTriggered = true;
-            if(player && player.pauseVideo) {
-                player.pauseVideo();
-            }
-            const html5Vid = document.getElementById('html5-video');
-            if(html5Vid) {
-                html5Vid.pause();
-            }
+    function isCheckpointBlocked(currentTime) {
+        if(!checkpointData || !checkpointData.hasCheckpoint || checkpointPassed) return false;
+        if(!checkpointData.checkpointSeconds || checkpointData.checkpointSeconds <= 0) return false;
+        if(typeof currentTime !== 'number' || isNaN(currentTime)) return false;
+        return currentTime >= (checkpointData.checkpointSeconds - 0.25);
+    }
 
-            if(checkpointData.checkpointType === 'quiz') {
-                showInVideoQuizOverlay();
-            } else if(checkpointData.checkpointType === 'code') {
-                showCodeCheckpointNotice();
-            }
+    function checkVideoCheckpoint(currentTime) {
+        if(!checkpointData || !checkpointData.hasCheckpoint || checkpointPassed) return;
+        if(isCheckpointBlocked(currentTime)) {
+            lockVideoAtCheckpoint();
+        }
+    }
+
+    function lockVideoAtCheckpoint() {
+        if(checkpointPassed || !checkpointData) return;
+
+        // Dừng video ngay lập tức và đưa về mốc checkpoint
+        if(player) {
+            if(typeof player.pauseVideo === 'function') player.pauseVideo();
+            if(typeof player.seekTo === 'function') player.seekTo(checkpointData.checkpointSeconds, true);
+        }
+        const html5Vid = document.getElementById('html5-video');
+        if(html5Vid) {
+            html5Vid.pause();
+            html5Vid.currentTime = checkpointData.checkpointSeconds;
+        }
+
+        // Kích hoạt overlay tương ứng để khóa không cho click vào video
+        if(checkpointData.checkpointType === 'quiz') {
+            showInVideoQuizOverlay();
+        } else if(checkpointData.checkpointType === 'code') {
+            showInVideoCodeLockOverlay();
+            showCodeCheckpointNotice();
         }
     }
 
@@ -1001,6 +1081,13 @@
         overlay.style.setProperty('display', 'flex', 'important');
     }
 
+    function showInVideoCodeLockOverlay() {
+        const lockOv = document.getElementById('inVideoCodeLockOverlay');
+        if(lockOv) {
+            lockOv.style.setProperty('display', 'flex', 'important');
+        }
+    }
+
     function verifyInVideoQuiz() {
         const selected = document.querySelector('input[name="ivqOption"]:checked');
         const msgEl = document.getElementById('ivqMessage');
@@ -1026,7 +1113,8 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 questionId: checkpointData.quiz.questionId,
-                selectedOptionId: parseInt(selected.value)
+                selectedOptionId: parseInt(selected.value),
+                lessonId: ${currentLesson.id}
             })
         })
         .then(res => res.json())
@@ -1048,7 +1136,7 @@
                 setTimeout(() => {
                     const ov = document.getElementById('inVideoQuizOverlay');
                     if(ov) ov.style.setProperty('display', 'none', 'important');
-                    if(player && player.playVideo) {
+                    if(player && typeof player.playVideo === 'function') {
                         player.playVideo();
                     }
                     const html5Vid = document.getElementById('html5-video');
@@ -1075,7 +1163,6 @@
                 msgEl.style.background = '#7f1d1d';
                 msgEl.style.color = '#fca5a5';
                 msgEl.innerText = 'Lỗi kết nối máy chủ: ' + err;
-            }
         });
     }
 
@@ -1172,9 +1259,11 @@
 
                     consoleEl.innerHTML = '<span style="color:#34d399; font-weight:bold;">🎉 CHÚC MỪNG! Bạn đã xuất sắc vượt qua toàn bộ Test Cases (' + passed + '/' + total + ').</span>';
                     
+                    const lockOvs = document.querySelectorAll('#inVideoCodeLockOverlay');
+                    lockOvs.forEach(o => o.style.setProperty('display', 'none', 'important'));
                     const notices = document.querySelectorAll('#videoCheckpointNotice');
                     notices.forEach(n => n.style.display = 'none');
-                    if(player && player.playVideo) {
+                    if(player && typeof player.playVideo === 'function') {
                         player.playVideo();
                     }
                     const html5Vid = document.getElementById('html5-video');
@@ -1273,6 +1362,10 @@
     function onPlayerReady(event) {
         // Toggle Play/Pause
         document.getElementById('ytPlayPauseBtn').addEventListener('click', function() {
+            if(player && player.getCurrentTime && isCheckpointBlocked(player.getCurrentTime())) {
+                lockVideoAtCheckpoint();
+                return;
+            }
             var state = player.getPlayerState();
             if (state == YT.PlayerState.PLAYING) {
                 player.pauseVideo();
@@ -1292,11 +1385,18 @@
             }
         });
 
-        // Seek (Tua video)
+        // Seek (Tua video) - CHẶN TUA VƯỢT CHECKPOINT
         document.getElementById('ytProgressBarContainer').addEventListener('click', function(e) {
             var rect = this.getBoundingClientRect();
             var pos = (e.clientX - rect.left) / this.offsetWidth;
-            player.seekTo(pos * player.getDuration());
+            var targetTime = pos * player.getDuration();
+            if (!checkpointPassed && checkpointData && checkpointData.hasCheckpoint && targetTime >= checkpointData.checkpointSeconds) {
+                player.seekTo(checkpointData.checkpointSeconds, true);
+                player.pauseVideo();
+                lockVideoAtCheckpoint();
+                return;
+            }
+            player.seekTo(targetTime);
         });
         
         updateTimeDisplay();
@@ -1304,19 +1404,31 @@
 
     function onPlayerStateChange(event) {
         var playBtn = document.getElementById('ytPlayPauseBtn');
-        if (event.data == YT.PlayerState.PLAYING) {
-            playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            timeUpdater = setInterval(updateTimeDisplay, 500);
+        if (event.data == YT.PlayerState.PLAYING || event.data == YT.PlayerState.BUFFERING) {
+            if (player && player.getCurrentTime && isCheckpointBlocked(player.getCurrentTime())) {
+                lockVideoAtCheckpoint();
+                return;
+            }
+            if (event.data == YT.PlayerState.PLAYING) {
+                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                if (!timeUpdater) {
+                    timeUpdater = setInterval(updateTimeDisplay, 300);
+                }
+            }
         } else {
             playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
             clearInterval(timeUpdater);
+            timeUpdater = null;
         }
     }
 
     function updateTimeDisplay() {
-        if(player && player.getCurrentTime) { checkVideoCheckpoint(player.getCurrentTime()); }
         if(player && player.getCurrentTime) {
             var current = player.getCurrentTime();
+            if (isCheckpointBlocked(current)) {
+                lockVideoAtCheckpoint();
+                return;
+            }
             var duration = player.getDuration();
             
             if (duration > 0) {

@@ -1,5 +1,6 @@
 package com.lms.dao;
 
+import com.lms.model.FileData;
 import com.lms.model.Message;
 import com.lms.util.DBConnection;
 
@@ -12,7 +13,8 @@ import java.util.HashMap;
 public class MessageDAO {
 
     public void insertMessage(Message message) throws SQLException {
-        String sql = "INSERT INTO messages (sender_id, receiver_id, content, sent_at, is_read) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO messages (sender_id, receiver_id, content, sent_at, is_read, file_name, file_type, file_size, file_data) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
@@ -21,6 +23,18 @@ public class MessageDAO {
             ps.setString(3, message.getContent());
             ps.setTimestamp(4, Timestamp.valueOf(message.getSentAt()));
             ps.setBoolean(5, message.isRead());
+            ps.setString(6, message.getFileName());
+            ps.setString(7, message.getFileType());
+            if (message.getFileSize() != null) {
+                ps.setInt(8, message.getFileSize());
+            } else {
+                ps.setNull(8, Types.INTEGER);
+            }
+            if (message.getFileData() != null) {
+                ps.setBytes(9, message.getFileData());
+            } else {
+                ps.setNull(9, Types.BINARY);
+            }
             ps.executeUpdate();
             
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -32,7 +46,8 @@ public class MessageDAO {
     }
 
     public List<Message> getConversation(int user1, int user2, int limit, int offset) throws SQLException {
-        String sql = "SELECT * FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?) " +
+        String sql = "SELECT id, sender_id, receiver_id, content, sent_at, is_read, file_name, file_type, file_size " +
+                     "FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?) " +
                      "ORDER BY sent_at DESC LIMIT ? OFFSET ?";
         List<Message> list = new ArrayList<>();
         try (Connection conn = DBConnection.getConnection();
@@ -54,11 +69,39 @@ public class MessageDAO {
                     m.setContent(rs.getString("content"));
                     m.setSentAt(rs.getTimestamp("sent_at").toLocalDateTime());
                     m.setRead(rs.getBoolean("is_read"));
+                    m.setFileName(rs.getString("file_name"));
+                    m.setFileType(rs.getString("file_type"));
+                    int size = rs.getInt("file_size");
+                    if (!rs.wasNull()) {
+                        m.setFileSize(size);
+                    }
                     list.add(0, m); // add to front so it's chronologically ordered
                 }
             }
         }
         return list;
+    }
+
+    public Message getMessageFile(int messageId) throws SQLException {
+        String sql = "SELECT id, sender_id, receiver_id, file_name, file_type, file_size, file_data FROM messages WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, messageId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Message m = new Message();
+                    m.setId(rs.getInt("id"));
+                    m.setSenderId(rs.getInt("sender_id"));
+                    m.setReceiverId(rs.getInt("receiver_id"));
+                    m.setFileName(rs.getString("file_name"));
+                    m.setFileType(rs.getString("file_type"));
+                    m.setFileSize(rs.getInt("file_size"));
+                    m.setFileData(rs.getBytes("file_data"));
+                    return m;
+                }
+            }
+        }
+        return null;
     }
 
     public void markAsRead(int senderId, int receiverId) throws SQLException {
@@ -99,7 +142,6 @@ public class MessageDAO {
     }
 
     public void deleteMessage(int messageId, int userId) throws SQLException {
-        // Only allow sender or receiver to delete it. To be safe, maybe just allow if it involves them.
         String sql = "DELETE FROM messages WHERE id = ? AND (sender_id = ? OR receiver_id = ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

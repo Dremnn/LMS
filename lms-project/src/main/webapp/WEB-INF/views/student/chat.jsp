@@ -100,6 +100,36 @@
         body.dark-theme .add-contact-form input { background: #111312 !important; border-color: #093C62 !important; color: #FFFFFF !important; }
         body.dark-theme .no-chat-selected { color: #9DB9CB !important; }
         body.dark-theme .no-chat-selected i { color: #093C62 !important; }
+        
+        /* File attachment styles */
+        .chat-file-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            margin-top: 5px;
+            border: 1px solid rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+        }
+        .chat-file-card .file-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+        .chat-file-card .file-action-btn:hover {
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
+        body.dark-theme #filePreviewContainer { background: #182535 !important; border-top-color: #093C62 !important; }
+        body.dark-theme #filePreviewName { color: #FFFFFF !important; }
+        body.dark-theme #filePreviewSize { color: #9DB9CB !important; }
+        body.dark-theme .chat-file-card { border-color: rgba(255,255,255,0.1) !important; }
     </style>
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 </head>
@@ -235,9 +265,47 @@
                     <% if (conversation != null && !conversation.isEmpty()) { 
                         for (Message msg : conversation) {
                             boolean isMine = msg.getSenderId() == currentUser.getId();
+                            boolean hasFile = msg.hasFile();
+                            String fName = msg.getFileName();
+                            String fType = msg.getFileType() != null ? msg.getFileType().toLowerCase() : "";
+                            boolean isImg = hasFile && (fType.startsWith("image/") || (fName != null && fName.matches(".*\\.(png|jpg|jpeg|gif|webp|bmp)$")));
+                            String downloadUrl = request.getContextPath() + "/chat/download?id=" + msg.getId();
+                            String viewUrl = downloadUrl + "&inline=true";
                     %>
                         <div class="message <%= isMine ? "sent" : "received" %>" title="Nhấp chuột trái để xóa tin nhắn này">
-                            <div class="msg-bubble" style="cursor: pointer;" data-msg-id="<%=msg.getId()%>" data-target-id="<%=targetUser.getId()%>" onclick="deleteMessage(this.dataset.msgId, this.dataset.targetId)"><%= msg.getContent() %></div>
+                            <div class="msg-bubble" style="cursor: pointer;" data-msg-id="<%=msg.getId()%>" data-target-id="<%=targetUser.getId()%>" onclick="deleteMessage(this.dataset.msgId, this.dataset.targetId, event)">
+                                <% if (hasFile) { %>
+                                    <% if (isImg) { %>
+                                        <div style="margin-bottom: 6px;">
+                                            <a href="<%= viewUrl %>" target="_blank" onclick="event.stopPropagation();" title="Nhấp để xem ảnh đầy đủ">
+                                                <img src="<%= viewUrl %>" alt="<%= fName %>" style="max-width: 250px; max-height: 200px; border-radius: 8px; display: block; object-fit: cover; border: 1px solid rgba(0,0,0,0.1);" />
+                                            </a>
+                                        </div>
+                                    <% } %>
+                                    <div class="chat-file-card" style="background: <%= isMine ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.06)" %>;" onclick="event.stopPropagation();">
+                                        <i class="fa-solid fa-file-arrow-down" style="font-size: 22px; color: <%= isMine ? "#ffffff" : "#076fa4" %>;"></i>
+                                        <div style="flex: 1; min-width: 0; text-align: left;">
+                                            <div style="font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;" title="<%= fName %>"><%= fName %></div>
+                                            <% if (msg.getFileSize() != null && msg.getFileSize() > 0) { %>
+                                                <div style="font-size: 11px; opacity: 0.8;"><%= String.format("%.1f KB", msg.getFileSize() / 1024.0) %></div>
+                                            <% } %>
+                                        </div>
+                                        <div style="display: flex; gap: 6px; align-items: center;">
+                                            <a href="<%= viewUrl %>" target="_blank" class="file-action-btn" style="color: inherit; background: rgba(0,0,0,0.12);" title="Xem trực tiếp" onclick="event.stopPropagation();">
+                                                <i class="fa-solid fa-eye" style="font-size: 13px;"></i>
+                                            </a>
+                                            <a href="<%= downloadUrl %>" download="<%= fName %>" class="file-action-btn" style="color: inherit; background: rgba(0,0,0,0.12);" title="Tải về máy" onclick="event.stopPropagation();">
+                                                <i class="fa-solid fa-download" style="font-size: 13px;"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <% if (msg.getContent() != null && !msg.getContent().trim().isEmpty() && !msg.getContent().equals(fName)) { %>
+                                        <div style="margin-top: 6px;"><%= msg.getContent() %></div>
+                                    <% } %>
+                                <% } else { %>
+                                    <%= msg.getContent() %>
+                                <% } %>
+                            </div>
                             <div class="msg-time"><%= msg.getSentAt().format(timeFormatter) %></div>
                         </div>
                     <% } } else { %>
@@ -248,20 +316,30 @@
                 </div>
 
                 <div class="chat-input-area">
-                    <form action="<%=request.getContextPath()%>/chat" method="post" id="chatForm">
+                    <div id="filePreviewContainer" style="display:none; padding: 7px 14px; background: #f3f4f6; border-top: 1px solid #e5e7eb; align-items: center; justify-content: space-between; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #374151; overflow: hidden;">
+                            <i class="fa-solid fa-file-lines" style="color: #076fa4; font-size: 16px;"></i>
+                            <span id="filePreviewName" style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px;"></span>
+                            <span id="filePreviewSize" style="font-size: 11px; color: #6b7280;"></span>
+                        </div>
+                        <button type="button" onclick="clearSelectedFile()" style="background: none; border: none; cursor: pointer; color: #ef4444; font-size: 16px; padding: 2px 6px;" title="Hủy file đính kèm">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <form action="<%=request.getContextPath()%>/chat" method="post" id="chatForm" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="targetId" value="<%=targetUser.getId()%>">
-                                                  <div style="position:relative; display:flex; align-items:center;">
-                              <i class="far fa-smile" style="font-size: 24px; color: #9ca3af; cursor: pointer;" id="emojiButton"></i>
-                              <div id="emojiPickerContainer" style="display:none; position:absolute; bottom:40px; left:0; z-index:100; box-shadow:0 -2px 10px rgba(0,0,0,0.1); border-radius:8px;">
-                                  <emoji-picker style="--num-columns: 8; --emoji-size: 1.5rem;"></emoji-picker>
-                              </div>
-                          </div>
-                          <label style="cursor: pointer; margin-right: 5px; display:flex; align-items:center;" title="Đính kèm">
-                              <i class="fas fa-paperclip" style="font-size: 22px; color: #9ca3af;"></i>
-                              <input type="file" id="chatFile" style="display:none;" onchange="if(this.value) { document.querySelector('.chat-input-area input[type=text]').value += ' [Đính kèm: ' + this.files[0].name + ']'; document.getElementById('chatInput').focus(); }">
-                          </label>
-                        <input type="text" id="chatInput" name="content" placeholder="Nhập tin nhắn của bạn..." required autocomplete="off" autofocus>
+                        <div style="position:relative; display:flex; align-items:center;">
+                            <i class="far fa-smile" style="font-size: 24px; color: #9ca3af; cursor: pointer;" id="emojiButton"></i>
+                            <div id="emojiPickerContainer" style="display:none; position:absolute; bottom:40px; left:0; z-index:100; box-shadow:0 -2px 10px rgba(0,0,0,0.1); border-radius:8px;">
+                                <emoji-picker style="--num-columns: 8; --emoji-size: 1.5rem;"></emoji-picker>
+                            </div>
+                        </div>
+                        <label style="cursor: pointer; margin-right: 5px; display:flex; align-items:center;" title="Đính kèm file hoặc ảnh">
+                            <i class="fas fa-paperclip" style="font-size: 22px; color: #9ca3af;"></i>
+                            <input type="file" id="chatFile" name="file" style="display:none;" onchange="handleFileSelect(this)">
+                        </label>
+                        <input type="text" id="chatInput" name="content" placeholder="Nhập tin nhắn của bạn..." autocomplete="off" autofocus>
                         <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i></button>
                     </form>
                 </div>
@@ -294,7 +372,33 @@
             if (form) form.classList.toggle("show");
         }
 
-        function deleteMessage(msgId, targetId) {
+        function handleFileSelect(input) {
+            if (input && input.files && input.files.length > 0) {
+                var file = input.files[0];
+                var preview = document.getElementById('filePreviewContainer');
+                var nameEl = document.getElementById('filePreviewName');
+                var sizeEl = document.getElementById('filePreviewSize');
+                if (preview && nameEl && sizeEl) {
+                    nameEl.innerText = file.name;
+                    sizeEl.innerText = '(' + (file.size / 1024).toFixed(1) + ' KB)';
+                    preview.style.display = 'flex';
+                }
+                var txtInput = document.getElementById('chatInput');
+                if (txtInput) txtInput.focus();
+            }
+        }
+
+        function clearSelectedFile() {
+            var fileInput = document.getElementById('chatFile');
+            if (fileInput) fileInput.value = '';
+            var preview = document.getElementById('filePreviewContainer');
+            if (preview) preview.style.display = 'none';
+        }
+
+        function deleteMessage(msgId, targetId, event) {
+            if (event && event.target && (event.target.closest('a') || event.target.closest('button') || event.target.closest('.chat-file-card'))) {
+                return;
+            }
             if (confirm("Bạn có chắc chắn muốn xóa tin nhắn này không?")) {
                 document.getElementById('delMsgId').value = msgId;
                 document.getElementById('delTargetId').value = targetId;
@@ -315,9 +419,11 @@
 
         function sendChatMessage() {
             var input = document.getElementById('chatInput');
-            if (!input) return;
-            var text = input.value.trim();
-            if (!text) return;
+            var fileInput = document.getElementById('chatFile');
+            var text = input ? input.value.trim() : '';
+            var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+
+            if (!text && !hasFile) return;
 
             var box = document.getElementById('chatMessagesBox');
             var now = new Date();
@@ -327,34 +433,54 @@
             if (box) {
                 var msgDiv = document.createElement('div');
                 msgDiv.className = 'message sent';
-                msgDiv.innerHTML = '<div class="msg-bubble">' + escapeHtml(text) + '</div><div class="msg-time">' + timeStr + '</div>';
+                var bubbleContent = '';
+                if (hasFile) {
+                    var f = fileInput.files[0];
+                    bubbleContent += '<div class="chat-file-card" style="background: rgba(255,255,255,0.15);">' +
+                        '<i class="fa-solid fa-file-arrow-up" style="font-size:20px; color:#ffffff;"></i>' +
+                        '<div style="flex:1; min-width:0; text-align:left;">' +
+                        '<div style="font-weight:600; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escapeHtml(f.name) + '</div>' +
+                        '<div style="font-size:11px; opacity:0.8;">' + (f.size / 1024).toFixed(1) + ' KB (Đang gửi...)</div>' +
+                        '</div></div>';
+                }
+                if (text) {
+                    bubbleContent += '<div style="' + (hasFile ? 'margin-top:6px;' : '') + '">' + escapeHtml(text) + '</div>';
+                }
+                msgDiv.innerHTML = '<div class="msg-bubble">' + bubbleContent + '</div><div class="msg-time">' + timeStr + '</div>';
                 box.appendChild(msgDiv);
                 box.scrollTop = box.scrollHeight;
             }
 
-            // Xóa nội dung ô input ngay lập tức
-            input.value = '';
-            input.focus();
-
-            // Gửi ngầm qua AJAX fetch - Không tải lại trang
+            // Gửi ngầm qua AJAX fetch FormData
             var targetId = '<%= targetUser != null ? targetUser.getId() : 0 %>';
-            var params = new URLSearchParams();
-            params.append('action', 'send');
-            params.append('targetId', targetId);
-            params.append('content', text);
+            var formData = new FormData();
+            formData.append('action', 'send');
+            formData.append('targetId', targetId);
+            if (text) formData.append('content', text);
+            if (hasFile) formData.append('file', fileInput.files[0]);
+
+            // Xóa nội dung ô input ngay lập tức
+            if (input) input.value = '';
+            clearSelectedFile();
+            if (input) input.focus();
 
             fetch('<%=request.getContextPath()%>/chat', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: params.toString()
+                body: formData
             }).then(function(res) {
                 if (!res.ok) {
                     return res.json().then(function(err) {
                         alert(err.message || 'Lỗi gửi tin nhắn');
                     });
+                }
+                // Nếu gửi file, tải lại nhẹ để cập nhật link download ID chính xác từ database
+                if (hasFile) {
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 400);
                 }
             }).catch(function(err) {
                 console.error('Lỗi khi gửi tin nhắn:', err);

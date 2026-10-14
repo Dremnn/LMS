@@ -3,11 +3,14 @@ package com.lms.controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.lms.dao.CodingExerciseDAO;
 import com.lms.dao.LessonDAO;
 import com.lms.dao.QuestionDAO;
 import com.lms.model.AnswerOption;
+import com.lms.model.CodingExercise;
 import com.lms.model.Lesson;
 import com.lms.model.Question;
+import com.lms.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -24,6 +27,7 @@ public class VideoCheckpointServlet extends HttpServlet {
     private final Gson gson = new Gson();
     private final LessonDAO lessonDAO = new LessonDAO();
     private final QuestionDAO questionDAO = new QuestionDAO();
+    private final CodingExerciseDAO exerciseDAO = new CodingExerciseDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -82,12 +86,29 @@ public class VideoCheckpointServlet extends HttpServlet {
                 return;
             }
 
+            User currentUser = (User) req.getSession().getAttribute("currentUser");
+            boolean isPassed = false;
+            if (currentUser != null) {
+                if ("code".equalsIgnoreCase(lesson.getCheckpointType())) {
+                    CodingExercise ex = exerciseDAO.findByLessonId(lesson.getId());
+                    if (ex != null && exerciseDAO.hasStudentPassed(ex.getId(), currentUser.getId())) {
+                        isPassed = true;
+                    }
+                } else if ("quiz".equalsIgnoreCase(lesson.getCheckpointType())) {
+                    Boolean quizPassed = (Boolean) req.getSession().getAttribute("checkpoint_quiz_passed_" + lesson.getId());
+                    if (Boolean.TRUE.equals(quizPassed)) {
+                        isPassed = true;
+                    }
+                }
+            }
+
             JsonObject res = new JsonObject();
             res.addProperty("success", true);
             res.addProperty("hasCheckpoint", true);
             res.addProperty("checkpointSeconds", lesson.getVideoCheckpointSeconds());
             res.addProperty("checkpointType", lesson.getCheckpointType() != null ? lesson.getCheckpointType() : "code");
             res.addProperty("checkpointRefId", lesson.getCheckpointRefId());
+            res.addProperty("isPassed", isPassed);
 
             if ("quiz".equalsIgnoreCase(lesson.getCheckpointType()) && lesson.getCheckpointRefId() != null) {
                 Question question = questionDAO.findById(lesson.getCheckpointRefId());
@@ -137,6 +158,7 @@ public class VideoCheckpointServlet extends HttpServlet {
                 JsonObject reqJson = gson.fromJson(sb.toString(), JsonObject.class);
                 int questionId = reqJson.get("questionId").getAsInt();
                 int selectedOptionId = reqJson.get("selectedOptionId").getAsInt();
+                int lessonId = reqJson.has("lessonId") ? reqJson.get("lessonId").getAsInt() : 0;
 
                 Question question = questionDAO.findById(questionId);
                 List<AnswerOption> options = questionDAO.findOptionsByQuestionId(questionId);
@@ -153,6 +175,9 @@ public class VideoCheckpointServlet extends HttpServlet {
                 result.addProperty("success", true);
                 result.addProperty("isCorrect", isCorrect);
                 if (isCorrect) {
+                    if (lessonId > 0) {
+                        req.getSession().setAttribute("checkpoint_quiz_passed_" + lessonId, true);
+                    }
                     String exp = (question != null && question.getExplanation() != null && !question.getExplanation().trim().isEmpty())
                             ? question.getExplanation()
                             : "Tuyệt vời! Bạn đã chọn đáp án hoàn toàn chính xác.";

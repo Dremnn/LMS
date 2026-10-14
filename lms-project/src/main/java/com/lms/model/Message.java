@@ -9,6 +9,10 @@ public class Message {
     private String content;
     private LocalDateTime sentAt;
     private boolean isRead;
+    private String fileName;
+    private String fileType;
+    private Integer fileSize;
+    private byte[] fileData;
 
     public Message() {}
 
@@ -38,4 +42,20 @@ public class Message {
 
     public boolean isRead() { return isRead; }
     public void setRead(boolean read) { isRead = read; }
+
+    public String getFileName() { return fileName; }
+    public void setFileName(String fileName) { this.fileName = fileName; }
+
+    public String getFileType() { return fileType; }
+    public void setFileType(String fileType) { this.fileType = fileType; }
+
+    public Integer getFileSize() { return fileSize; }
+    public void setFileSize(Integer fileSize) { this.fileSize = fileSize; }
+
+    public byte[] getFileData() { return fileData; }
+    public void setFileData(byte[] fileData) { this.fileData = fileData; }
+
+    public boolean hasFile() {
+        return fileName != null && !fileName.trim().isEmpty();
+    }
 }

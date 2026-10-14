@@ -17,14 +17,25 @@ public class MessageService {
     // ---------------- MESSAGES ----------------
 
     public void sendMessage(int senderId, int receiverId, String content) throws SQLException {
-        // You might want to check privacy settings here (e.g. only contacts can message)
+        sendMessage(senderId, receiverId, content, null, null, null, null);
+    }
+
+    public void sendMessage(int senderId, int receiverId, String content, String fileName, String fileType, Integer fileSize, byte[] fileData) throws SQLException {
         Message message = new Message();
         message.setSenderId(senderId);
         message.setReceiverId(receiverId);
         message.setContent(content);
         message.setSentAt(LocalDateTime.now());
         message.setRead(false);
+        message.setFileName(fileName);
+        message.setFileType(fileType);
+        message.setFileSize(fileSize);
+        message.setFileData(fileData);
         messageDAO.insertMessage(message);
+    }
+
+    public Message getMessageFile(int messageId) throws SQLException {
+        return messageDAO.getMessageFile(messageId);
     }
 
     public List<Message> getConversation(int userId1, int userId2, int limit, int offset) throws SQLException {

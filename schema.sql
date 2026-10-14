@@ -1,4 +1,4 @@
-﻿DROP TRIGGER IF EXISTS trg_lesson_update_total_lessons ON lessons;
+DROP TRIGGER IF EXISTS trg_lesson_update_total_lessons ON lessons;
 CREATE TRIGGER trg_lesson_update_total_lessons
 AFTER INSERT OR DELETE OR UPDATE OF section_id ON lessons
 FOR EACH ROW EXECUTE FUNCTION trg_lesson_update_total_lessons_fn();
@@ -37,7 +37,11 @@ CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
-    content TEXT NOT NULL,
+    content TEXT,
+    file_name VARCHAR(255),
+    file_type VARCHAR(100),
+    file_size INT,
+    file_data BYTEA,
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_read BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
