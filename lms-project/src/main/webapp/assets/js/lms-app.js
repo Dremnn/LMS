@@ -208,8 +208,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 // ---------- Unread Chat Badge & Notification Dropdown ----------
     const chatBtn = document.querySelector('a.quick-action-btn[href$="/chat"]');
     const notifBtn = document.querySelector('a.quick-action-btn[href$="/notifications"]');
-    let basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
-    if (basePath === "" || basePath === "/") basePath = "/LMS"; // Default context
+
+    // Xác định chính xác context path ứng dụng từ href của các nút trên navbar
+    let basePath = '';
+    if (notifBtn && notifBtn.getAttribute('href')) {
+        const href = notifBtn.getAttribute('href');
+        const idx = href.lastIndexOf('/notifications');
+        if (idx !== -1) {
+            basePath = href.substring(0, idx);
+        }
+    } else if (chatBtn && chatBtn.getAttribute('href')) {
+        const href = chatBtn.getAttribute('href');
+        const idx = href.lastIndexOf('/chat');
+        if (idx !== -1) {
+            basePath = href.substring(0, idx);
+        }
+    } else {
+        const path = window.location.pathname;
+        const slashIdx = path.indexOf('/', 1);
+        if (slashIdx !== -1) {
+            const firstSegment = path.substring(1, slashIdx);
+            if (!['courses', 'instructor', 'student', 'admin', 'chat', 'notifications', 'login', 'register', 'profile', 'wallet', 'dashboard', 'report-issue.jsp'].includes(firstSegment)) {
+                basePath = '/' + firstSegment;
+            }
+        }
+    }
 
     if (chatBtn || notifBtn) {
         fetch(window.location.origin + basePath + '/api/chat/unread')
@@ -282,7 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Lấy tọa độ của nút chuông
             const rect = notifBtn.getBoundingClientRect();
             dropdown.style.top = (rect.bottom + window.scrollY + 10) + 'px';
-            dropdown.style.left = rect.left + 'px'; // Căn mép trái dropdown bằng mép trái button
+            dropdown.style.left = Math.max(10, Math.min(window.innerWidth - 330, rect.left)) + 'px'; // Căn mép trái dropdown không vượt quá màn hình
             
             dropdown.style.width = '320px';
             dropdown.style.background = document.body.classList.contains('dark-theme') ? '#182535' : '#ffffff';
@@ -330,9 +353,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 })
                 .catch(err => {
-                    dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #e53e3e; font-size: 13px;">Lỗi tải thông báo.</div>';
+                    dropdown.innerHTML = '<div style="padding: 15px; text-align: center; color: #e53e3e; font-size: 13px;">Lỗi tải thông báo. <a href="' + basePath + '/notifications" style="display:block;margin-top:6px;color:#3182ce;font-weight:600;">Xem tất cả thông báo</a></div>';
                 });
-                // Close dropdown when clicking outside
+            // Close dropdown when clicking outside
             setTimeout(() => {
                 document.addEventListener('click', function closeDropdown(e) {
                     if (!notifBtn.contains(e.target) && !dropdown.contains(e.target)) {

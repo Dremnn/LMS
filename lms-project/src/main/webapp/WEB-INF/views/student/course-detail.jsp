@@ -355,11 +355,10 @@
                             </div>
                         </div>
                     <% } else { %>
-                        <!-- Form ĐĂNG KÝ HỌC NGAY (POST về /enrollments/new -> EnrollmentServlet -> EnrollmentService.enroll) -->
-                        <form action="${pageContext.request.contextPath}/enrollments/new" method="post" style="display:inline;">
-                            <input type="hidden" name="courseId" value="${course.id}" />
-                            <button type="submit" class="btn-enroll"><i class="fa-solid fa-rocket"></i> Đăng ký học ngay</button>
-                        </form>
+                        <!-- Nút Mở Modal Xác Nhận Đăng Ký Học -->
+                        <button type="button" class="btn-enroll" onclick="openEnrollConfirmModal()">
+                            <i class="fa-solid fa-rocket"></i> Đăng ký học ngay
+                        </button>
                     <% } %>
                 </c:otherwise>
             </c:choose>
@@ -645,6 +644,69 @@
     </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- MODAL XÁC NHẬN ĐĂNG KÝ KHÓA HỌC -->
+<!-- ========================================================================= -->
+<div id="enrollConfirmModal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:18px; max-width:480px; width:90%; padding:28px 32px; box-shadow:0 20px 60px rgba(0,0,0,0.25); text-align:left; animation: modalPop 0.25s ease;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:rgba(7,111,164,0.12); color:#076FA4; display:flex; align-items:center; justify-content:center; font-size:18px;">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3 style="font-size:18px; font-weight:800; color:#093C62; margin:0;">Xác nhận đăng ký khóa học</h3>
+            </div>
+            <button type="button" onclick="closeEnrollConfirmModal()" style="background:none; border:none; font-size:20px; color:#94A3B8; cursor:pointer;">&times;</button>
+        </div>
+
+        <p style="font-size:14px; color:#475569; line-height:1.6; margin-bottom:16px;">
+            Bạn đang thực hiện đăng ký tham gia khóa học:
+        </p>
+
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:16px; margin-bottom:20px;">
+            <div style="font-weight:700; color:#0F172A; font-size:15px; margin-bottom:8px;"><c:out value="${course.title}"/></div>
+            <div style="font-size:13px; color:#64748B; margin-bottom:4px;">
+                <i class="fa-solid fa-chalkboard-user"></i> Giảng viên: <strong><c:out value="${course.instructorName}"/></strong>
+            </div>
+            <div style="font-size:13px; color:#64748B;">
+                <i class="fa-solid fa-tag"></i> Học phí: 
+                <strong style="color: ${course.price > 0 ? '#076FA4' : '#10B981'}; font-size:14px;">
+                    <c:choose>
+                        <c:when test="${course.price == 0 || course.price == null}">Miễn phí</c:when>
+                        <c:otherwise>${course.price} đ</c:otherwise>
+                    </c:choose>
+                </strong>
+            </div>
+        </div>
+
+        <c:if test="${currentUser != null && course.price > 0}">
+            <div style="font-size:13px; color:#475569; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px;">
+                <span><i class="fa-solid fa-wallet" style="color:#076FA4;"></i> Số dư ví hiện tại:</span>
+                <strong style="color:#093C62;"><%= (currentUser != null && currentUser.getBalance() != null ? String.format(java.util.Locale.US, "%,dđ", currentUser.getBalance().longValue()) : "0đ") %></strong>
+            </div>
+        </c:if>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+            <button type="button" onclick="closeEnrollConfirmModal()" class="btn" style="background:#F1F5F9; color:#475569; border:none; padding:11px 22px; border-radius:10px; font-weight:600; cursor:pointer;">
+                Hủy bỏ
+            </button>
+            <form action="${pageContext.request.contextPath}/enrollments/new" method="post" style="display:inline; margin:0;">
+                <input type="hidden" name="courseId" value="${course.id}" />
+                <button type="submit" class="btn" style="background:linear-gradient(135deg,#076FA4,#093C62); color:#fff; border:none; padding:11px 24px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-check"></i> Xác nhận đăng ký
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes modalPop {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+
 <!-- Dynamic Island Theme Toggle (Lưu tùy chọn vào Cookie 365 ngày) -->
 <div class="theme-toggle-island" id="themeToggle" title="Chuyển chế độ giao diện">
     <div class="toggle-icon sun-icon"><i class="fa-solid fa-sun"></i></div>
@@ -656,6 +718,16 @@
     document.querySelectorAll('.progress-bar-fill[data-progress]').forEach(function (fill) {
         fill.style.width = fill.dataset.progress + '%';
     });
+
+    function openEnrollConfirmModal() {
+        const modal = document.getElementById('enrollConfirmModal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeEnrollConfirmModal() {
+        const modal = document.getElementById('enrollConfirmModal');
+        if (modal) modal.style.display = 'none';
+    }
 
     function toggleLessonDesc(lessonId, btn) {
         const el = document.getElementById('lesson-desc-' + lessonId);

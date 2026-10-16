@@ -12,7 +12,7 @@ public class NotificationDAO {
     public List<Notification> findByUser(int userId, int limit) {
         List<Notification> list = new ArrayList<>();
         String sql = "SELECT id, user_id, type, title, message, related_url, is_read, created_at " +
-                     "FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?";
+                     "FROM notifications WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

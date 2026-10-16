@@ -588,3 +588,20 @@ CREATE TABLE student_code_submissions (
     output_message TEXT,
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ==========================================
+-- BÌNH LUẬN & HỎI ĐÁP BÀI HỌC (LESSON COMMENTS / Q&A)
+-- ==========================================
+
+CREATE TABLE lesson_comments (
+    id SERIAL PRIMARY KEY,
+    lesson_id INT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    parent_id INT REFERENCES lesson_comments(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_lesson_comments_lesson ON lesson_comments(lesson_id);
+CREATE INDEX idx_lesson_comments_parent ON lesson_comments(parent_id);
+

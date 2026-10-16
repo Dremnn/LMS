@@ -1449,6 +1449,576 @@
 </script>
 </c:if>
 
+<!-- ========================================================================= -->
+<!-- NÚT ICON NỔI MỞ BÌNH LUẬN & HỎI ĐÁP BÀI HỌC (FLOATING BUTTON) -->
+<!-- ========================================================================= -->
+<button id="openCommentsBtn" onclick="toggleCommentsDrawer()" class="floating-comments-btn" title="Hỏi đáp & Thảo luận bài học">
+    <i class="fa-solid fa-comments"></i>
+    <span class="floating-comments-badge" id="commentsCountBadge">0</span>
+</button>
+
+<!-- ========================================================================= -->
+<!-- KHUNG BÌNH LUẬN TRƯỢT TỪ BÊN PHẢI (SLIDE-OUT COMMENTS DRAWER) -->
+<!-- ========================================================================= -->
+<div id="commentsDrawerOverlay" class="comments-drawer-overlay" onclick="toggleCommentsDrawer()"></div>
+
+<div id="commentsDrawer" class="comments-drawer">
+    <!-- Header của Drawer -->
+    <div class="comments-drawer-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:10px; background:rgba(7,111,164,0.12); color:#076FA4; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+            <div>
+                <h3 style="font-size:16px; font-weight:800; color:#093C62; margin:0;">Hỏi đáp & Thảo luận</h3>
+                <span style="font-size:12px; color:#64748B;">Bài học: <c:out value="${currentLesson.title}"/></span>
+            </div>
+        </div>
+        <button type="button" onclick="toggleCommentsDrawer()" class="comments-drawer-close">&times;</button>
+    </div>
+
+    <!-- Danh sách câu hỏi & thảo luận -->
+    <div class="comments-drawer-body" id="commentsContainer">
+        <div style="text-align:center; padding:40px 20px; color:#94A3B8;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:24px; margin-bottom:10px;"></i>
+            <p style="margin:0; font-size:13px;">Đang tải thảo luận...</p>
+        </div>
+    </div>
+
+    <!-- Form gửi bình luận câu hỏi mới -->
+    <div class="comments-drawer-footer">
+        <div id="replyingNotice" style="display:none; justify-content:space-between; align-items:center; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; padding:6px 12px; margin-bottom:8px; font-size:12px; color:#1E40AF;">
+            <span><i class="fa-solid fa-reply"></i> Đang trả lời <strong id="replyingToName">...</strong></span>
+            <button type="button" onclick="cancelReply()" style="background:none; border:none; color:#EF4444; font-weight:700; cursor:pointer;">&times; Hủy</button>
+        </div>
+        <form id="commentForm" onsubmit="submitComment(event)" style="display:flex; gap:8px;">
+            <input type="hidden" id="replyParentId" value="" />
+            <input type="text" id="commentInput" placeholder="Viết câu hỏi hoặc chia sẻ thắc mắc..." 
+                   required maxlength="1000" autocomplete="off" class="comment-input-box" />
+            <button type="submit" id="btnSendComment" class="comment-send-btn" title="Gửi câu hỏi">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Nút tròn nổi mở bình luận */
+.floating-comments-btn {
+    position: fixed;
+    right: 24px;
+    bottom: 28px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #076FA4, #093C62);
+    color: #fff;
+    border: none;
+    box-shadow: 0 8px 24px rgba(7, 111, 164, 0.35);
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 998;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.floating-comments-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 28px rgba(7, 111, 164, 0.45);
+}
+.floating-comments-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #EF4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    border: 2px solid #fff;
+}
+
+/* Overlay làm mờ nền */
+.comments-drawer-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 9998;
+}
+.comments-drawer-overlay.active {
+    display: block;
+}
+
+/* Khung Side Drawer trượt ra từ bên phải */
+.comments-drawer {
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    max-width: 90vw;
+    height: 100vh;
+    background: #FFFFFF;
+    box-shadow: -8px 0 32px rgba(15, 23, 42, 0.15);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.comments-drawer.open {
+    right: 0;
+}
+
+.comments-drawer-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid #E2E8F0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F8FAFC;
+}
+.comments-drawer-close {
+    background: none;
+    border: none;
+    font-size: 26px;
+    color: #94A3B8;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+}
+.comments-drawer-close:hover {
+    color: #0F172A;
+}
+
+.comments-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.comment-card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: background 0.15s;
+}
+.comment-card:hover {
+    background: #F1F5F9;
+}
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.comment-author-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #E2E8F0;
+}
+.comment-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #076FA4, #093C62);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+.comment-author-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0F172A;
+}
+.comment-role-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 12px;
+}
+.role-badge-instructor {
+    background: #FEF3C7;
+    color: #B45309;
+    border: 1px solid #FDE68A;
+}
+.role-badge-student {
+    background: #E0F2FE;
+    color: #0369A1;
+}
+.role-badge-admin {
+    background: #FEE2E2;
+    color: #B91C1C;
+}
+
+.comment-text {
+    font-size: 13.5px;
+    color: #334155;
+    line-height: 1.55;
+    word-break: break-word;
+    margin: 0;
+}
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: #64748B;
+    margin-top: 2px;
+}
+.comment-action-btn {
+    background: none;
+    border: none;
+    color: #076FA4;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.comment-action-btn:hover {
+    text-decoration: underline;
+}
+.comment-delete-btn {
+    color: #EF4444;
+}
+
+/* Luồng trả lời con (Replies) */
+.replies-thread {
+    margin-left: 18px;
+    padding-left: 14px;
+    border-left: 2px solid #CBD5E1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* Footer & ô nhập */
+.comments-drawer-footer {
+    padding: 14px 18px;
+    border-top: 1px solid #E2E8F0;
+    background: #FFFFFF;
+}
+.comment-input-box {
+    flex: 1;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 20px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.comment-input-box:focus {
+    border-color: #076FA4;
+}
+.comment-send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #076FA4;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: background 0.15s, transform 0.15s;
+    flex-shrink: 0;
+}
+.comment-send-btn:hover {
+    background: #093C62;
+    transform: scale(1.05);
+}
+
+/* Dark Theme support */
+body.dark-theme .comments-drawer {
+    background: #182535;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.4);
+}
+body.dark-theme .comments-drawer-header {
+    background: #111312;
+    border-bottom-color: #093C62;
+}
+body.dark-theme .comments-drawer-header h3 {
+    color: #FFFFFF !important;
+}
+body.dark-theme .comment-card {
+    background: #111312;
+    border-color: #093C62;
+}
+body.dark-theme .comment-author-name {
+    color: #FFFFFF;
+}
+body.dark-theme .comment-text {
+    color: #CBD5E1;
+}
+body.dark-theme .comments-drawer-footer {
+    background: #182535;
+    border-top-color: #093C62;
+}
+body.dark-theme .comment-input-box {
+    background: #111312;
+    border-color: #093C62;
+    color: #FFFFFF;
+}
+</style>
+
+<script>
+const currentLessonId = ${currentLesson.id};
+const currentUserId = ${currentUser != null ? currentUser.id : -1};
+const currentUserRole = '${currentUser != null ? currentUser.role : ""}';
+
+function toggleCommentsDrawer() {
+    const drawer = document.getElementById('commentsDrawer');
+    const overlay = document.getElementById('commentsDrawerOverlay');
+    if (!drawer) return;
+
+    if (drawer.classList.contains('open')) {
+        drawer.classList.remove('open');
+        overlay.classList.remove('active');
+    } else {
+        drawer.classList.add('open');
+        overlay.classList.add('active');
+        loadComments();
+    }
+}
+
+function loadComments() {
+    fetch('${pageContext.request.contextPath}/lesson-comments?lessonId=' + currentLessonId)
+        .then(res => res.json())
+        .then(comments => {
+            renderComments(comments);
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById('commentsContainer').innerHTML = 
+                '<div style="text-align:center; padding:30px; color:#EF4444;"><i class="fa-solid fa-triangle-exclamation"></i> Không thể tải bình luận.</div>';
+        });
+}
+
+function renderComments(comments) {
+    const container = document.getElementById('commentsContainer');
+    const badge = document.getElementById('commentsCountBadge');
+    
+    let totalCount = 0;
+    comments.forEach(function(c) {
+        totalCount++;
+        if (c.replies) totalCount += c.replies.length;
+    });
+    badge.innerText = totalCount;
+
+    if (!comments || comments.length === 0) {
+        container.innerHTML = 
+            '<div style="text-align:center; padding:50px 20px; color:#94A3B8;">' +
+                '<div style="font-size:36px; margin-bottom:12px; color:#CBD5E1;"><i class="fa-regular fa-comments"></i></div>' +
+                '<h4 style="margin:0 0 6px 0; color:#64748B; font-size:15px;">Chưa có câu hỏi nào</h4>' +
+                '<p style="margin:0; font-size:13px;">Hãy là người đầu tiên đặt câu hỏi hoặc chia sẻ về bài học này!</p>' +
+            '</div>';
+        return;
+    }
+
+    let html = '';
+    comments.forEach(function(c) {
+        html += renderSingleComment(c, false);
+    });
+    container.innerHTML = html;
+}
+
+function renderSingleComment(c, isReply) {
+    const isOwner = (currentUserId === c.userId);
+    const canDelete = isOwner || currentUserRole === 'admin' || currentUserRole === 'instructor';
+
+    let roleBadge = '';
+    if (c.userRole === 'instructor') {
+        roleBadge = '<span class="comment-role-badge role-badge-instructor"><i class="fa-solid fa-chalkboard-user"></i> Giảng viên</span>';
+    } else if (c.userRole === 'admin') {
+        roleBadge = '<span class="comment-role-badge role-badge-admin"><i class="fa-solid fa-shield-halved"></i> Quản trị</span>';
+    } else {
+        roleBadge = '<span class="comment-role-badge role-badge-student">Học viên</span>';
+    }
+
+    let avatarHtml = '';
+    if (c.userAvatar && c.userAvatar.trim() !== '') {
+        avatarHtml = '<img src="' + c.userAvatar + '" class="comment-avatar" onerror="this.outerHTML=\'<div class=\\\'comment-avatar-placeholder\\\'>' + (c.userName ? c.userName.charAt(0).toUpperCase() : 'U') + '</div>\'" />';
+    } else {
+        avatarHtml = '<div class="comment-avatar-placeholder">' + (c.userName ? c.userName.charAt(0).toUpperCase() : 'U') + '</div>';
+    }
+
+    let repliesHtml = '';
+    if (c.replies && c.replies.length > 0) {
+        repliesHtml += '<div class="replies-thread">';
+        c.replies.forEach(function(rep) {
+            repliesHtml += renderSingleComment(rep, true);
+        });
+        repliesHtml += '</div>';
+    }
+
+    let replyBtnHtml = '';
+    if (!isReply) {
+        replyBtnHtml = '<button type="button" class="comment-action-btn" onclick="startReply(' + c.id + ', \'' + escapeHtml(c.userName) + '\')"><i class="fa-solid fa-reply"></i> Trả lời</button>';
+    }
+
+    let deleteBtnHtml = '';
+    if (canDelete) {
+        deleteBtnHtml = '<button type="button" class="comment-action-btn comment-delete-btn" onclick="deleteComment(' + c.id + ')"><i class="fa-solid fa-trash-can"></i> Xóa</button>';
+    }
+
+    return '<div class="comment-card" id="comment-item-' + c.id + '">' +
+        '<div class="comment-header">' +
+            '<div class="comment-author-info">' +
+                avatarHtml +
+                '<div>' +
+                    '<div style="display:flex; align-items:center; gap:6px;">' +
+                        '<span class="comment-author-name">' + escapeHtml(c.userName) + '</span>' +
+                        roleBadge +
+                    '</div>' +
+                    '<span style="font-size:11px; color:#94A3B8;">' + c.createdAtFormatted + '</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        '<p class="comment-text">' + escapeHtml(c.content) + '</p>' +
+        '<div class="comment-actions">' +
+            replyBtnHtml +
+            deleteBtnHtml +
+        '</div>' +
+        repliesHtml +
+    '</div>';
+}
+
+function startReply(commentId, authorName) {
+    document.getElementById('replyParentId').value = commentId;
+    document.getElementById('replyingToName').innerText = authorName;
+    document.getElementById('replyingNotice').style.display = 'flex';
+    const input = document.getElementById('commentInput');
+    input.focus();
+    input.placeholder = 'Trả lời ' + authorName + '...';
+}
+
+function cancelReply() {
+    document.getElementById('replyParentId').value = '';
+    document.getElementById('replyingNotice').style.display = 'none';
+    const input = document.getElementById('commentInput');
+    input.placeholder = 'Viết câu hỏi hoặc chia sẻ thắc mắc...';
+}
+
+function submitComment(e) {
+    e.preventDefault();
+    const input = document.getElementById('commentInput');
+    const content = input.value.trim();
+    const parentId = document.getElementById('replyParentId').value;
+
+    if (!content) return;
+
+    const btn = document.getElementById('btnSendComment');
+    btn.disabled = true;
+
+    const formData = new URLSearchParams();
+    formData.append('lessonId', currentLessonId);
+    formData.append('content', content);
+    if (parentId) formData.append('parentId', parentId);
+
+    fetch('${pageContext.request.contextPath}/lesson-comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        if (data.success) {
+            input.value = '';
+            cancelReply();
+            loadComments();
+        } else {
+            alert(data.message || 'Lỗi gửi bình luận!');
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        console.error(err);
+        alert('Lỗi kết nối máy chủ!');
+    });
+}
+
+function deleteComment(commentId) {
+    if (!confirm('Bạn có chắc muốn xóa bình luận này không?')) return;
+
+    const formData = new URLSearchParams();
+    formData.append('commentId', commentId);
+
+    fetch('${pageContext.request.contextPath}/lesson-comments/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            loadComments();
+        } else {
+            alert(data.message || 'Không thể xóa bình luận!');
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Tự động load số lượng bình luận ngay khi mở bài học
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('${pageContext.request.contextPath}/lesson-comments?lessonId=' + currentLessonId)
+        .then(res => res.json())
+        .then(comments => {
+            let totalCount = 0;
+            comments.forEach(c => {
+                totalCount++;
+                if (c.replies) totalCount += c.replies.length;
+            });
+            document.getElementById('commentsCountBadge').innerText = totalCount;
+        })
+        .catch(err => console.log('Comments count load error', err));
+});
+</script>
+
 </body>
 </html>
 

@@ -94,8 +94,45 @@ public class EnrollmentService {
             }
         }
 
-        // Lưu ý: total_students của course được Trigger trg_enrollment_update_total_students
-        // tự động cập nhật trong SQL Server ngay khi INSERT enrollment - không cần code thêm ở đây
+        // Gửi thông báo hệ thống đến Học viên và Giảng viên
+        try {
+            com.lms.dao.NotificationDAO notificationDAO = new com.lms.dao.NotificationDAO();
+
+            BigDecimal coursePrice = course.getPrice();
+            boolean isFree = (coursePrice == null || coursePrice.compareTo(BigDecimal.ZERO) == 0);
+            String priceFormatted = isFree ? "Miễn phí" : String.format(java.util.Locale.US, "%,dđ", coursePrice.longValue());
+
+            String studentName = (student.getFullName() != null && !student.getFullName().trim().isEmpty())
+                    ? student.getFullName().trim()
+                    : student.getEmail();
+
+            // 1. Thông báo cho Học viên (ghi rõ học phí đã đăng ký)
+            com.lms.model.Notification notifStudent = new com.lms.model.Notification(
+                studentId,
+                "enrollment",
+                "Đăng ký thành công khóa học: " + course.getTitle(),
+                "Chúc mừng bạn đã ghi danh thành công khóa học '" + course.getTitle() 
+                    + "' với học phí: " + priceFormatted + ". Hãy bắt đầu bài học đầu tiên ngay nhé!",
+                "/courses/detail?id=" + courseId
+            );
+            notificationDAO.save(notifStudent);
+
+            // 2. Thông báo cho Giảng viên sở hữu khóa học
+            int instructorId = course.getInstructorId();
+            if (instructorId > 0) {
+                com.lms.model.Notification notifInstructor = new com.lms.model.Notification(
+                    instructorId,
+                    "enrollment",
+                    "Học viên mới đăng ký: " + course.getTitle(),
+                    "Học viên " + studentName + " vừa đăng ký tham gia khóa học '" + course.getTitle() 
+                        + "' của bạn với mức phí: " + priceFormatted + ".",
+                    "/instructor/courses/manage?id=" + courseId
+                );
+                notificationDAO.save(notifInstructor);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return enrollment;
     }
