@@ -231,7 +231,7 @@
                         </c:forEach>
                     </div>
                     <div class="question-footer" style="display:flex; justify-content:flex-end; gap:8px;">
-                        <button type="button" class="btn-action-sm" onclick="openEditQuestionModal(${question.id})">
+                        <button type="button" class="btn-action-sm" data-id="${question.id}" onclick="openEditQuestionModal(this.dataset.id)">
                             <i class="fa-solid fa-pen-to-square"></i> Sửa câu hỏi
                         </button>
                         <form action="${pageContext.request.contextPath}/instructor/quizzes/questions/delete"

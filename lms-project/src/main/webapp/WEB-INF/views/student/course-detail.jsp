@@ -670,7 +670,7 @@
             </div>
             <div style="font-size:13px; color:#64748B;">
                 <i class="fa-solid fa-tag"></i> Học phí: 
-                <strong style="color: ${course.price > 0 ? '#076FA4' : '#10B981'}; font-size:14px;">
+                <strong style="--c: ${course.price > 0 ? '#076FA4' : '#10B981'}; color: var(--c); font-size:14px;">
                     <c:choose>
                         <c:when test="${course.price == 0 || course.price == null}">Miễn phí</c:when>
                         <c:otherwise>${course.price} đ</c:otherwise>

@@ -72,6 +72,8 @@
         .meta-row{display:flex;justify-content:space-between;font-size:14px;}
         .meta-row .label{color:#5C7688;}
         .meta-row .value{font-weight:600;color:#093C62;}
+        .meta-row .value.passed{color:#047857;font-size:16px;}
+        .meta-row .value.failed{color:#B91C1C;font-size:16px;}
         .result-actions{padding:24px 36px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
         .btn-back{padding:11px 24px;background:#E2EEF5;color:#093C62;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;}
         .btn-back:hover{background:#C6D8E3;}
@@ -131,6 +133,8 @@
         body.dark-theme .result-meta{background:#111312;border-top-color:#093C62;}
         body.dark-theme .meta-row .label{color:#9DB9CB;}
         body.dark-theme .meta-row .value{color:#F4F8FA;}
+        body.dark-theme .meta-row .value.passed{color:#34D399;}
+        body.dark-theme .meta-row .value.failed{color:#F87171;}
         body.dark-theme .btn-back{background:#093C62;color:#F4F8FA;}
         body.dark-theme .btn-back:hover{background:#076FA4;}
     </style>
@@ -259,7 +263,7 @@
             </div>
             <div class="meta-row">
                 <span class="label"><i class="fa-solid fa-chart-line"></i> Điểm của bạn</span>
-                <span class="value" style="color:${attempt.passed ? '#276749' : '#9b2c2c'};font-size:16px;">${attempt.score}/100</span>
+                <span class="value ${attempt.passed ? 'passed' : 'failed'}">${attempt.score}/100</span>
             </div>
             <div class="meta-row">
                 <span class="label"><i class="fa-regular fa-clock"></i> Thời gian nộp</span>

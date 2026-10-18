@@ -112,6 +112,11 @@
             border: 1px solid rgba(0,0,0,0.06);
             transition: all 0.2s ease;
         }
+        .message.sent .chat-file-card { background: rgba(255,255,255,0.15); }
+        .message.received .chat-file-card { background: rgba(0,0,0,0.06); }
+        .message.sent .chat-file-card .file-icon { font-size: 22px; color: #ffffff; }
+        .message.received .chat-file-card .file-icon { font-size: 22px; color: #076fa4; }
+        body.dark-theme .message.received .chat-file-card .file-icon { color: #38bdf8; }
         .chat-file-card .file-action-btn {
             display: inline-flex;
             align-items: center;
@@ -282,8 +287,8 @@
                                             </a>
                                         </div>
                                     <% } %>
-                                    <div class="chat-file-card" style="background: <%= isMine ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.06)" %>;" onclick="event.stopPropagation();">
-                                        <i class="fa-solid fa-file-arrow-down" style="font-size: 22px; color: <%= isMine ? "#ffffff" : "#076fa4" %>;"></i>
+                                    <div class="chat-file-card" onclick="event.stopPropagation();">
+                                        <i class="fa-solid fa-file-arrow-down file-icon"></i>
                                         <div style="flex: 1; min-width: 0; text-align: left;">
                                             <div style="font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;" title="<%= fName %>"><%= fName %></div>
                                             <% if (msg.getFileSize() != null && msg.getFileSize() > 0) { %>

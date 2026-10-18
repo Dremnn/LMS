@@ -115,7 +115,7 @@
                         </div>
                     </label>
                 </div>
-                <div id="sectionIdWrap" style="${formAttachType == 'section' ? 'display:block;' : 'display:none;'}">
+                <div id="sectionIdWrap" style="--d: ${formAttachType == 'section' ? 'block' : 'none'}; display: var(--d);">
                     <label for="sectionId">Chọn chương muốn gắn *</label>
                     <select id="sectionId" name="sectionId" ${formAttachType == 'section' ? 'required' : ''}>
                         <option value="">-- Chọn một chương --</option>

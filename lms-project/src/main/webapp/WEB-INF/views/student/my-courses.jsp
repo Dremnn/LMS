@@ -563,11 +563,11 @@
                             <div class="progress-wrap">
                                 <div class="progress-label">
                                     <span>Tiến độ học tập</span>
-                                    <span><strong>${enrollment.progressPercent}%</strong></span>
+                                    <span><strong>${not empty enrollment.progressPercent ? enrollment.progressPercent : 0}%</strong></span>
                                 </div>
                                 <div class="progress-bar-bg">
                                     <div class="progress-bar-fill ${enrollment.status == 'completed' ? 'completed' : ''}"
-                                         style="width: ${enrollment.progressPercent}%;"></div>
+                                         style="--progress: ${not empty enrollment.progressPercent ? enrollment.progressPercent : 0}%; width: var(--progress);"></div>
                                 </div>
                             </div>
                         </div>

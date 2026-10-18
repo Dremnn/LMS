@@ -18,11 +18,10 @@ public class AppContextListener implements ServletContextListener {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         NotificationService notificationService = new NotificationService();
 
-        // Chờ 15 giây sau khi server khởi động xong mới bắt đầu quét định kỳ
+        // Chờ 30 giây sau khi server khởi động xong mới bắt đầu quét định kỳ mỗi 15 phút
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 notificationService.checkAndNotifyQuizDeadlines();
-                System.out.println("Ran checkAndNotifyQuizDeadlines background task.");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -31,7 +30,7 @@ public class AppContextListener implements ServletContextListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, 15, 60, TimeUnit.SECONDS);
+        }, 30, 900, TimeUnit.SECONDS);
     }
 
     @Override

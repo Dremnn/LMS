@@ -420,11 +420,17 @@
         </div>
     </div>
 
+    <div id="coursesDataStore" style="display:none;">
+        <% if (myCourses != null) { for (Course c : myCourses) { %>
+            <span data-id="<%= c.getId() %>" data-title="<%= esc.apply(c.getTitle()) %>"></span>
+        <% } } %>
+    </div>
+
     <script>
         var courseMap = {};
-        <% if (myCourses != null) { for (Course c : myCourses) { %>
-        courseMap['<%= c.getId() %>'] = '<%= esc.apply(c.getTitle()) %>';
-        <% } } %>
+        document.querySelectorAll('#coursesDataStore span').forEach(function(el) {
+            courseMap[el.getAttribute('data-id')] = el.getAttribute('data-title');
+        });
 
         // Khởi tạo TinyMCE
         tinymce.init({

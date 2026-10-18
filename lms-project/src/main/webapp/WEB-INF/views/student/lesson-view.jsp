@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -279,7 +279,7 @@
                     <span><strong>${enrollment.progressPercent}%</strong></span>
                 </div>
                 <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width:${enrollment.progressPercent}%;"></div>
+                    <div class="progress-bar-fill" style="--progress: ${not empty enrollment.progressPercent ? enrollment.progressPercent : 0}%; width: var(--progress);"></div>
                 </div>
             </c:if>
             <c:if test="${enrollment == null}">
@@ -339,7 +339,7 @@
                     <c:forEach var="asg" items="${assignments}">
                         <c:if test="${asg.sectionId == section.id}">
                             <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="lesson-link quiz-link">
-                                <span class="dot" style="border-color:#0d9488; ${asg.submittedByMe ? 'background:#0d9488;' : 'background:#ccfbf1;'} border-radius:3px;"></span>
+                                <span class="dot" style="border-color:#0d9488; --bg: ${asg.submittedByMe ? '#0d9488' : '#ccfbf1'}; background: var(--bg); border-radius:3px;"></span>
                                 <span>
                                     <i class="fa-solid fa-paperclip" style="color:#0d9488; margin-right:4px;"></i> <c:out value="${asg.title}"/>
                                     <c:if test="${not empty asg.dueAt}">
@@ -392,7 +392,7 @@
                     <c:forEach var="asg" items="${assignments}">
                         <c:if test="${asg.sectionId == null}">
                             <a href="${pageContext.request.contextPath}/student/assignments/view?id=${asg.id}" class="lesson-link quiz-link" style="background:#F0FDFA;">
-                                <span class="dot" style="border-color:#0D9488; ${asg.submittedByMe ? 'background:#0D9488;' : 'background:#CCFBF1;'} border-radius:3px;"></span>
+                                <span class="dot" style="border-color:#0D9488; --bg: ${asg.submittedByMe ? '#0D9488' : '#CCFBF1'}; background: var(--bg); border-radius:3px;"></span>
                                 <span>
                                     <span style="font-weight:700; color:#0F766E;"><i class="fa-solid fa-paperclip" style="color:#0D9488; margin-right:4px;"></i> <c:out value="${asg.title}"/></span>
                                     <c:if test="${not empty asg.dueAt}">
@@ -802,7 +802,7 @@
 
                 <%-- Nút vào không gian Nhóm (Chỉ hiện cho Student đã enroll và Giáo viên) --%>
         <c:if test="${enrollment != null || isPreview}">
-            <a href="${pageContext.request.contextPath}/student/my-group?courseId=${course.id}" class="doc-link" style="background:#0ea5e9; color:#fff; border-color:#0ea5e9; margin-left: ${empty currentLesson.documentUrl ? '0' : '12px'};">
+            <a href="${pageContext.request.contextPath}/student/my-group?courseId=${course.id}" class="doc-link" style="background:#0ea5e9; color:#fff; border-color:#0ea5e9; --ml: ${empty currentLesson.documentUrl ? '0' : '12px'}; margin-left: var(--ml);">
                 <i class="fa-solid fa-users"></i> Xem Nhóm Của Tôi & Nộp Bài
             </a>
             
@@ -1007,6 +1007,7 @@
             </c:when>
         </c:choose>
     </main>
+<!-- Code Compiler -->
 <script>
     let codeEditor = null;
     let isCompilerVisible = false;
@@ -1115,7 +1116,7 @@
         return m + ":" + (s < 10 ? "0" : "") + s;
     }
 
-    const isPreview = ${isPreview ? 'true' : 'false'};
+    var isPreview = '${isPreview}' === 'true';
     let currentExerciseId = null;
     let checkpointData = null;
     let checkpointPassed = isPreview ? true : false;
@@ -1583,7 +1584,7 @@
             body: JSON.stringify({
                 questionId: checkpointData.quiz.questionId,
                 selectedOptionId: parseInt(selected.value),
-                lessonId: ${currentLesson.id}
+                lessonId: Number('${currentLesson.id}')
             })
         })
         .then(res => res.json())
@@ -1818,6 +1819,7 @@
 
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
 
+<!-- Video checkpoint -->
 <c:if test="${not empty youtubeEmbedUrl}">
 <script>
     var player = null;
@@ -2282,9 +2284,10 @@ body.dark-theme .comment-input-box {
 }
 </style>
 
+<!-- Comment -->
 <script>
-const currentLessonId = ${currentLesson.id};
-const currentUserId = ${currentUser != null ? currentUser.id : -1};
+const currentLessonId = Number('${currentLesson.id}');
+const currentUserId = Number('${currentUser != null ? currentUser.id : -1}');
 const currentUserRole = '${currentUser != null ? currentUser.role : ""}';
 
 function toggleCommentsDrawer() {
