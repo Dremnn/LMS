@@ -43,6 +43,18 @@ public class Lesson implements Serializable {
     @Column(name = "checkpoint_ref_id")
     private Integer checkpointRefId;
 
+    @Column(name = "assessment_type")
+    private String assessmentType; // "none", "quiz", "code", "assignment"
+
+    @Column(name = "assessment_ref_id")
+    private Integer assessmentRefId;
+
+    @Transient
+    private String assessmentTitle;
+
+    @Transient
+    private boolean locked;
+
     // Quan hệ ORM
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "section_id", insertable = false, updatable = false)
@@ -105,4 +117,16 @@ public class Lesson implements Serializable {
 
     public Integer getCheckpointRefId() { return checkpointRefId; }
     public void setCheckpointRefId(Integer checkpointRefId) { this.checkpointRefId = checkpointRefId; }
+
+    public String getAssessmentType() { return assessmentType; }
+    public void setAssessmentType(String assessmentType) { this.assessmentType = assessmentType; }
+
+    public Integer getAssessmentRefId() { return assessmentRefId; }
+    public void setAssessmentRefId(Integer assessmentRefId) { this.assessmentRefId = assessmentRefId; }
+
+    public String getAssessmentTitle() { return assessmentTitle; }
+    public void setAssessmentTitle(String assessmentTitle) { this.assessmentTitle = assessmentTitle; }
+
+    public boolean isLocked() { return locked; }
+    public void setLocked(boolean locked) { this.locked = locked; }
 }

@@ -164,6 +164,8 @@ CREATE TABLE lessons (
     video_checkpoint_seconds INTEGER,
     checkpoint_type     VARCHAR(20),
     checkpoint_ref_id   INTEGER,
+    assessment_type     VARCHAR(20) DEFAULT 'none',
+    assessment_ref_id   INTEGER,
     order_index         INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT fk_lessons_section

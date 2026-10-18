@@ -162,9 +162,18 @@ public class CourseContentServlet extends HttpServlet {
                 String cpRefStr = request.getParameter("checkpointRefId");
                 Integer checkpointRefId = (cpRefStr != null && !cpRefStr.trim().isEmpty()) ? Integer.parseInt(cpRefStr.trim()) : null;
 
+                String assessmentType = request.getParameter("assessmentType");
+                String assessRefStr = request.getParameter("assessmentRefId");
+                Integer assessmentRefId = (assessRefStr != null && !assessRefStr.trim().isEmpty()) ? Integer.parseInt(assessRefStr.trim()) : null;
+
                 com.lms.model.Lesson createdLesson = courseService.addLesson(sectionId, currentUser.getId(), title, videoUrl, documentUrl, duration, description);
-                if (createdLesson != null && (videoCheckpointSeconds != null || checkpointType != null)) {
-                    new com.lms.dao.LessonDAO().updateCheckpoint(createdLesson.getId(), videoCheckpointSeconds, checkpointType, checkpointRefId);
+                if (createdLesson != null) {
+                    if (videoCheckpointSeconds != null || checkpointType != null) {
+                        new com.lms.dao.LessonDAO().updateCheckpoint(createdLesson.getId(), videoCheckpointSeconds, checkpointType, checkpointRefId);
+                    }
+                    if (assessmentType != null && !assessmentType.trim().isEmpty()) {
+                        new com.lms.dao.LessonDAO().updateAssessment(createdLesson.getId(), assessmentType, assessmentRefId);
+                    }
                 }
 
             } else if ("/instructor/courses/lessons/edit".equals(path)) {
@@ -191,8 +200,13 @@ public class CourseContentServlet extends HttpServlet {
                 String cpRefStr = request.getParameter("checkpointRefId");
                 Integer checkpointRefId = (cpRefStr != null && !cpRefStr.trim().isEmpty()) ? Integer.parseInt(cpRefStr.trim()) : null;
 
+                String assessmentType = request.getParameter("assessmentType");
+                String assessRefStr = request.getParameter("assessmentRefId");
+                Integer assessmentRefId = (assessRefStr != null && !assessRefStr.trim().isEmpty()) ? Integer.parseInt(assessRefStr.trim()) : null;
+
                 courseService.updateLesson(lessonId, currentUser.getId(), title, videoUrl, documentUrl, duration, description);
                 new com.lms.dao.LessonDAO().updateCheckpoint(lessonId, videoCheckpointSeconds, checkpointType, checkpointRefId);
+                new com.lms.dao.LessonDAO().updateAssessment(lessonId, assessmentType, assessmentRefId);
 
             } else if ("/instructor/courses/lessons/delete".equals(path)) {
                 courseId = Integer.parseInt(request.getParameter("courseId"));

@@ -54,9 +54,23 @@
         .btn-submit-review{padding:12px 32px;background:linear-gradient(135deg,#f6ad55,#ed8936);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s;}
         .btn-submit-review:hover{opacity:.9;transform:translateY(-1px);}
         .readonly-notice{background:#fffff0;border:1px solid #f6e05e;color:#744210;padding:12px 16px;border-radius:9px;font-size:13px;margin-bottom:20px;}
-        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
         .modal-overlay.active{display:flex;}
         .modal-card{background:#fff;border-radius:16px;padding:24px 28px;width:90%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalSlide .25s ease;}
+        .modal-body::-webkit-scrollbar{width:8px;}
+        .modal-body::-webkit-scrollbar-track{background:#f1f5f9;border-radius:4px;}
+        .modal-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px;}
+        .modal-body::-webkit-scrollbar-thumb:hover{background:#94a3b8;}
+        body.dark-theme .modal-body::-webkit-scrollbar-track{background:#111312;}
+        body.dark-theme .modal-body::-webkit-scrollbar-thumb{background:#334155;}
+        body.dark-theme .modal-body::-webkit-scrollbar-thumb:hover{background:#475569;}
+        body.dark-theme #editLessonModal .modal-header{border-bottom-color:#093C62 !important;background:#111312 !important;}
+        body.dark-theme #editLessonModal .modal-footer{border-top-color:#093C62 !important;background:#111312 !important;}
+        body.dark-theme #editLessonModal label{color:#9DB9CB !important;}
+        body.dark-theme #editLessonModal [style*="background: #f8fafc"]{background:#111312 !important;border-color:#093C62 !important;}
+        body.dark-theme #editLessonModal [style*="background: #eff6ff"]{background:#0c2d48 !important;border-color:#1e4e79 !important;}
+        body.dark-theme #editLessonModal [style*="color: #1e40af"]{color:#7dd3fc !important;}
+        body.dark-theme #editLessonModal [style*="color: #334155"]{color:#e2e8f0 !important;}
         @keyframes modalSlide{from{transform:translateY(-20px) scale(.96);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
         .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
         .modal-header h3{font-size:17px;font-weight:700;color:#093C62;}
@@ -318,6 +332,21 @@
                                                      <i class="fa-solid fa-align-left"></i> Có mô tả
                                                  </span>
                                              </c:if>
+                                             <c:if test="${lesson.assessmentType == 'quiz'}">
+                                                 <span class="badge" style="background:#fef3c7; color:#b45309; font-size:11px; margin-left:6px;" title="Yêu cầu vượt qua Quiz để mở khóa bài tiếp theo">
+                                                     <i class="fa-solid fa-circle-question"></i> Quiz
+                                                 </span>
+                                             </c:if>
+                                             <c:if test="${lesson.assessmentType == 'code'}">
+                                                 <span class="badge" style="background:#e0e7ff; color:#4338ca; font-size:11px; margin-left:6px;" title="Yêu cầu pass 100% test cases bài tập Code để mở khóa bài tiếp theo">
+                                                     <i class="fa-solid fa-code"></i> Code
+                                                 </span>
+                                             </c:if>
+                                             <c:if test="${lesson.assessmentType == 'assignment'}">
+                                                 <span class="badge" style="background:#ccfbf1; color:#0f766e; font-size:11px; margin-left:6px;" title="Yêu cầu nộp bài tập Assignment để mở khóa bài tiếp theo">
+                                                     <i class="fa-solid fa-paperclip"></i> Nộp bài
+                                                 </span>
+                                             </c:if>
                                          </span>
                                         <div style="display:flex;align-items:center;gap:8px;">
                                             <span class="lesson-dur">
@@ -340,6 +369,11 @@
                                                     data-video="<c:out value="${lesson.videoUrl}" escapeXml="true"/>"
                                                     data-doc="<c:out value="${lesson.documentUrl}" escapeXml="true"/>"
                                                     data-desc="<c:out value="${lesson.description}" escapeXml="true"/>"
+                                                    data-cp-seconds="${lesson.videoCheckpointSeconds != null ? lesson.videoCheckpointSeconds : ''}"
+                                                    data-cp-type="${lesson.checkpointType != null ? lesson.checkpointType : ''}"
+                                                    data-cp-ref="${lesson.checkpointRefId != null ? lesson.checkpointRefId : ''}"
+                                                    data-assessment-type="${lesson.assessmentType != null ? lesson.assessmentType : 'none'}"
+                                                    data-assessment-ref-id="${lesson.assessmentRefId != null ? lesson.assessmentRefId : ''}"
                                                     onclick="openEditLessonModal(this)">
                                                 <i class="fa-solid fa-pen"></i> Sửa bài học
                                             </button>
@@ -419,6 +453,47 @@
                                         <option value="">-- Chọn câu hỏi trắc nghiệm --</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="form-row" style="margin-top:10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 12px; display:flex; gap:12px; align-items:flex-end;">
+                                <div class="form-group" style="flex:1.5;">
+                                    <label style="font-weight:700; color:#1e40af; font-size:12px;">
+                                        <i class="fa-solid fa-lock"></i> Điều kiện hoàn thành để mở khóa bài tiếp theo
+                                    </label>
+                                    <select name="assessmentType" class="form-control add-assess-type" onchange="toggleAddAssessType(this)" style="font-size:12.5px;">
+                                        <option value="none">-- Không yêu cầu bài kiểm tra (Học viên tự đánh dấu hoàn thành) --</option>
+                                        <option value="quiz">Yêu cầu hoàn thành Quiz trắc nghiệm (Đạt điểm pass)</option>
+                                        <option value="code">Yêu cầu hoàn thành bài tập Code (Đạt 100% test cases)</option>
+                                        <option value="assignment">Yêu cầu nộp bài tập Assignment (Gửi file nộp bài)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group add-assess-quiz-group" style="flex:2; display:none;">
+                                    <label style="font-weight:700; color:#1e40af; font-size:12px;">
+                                        <i class="fa-solid fa-circle-question"></i> Chọn bài Quiz yêu cầu
+                                    </label>
+                                    <select class="form-control add-assess-quiz-select" onchange="syncAddAssessRef(this)" style="font-size:12.5px;">
+                                        <option value="">-- Chọn bài Quiz của khóa học --</option>
+                                        <c:forEach var="q" items="${quizzes}">
+                                            <option value="${q.id}"><c:out value="${q.title}"/> (Điểm đạt: ${q.passScore})</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="form-group add-assess-asg-group" style="flex:2; display:none;">
+                                    <label style="font-weight:700; color:#1e40af; font-size:12px;">
+                                        <i class="fa-solid fa-paperclip"></i> Chọn bài tập Assignment yêu cầu
+                                    </label>
+                                    <select class="form-control add-assess-asg-select" onchange="syncAddAssessRef(this)" style="font-size:12.5px;">
+                                        <option value="">-- Chọn bài tập Assignment --</option>
+                                        <c:forEach var="asg" items="${assignments}">
+                                            <option value="${asg.id}"><c:out value="${asg.title}"/></option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="form-group add-assess-code-hint" style="flex:2; display:none;">
+                                    <div style="font-size:12px; color:#1e40af; padding-bottom:6px;">
+                                        <i class="fa-solid fa-circle-info"></i> Sau khi tạo bài học, hãy bấm nút <strong>💻 Bài tập Code</strong> bên cạnh bài học để nhập đề bài và test cases.
+                                    </div>
+                                </div>
+                                <input type="hidden" name="assessmentRefId" class="add-assess-ref-id">
                             </div>
                             <div style="margin-top:12px;">
                                 <button type="submit" class="btn btn-primary btn-sm">➕ Thêm bài học</button>
@@ -605,62 +680,121 @@
 
 <%-- MODAL SỬA BÀI HỌC --%>
 <div class="modal-overlay" id="editLessonModal" onclick="if(event.target===this)closeEditLessonModal()">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h3>✏️ Chỉnh sửa bài học</h3>
-            <button type="button" class="btn-close" onclick="closeEditLessonModal()">&times;</button>
+    <div class="modal-card" style="max-width: 720px; width: 95%; max-height: 88vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);">
+        <!-- Header cố định trên cùng -->
+        <div class="modal-header" style="padding: 16px 24px; border-bottom: 1px solid #C6D8E3; margin-bottom: 0; background: #F8FAFC; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #093C62; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-pen-to-square" style="color: #076FA4;"></i> Chỉnh sửa bài học
+            </h3>
+            <button type="button" class="btn-close" onclick="closeEditLessonModal()" style="font-size: 22px; cursor: pointer; color: #64748b; background: none; border: none; line-height: 1;">&times;</button>
         </div>
-        <form action="${pageContext.request.contextPath}/instructor/courses/lessons/edit" method="post">
-            <input type="hidden" name="courseId" value="${course.id}">
-            <input type="hidden" name="lessonId" id="modalEditLessonId">
-            <div class="form-group" style="margin-bottom:14px;">
-                <label>Tên bài học *</label>
-                <input type="text" name="title" id="modalEditLessonTitle" class="form-control" required style="margin-top:4px;">
-            </div>
-            <div class="form-group" style="margin-bottom:14px;">
-                <label>Thời lượng (phút)</label>
-                <input type="number" name="durationMinutes" id="modalEditLessonDuration" class="form-control" min="1" style="margin-top:4px;">
-            </div>
-            <div class="form-group" style="margin-bottom:14px;">
-                <label>URL Video</label>
-                <input type="text" name="videoUrl" id="modalEditLessonVideo" class="form-control" placeholder="https://youtube.com/..." style="margin-top:4px;">
-            </div>
-            <div class="form-group" style="margin-bottom:18px;">
-                <label>URL Tài liệu</label>
-                <input type="text" name="documentUrl" id="modalEditLessonDoc" class="form-control" placeholder="https://drive.google.com/..." style="margin-top:4px;">
-            </div>
-            <div class="form-group" style="margin-bottom:18px;">
-                <label>Mô tả nội dung bài học</label>
-                <textarea name="description" id="modalEditLessonDesc" class="form-control" rows="3" placeholder="Tóm tắt nội dung bài học..." style="margin-top:4px;"></textarea>
-            </div>
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; margin-bottom:16px;">
-                <div style="font-weight:700; color:#334155; font-size:13px; margin-bottom:8px;">
-                    <i class="fa-solid fa-flag-checkered" style="color:#6366f1;"></i> Điểm Dừng Video (Interactive Checkpoint)
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:10px;">
-                    <div class="form-group">
-                        <label style="font-size:12px;">Điểm dừng Video (giây)</label>
-                        <input type="number" name="videoCheckpointSeconds" id="modalEditLessonCpSeconds" class="form-control" placeholder="Ví dụ: 30" min="1" style="margin-top:4px;">
+        
+        <!-- Form chứa Body cuộn mượt mà & Footer cố định -->
+        <form action="${pageContext.request.contextPath}/instructor/courses/lessons/edit" method="post" style="display: flex; flex-direction: column; flex: 1; min-height: 0; margin: 0; overflow: hidden;">
+            <div class="modal-body" style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0;">
+                <input type="hidden" name="courseId" value="${course.id}">
+                <input type="hidden" name="lessonId" id="modalEditLessonId">
+                
+                <!-- Hàng 1: Tên bài học & Thời lượng -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-weight: 600; font-size: 12px; color: #093C62;">Tên bài học *</label>
+                        <input type="text" name="title" id="modalEditLessonTitle" class="form-control" required style="margin-top: 4px;">
                     </div>
-                    <div class="form-group">
-                        <label style="font-size:12px;">Loại điểm dừng</label>
-                        <select name="checkpointType" id="modalEditLessonCpType" class="form-control" onchange="toggleEditCpType()" style="margin-top:4px;">
-                            <option value="">-- Không có điểm dừng --</option>
-                            <option value="quiz">Trả lời câu hỏi Quiz trắc nghiệm</option>
-                            <option value="code">Làm bài tập Code thực hành</option>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-weight: 600; font-size: 12px; color: #093C62;">Thời lượng (phút)</label>
+                        <input type="number" name="durationMinutes" id="modalEditLessonDuration" class="form-control" min="1" style="margin-top: 4px;" placeholder="Ví dụ: 15">
+                    </div>
+                </div>
+
+                <!-- Hàng 2: URL Video & URL Tài liệu -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-weight: 600; font-size: 12px; color: #093C62;"><i class="fa-brands fa-youtube" style="color: #ef4444;"></i> URL Video</label>
+                        <input type="text" name="videoUrl" id="modalEditLessonVideo" class="form-control" placeholder="https://youtube.com/..." style="margin-top: 4px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-weight: 600; font-size: 12px; color: #093C62;"><i class="fa-solid fa-file-pdf" style="color: #0284c7;"></i> URL Tài liệu</label>
+                        <input type="text" name="documentUrl" id="modalEditLessonDoc" class="form-control" placeholder="https://drive.google.com/..." style="margin-top: 4px;">
+                    </div>
+                </div>
+
+                <!-- Hàng 3: Mô tả bài học -->
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-weight: 600; font-size: 12px; color: #093C62;"><i class="fa-solid fa-align-left" style="color: #64748b;"></i> Mô tả nội dung bài học</label>
+                    <textarea name="description" id="modalEditLessonDesc" class="form-control" rows="2" placeholder="Tóm tắt ngắn gọn nội dung bài học, mục tiêu cần đạt..." style="margin-top: 4px;"></textarea>
+                </div>
+
+                <!-- Hàng 4: Điểm dừng Video Checkpoint -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+                    <div style="font-weight: 700; color: #334155; font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-flag-checkered" style="color: #6366f1;"></i> Điểm Dừng Video (Interactive Checkpoint)
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin-bottom: 10px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 12px; font-weight: 600; color: #475569;">Điểm dừng Video (giây)</label>
+                            <input type="number" name="videoCheckpointSeconds" id="modalEditLessonCpSeconds" class="form-control" placeholder="Ví dụ: 30" min="1" style="margin-top: 4px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 12px; font-weight: 600; color: #475569;">Loại điểm dừng</label>
+                            <select name="checkpointType" id="modalEditLessonCpType" class="form-control" onchange="toggleEditCpType()" style="margin-top: 4px;">
+                                <option value="">-- Không có điểm dừng --</option>
+                                <option value="quiz">Trả lời câu hỏi Quiz trắc nghiệm</option>
+                                <option value="code">Làm bài tập Code thực hành</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="modalEditLessonCpQuizGroup" style="display: none; margin-bottom: 0;">
+                        <label style="font-size: 12px; font-weight: 600; color: #475569;">Chọn câu hỏi trắc nghiệm</label>
+                        <select name="checkpointRefId" id="modalEditLessonCpRefId" class="form-control" style="margin-top: 4px;">
+                            <option value="">-- Chọn câu hỏi --</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-group" id="modalEditLessonCpQuizGroup" style="display:none;">
-                    <label style="font-size:12px;">Chọn câu hỏi trắc nghiệm</label>
-                    <select name="checkpointRefId" id="modalEditLessonCpRefId" class="form-control" style="margin-top:4px;">
-                        <option value="">-- Chọn câu hỏi --</option>
-                    </select>
+
+                <!-- Hàng 5: Điều kiện mở khóa bài tiếp theo (Assessment gating) -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px 16px; margin-bottom: 4px;">
+                    <div style="font-weight: 700; color: #1e40af; font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-lock" style="color: #2563eb;"></i> Điều Kiện Mở Khóa Bài Tiếp Theo (Đánh Giá Hoàn Thành)
+                    </div>
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #1e40af;">Loại đánh giá bắt buộc</label>
+                        <select name="assessmentType" id="modalEditLessonAssessmentType" class="form-control" onchange="toggleEditAssessType()" style="margin-top: 4px;">
+                            <option value="none">-- Không yêu cầu bài kiểm tra (Học viên tự đánh dấu hoàn thành) --</option>
+                            <option value="quiz">Yêu cầu hoàn thành Quiz trắc nghiệm (Đạt điểm pass)</option>
+                            <option value="code">Yêu cầu hoàn thành bài tập Code (Đạt 100% test cases)</option>
+                            <option value="assignment">Yêu cầu nộp bài tập Assignment (Gửi file nộp bài)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="modalEditLessonAssessQuizGroup" style="display: none; margin-bottom: 10px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #1e40af;">Chọn bài Quiz yêu cầu</label>
+                        <select id="modalEditLessonAssessQuizSelect" class="form-control" onchange="syncEditAssessRef(this.value)" style="margin-top: 4px;">
+                            <option value="">-- Chọn bài Quiz của khóa học --</option>
+                            <c:forEach var="q" items="${quizzes}">
+                                <option value="${q.id}"><c:out value="${q.title}"/> (Điểm đạt: ${q.passScore})</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="form-group" id="modalEditLessonAssessAsgGroup" style="display: none; margin-bottom: 10px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #1e40af;">Chọn bài tập Assignment yêu cầu</label>
+                        <select id="modalEditLessonAssessAsgSelect" class="form-control" onchange="syncEditAssessRef(this.value)" style="margin-top: 4px;">
+                            <option value="">-- Chọn bài tập Assignment --</option>
+                            <c:forEach var="asg" items="${assignments}">
+                                <option value="${asg.id}"><c:out value="${asg.title}"/></option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div id="modalEditLessonAssessCodeHint" style="display: none; font-size: 12px; color: #1e40af; margin-bottom: 4px; line-height: 1.5;">
+                        <i class="fa-solid fa-circle-info"></i> Học sinh sẽ cần vượt qua toàn bộ Test Cases của bài tập Code gắn với bài này. Bạn có thể thiết lập đề bài và test cases bằng nút <strong>💻 Bài tập Code</strong> trong danh sách bài học.
+                    </div>
+                    <input type="hidden" name="assessmentRefId" id="modalEditLessonAssessmentRefId">
                 </div>
             </div>
-            <div style="display:flex;justify-content:flex-end;gap:10px;">
-                <button type="button" class="btn btn-outline btn-sm" onclick="closeEditLessonModal()">Hủy</button>
-                <button type="submit" class="btn btn-primary btn-sm">💾 Lưu thay đổi</button>
+
+            <!-- Footer cố định ở đáy, không bao giờ bị cuộn che khuất -->
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #C6D8E3; background: #F8FAFC; display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeEditLessonModal()" style="padding: 8px 18px; font-size: 13px;">Hủy</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 8px 22px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(7,111,164,0.25);">💾 Lưu thay đổi</button>
             </div>
         </form>
     </div>
@@ -688,6 +822,28 @@
             document.getElementById('modalEditLessonVideo').value = arg1.dataset.video || '';
             document.getElementById('modalEditLessonDoc').value = arg1.dataset.doc || '';
             document.getElementById('modalEditLessonDesc').value = (arg1.dataset.desc || '').trim();
+
+            // Populate Checkpoint fields
+            document.getElementById('modalEditLessonCpSeconds').value = arg1.dataset.cpSeconds || '';
+            document.getElementById('modalEditLessonCpType').value = arg1.dataset.cpType || '';
+            toggleEditCpType();
+            if (arg1.dataset.cpRef) {
+                document.getElementById('modalEditLessonCpRefId').value = arg1.dataset.cpRef;
+            }
+
+            // Populate Assessment fields
+            const aType = arg1.dataset.assessmentType || 'none';
+            const aRef = arg1.dataset.assessmentRefId || '';
+            document.getElementById('modalEditLessonAssessmentType').value = aType;
+            document.getElementById('modalEditLessonAssessmentRefId').value = aRef;
+            toggleEditAssessType();
+            if (aRef) {
+                if (aType === 'quiz') {
+                    document.getElementById('modalEditLessonAssessQuizSelect').value = aRef;
+                } else if (aType === 'assignment') {
+                    document.getElementById('modalEditLessonAssessAsgSelect').value = aRef;
+                }
+            }
         } else {
             document.getElementById('modalEditLessonId').value = arg1 || '';
             document.getElementById('modalEditLessonTitle').value = title || '';
@@ -1062,6 +1218,56 @@
         } else {
             quizGroup.style.display = 'none';
         }
+    }
+
+    function toggleAddAssessType(selectEl) {
+        const form = selectEl.closest('form');
+        const type = selectEl.value;
+        const quizGroup = form.querySelector('.add-assess-quiz-group');
+        const asgGroup = form.querySelector('.add-assess-asg-group');
+        const codeHint = form.querySelector('.add-assess-code-hint');
+        const refInput = form.querySelector('.add-assess-ref-id');
+
+        quizGroup.style.display = (type === 'quiz') ? 'block' : 'none';
+        asgGroup.style.display = (type === 'assignment') ? 'block' : 'none';
+        codeHint.style.display = (type === 'code') ? 'block' : 'none';
+
+        if (type === 'quiz') {
+            refInput.value = form.querySelector('.add-assess-quiz-select').value;
+        } else if (type === 'assignment') {
+            refInput.value = form.querySelector('.add-assess-asg-select').value;
+        } else {
+            refInput.value = '';
+        }
+    }
+
+    function syncAddAssessRef(selectEl) {
+        const form = selectEl.closest('form');
+        form.querySelector('.add-assess-ref-id').value = selectEl.value;
+    }
+
+    function toggleEditAssessType() {
+        const type = document.getElementById('modalEditLessonAssessmentType').value;
+        const quizGroup = document.getElementById('modalEditLessonAssessQuizGroup');
+        const asgGroup = document.getElementById('modalEditLessonAssessAsgGroup');
+        const codeHint = document.getElementById('modalEditLessonAssessCodeHint');
+        const refInput = document.getElementById('modalEditLessonAssessmentRefId');
+
+        quizGroup.style.display = (type === 'quiz') ? 'block' : 'none';
+        asgGroup.style.display = (type === 'assignment') ? 'block' : 'none';
+        codeHint.style.display = (type === 'code') ? 'block' : 'none';
+
+        if (type === 'quiz') {
+            refInput.value = document.getElementById('modalEditLessonAssessQuizSelect').value;
+        } else if (type === 'assignment') {
+            refInput.value = document.getElementById('modalEditLessonAssessAsgSelect').value;
+        } else {
+            refInput.value = '';
+        }
+    }
+
+    function syncEditAssessRef(val) {
+        document.getElementById('modalEditLessonAssessmentRefId').value = val;
     }
 
     function toggleEditCpType() {

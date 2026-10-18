@@ -195,9 +195,24 @@ public class CompilerServlet extends HttpServlet {
                     sub.setExercise(exercise);
                     sub.setSubmittedCode(code);
                     sub.setStatus(status);
-                    sub.setOutputMessage("Passed " + passedTests + "/" + totalTests + " test cases.");
-                    sub.setSubmittedAt(new Date());
                     exerciseDAO.saveSubmission(sub);
+
+                    // Tự động đánh dấu hoàn thành bài học khi pass 100% test cases
+                    if (allPassed && exercise.getLesson() != null) {
+                        try {
+                            int lessonId = exercise.getLesson().getId();
+                            com.lms.model.Lesson l = new com.lms.dao.LessonDAO().findById(lessonId);
+                            if (l != null) {
+                                com.lms.model.Section s = new com.lms.dao.SectionDAO().findById(l.getSectionId());
+                                int cId = (s != null) ? s.getCourseId() : 0;
+                                if (cId > 0) {
+                                    new com.lms.service.EnrollmentService().toggleLessonCompletion(currentUser.getId(), cId, lessonId, true);
+                                }
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                 }
             }
 

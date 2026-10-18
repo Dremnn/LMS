@@ -205,4 +205,19 @@ public class QuizAttemptDAO {
 
         return a;
     }
+
+    public boolean hasStudentPassed(int studentId, int quizId) {
+        String sql = "SELECT 1 FROM quiz_attempts WHERE student_id = ? AND quiz_id = ? AND is_passed = TRUE LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, studentId);
+            stmt.setInt(2, quizId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

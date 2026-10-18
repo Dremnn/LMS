@@ -33,6 +33,8 @@
         .lesson-link{display:flex;align-items:center;gap:12px;padding:12px 20px;font-size:14px;color:#093C62;text-decoration:none;transition:all .15s;cursor:pointer;border-left:3px solid transparent;border-bottom:1px solid #F0F6FA;}
         .lesson-link:hover{background:#E2EEF5;color:#076FA4;}
         .lesson-link.active{background:#E2EEF5;color:#076FA4;font-weight:700;border-left-color:#076FA4;}
+        .lesson-link.locked{color:#94a3b8;cursor:not-allowed;background:rgba(241,245,249,0.5);opacity:0.75;}
+        .lesson-link.locked:hover{background:rgba(241,245,249,0.7);color:#94a3b8;}
         .lesson-link .tick{color:#10B981;font-size:14px;font-weight:800;flex-shrink:0;}
         .lesson-link .dot{width:9px;height:9px;border-radius:50%;border:2px solid #9DB9CB;flex-shrink:0;}
         .lesson-link.active .dot{background:#076FA4;border-color:#076FA4;}
@@ -71,6 +73,8 @@
         body.dark-theme .lesson-link{color:#9DB9CB;border-bottom-color:#182535;}
         body.dark-theme .lesson-link:hover{background:#182535;color:#F4F8FA;}
         body.dark-theme .lesson-link.active{background:#093C62;color:#F4F8FA;border-left-color:#076FA4;}
+        body.dark-theme .lesson-link.locked{background:rgba(17,19,18,0.5);color:#475569;}
+        body.dark-theme .lesson-link.locked:hover{background:rgba(17,19,18,0.7);color:#475569;}
         body.dark-theme .lesson-link .dot{border-color:#9DB9CB;}
         body.dark-theme .lesson-link.active .dot{background:#076FA4;border-color:#076FA4;}
         body.dark-theme .lesson-title{color:#F4F8FA;}
@@ -90,15 +94,74 @@
         body.dark-theme .complete-card h3{color:#F4F8FA;}
         body.dark-theme .form-check-label{color:#9DB9CB;}
         body.dark-theme .divider{border-top-color:#093C62;}
-        /* ---- CUSTOM YOUTUBE CONTROLS ---- */
+        /* ---- CUSTOM VIDEO CONTROLS & CHECKPOINT MARKERS ---- */
         .video-wrap { margin-bottom: 0 !important; }
-        .custom-yt-controls { background: #093C62; display: flex; align-items: center; padding: 12px 16px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; margin-bottom: 28px; gap: 12px; box-shadow: 0 12px 36px rgba(0,0,0,.15); }
-        .yt-control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; padding: 4px 8px; transition: color 0.2s; }
-        .yt-control-btn:hover { color: #10B981; }
-        .yt-time-display { color: #C6D8E3; font-size: 13px; font-weight: 500; min-width: 80px; text-align: center; font-family: monospace; }
-        .yt-progress-container { flex: 1; cursor: pointer; padding: 8px 0; }
-        .yt-progress-bg { background: rgba(255,255,255,0.2); height: 6px; border-radius: 4px; overflow: hidden; position: relative; }
-        .yt-progress-fill { background: #10B981; height: 100%; width: 0%; border-radius: 4px; transition: width 0.1s linear; }
+        .custom-yt-controls { background: #093C62; display: flex; align-items: center; padding: 12px 16px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; margin-bottom: 28px; gap: 12px; box-shadow: 0 12px 36px rgba(0,0,0,.15); user-select: none; }
+        .yt-control-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; padding: 4px 8px; transition: color 0.2s, transform 0.1s; display: inline-flex; align-items: center; justify-content: center; }
+        .yt-control-btn:hover { color: #10B981; transform: scale(1.1); }
+        .yt-time-display { color: #C6D8E3; font-size: 13px; font-weight: 500; min-width: 95px; text-align: center; font-family: monospace; }
+        .yt-progress-container { flex: 1; cursor: pointer; padding: 10px 0; position: relative; }
+        .yt-progress-bg { background: rgba(255,255,255,0.22); height: 6px; border-radius: 4px; overflow: hidden; position: relative; }
+        .yt-progress-fill { background: #10B981; height: 100%; width: 0%; border-radius: 4px; transition: width 0.08s linear; }
+
+        /* Checkpoint Markers on Video Timeline */
+        .checkpoint-marker-dot {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #f59e0b;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.95), 0 2px 5px rgba(0,0,0,0.4);
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .checkpoint-marker-dot:hover {
+            transform: translate(-50%, -50%) scale(1.4);
+            background: #fbbf24;
+            box-shadow: 0 0 14px rgba(251, 191, 36, 1), 0 2px 8px rgba(0,0,0,0.6);
+        }
+        .checkpoint-marker-dot.passed {
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.9), 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .checkpoint-marker-dot .checkpoint-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            color: #f8fafc;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 25;
+        }
+        .checkpoint-marker-dot .checkpoint-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 4px;
+            border-style: solid;
+            border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
+        }
+        .checkpoint-marker-dot:hover .checkpoint-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
     <!-- CodeMirror & Compiler Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
@@ -231,18 +294,35 @@
                 <div class="section-group">
                     <div class="section-title">Chương ${st.index + 1}: <c:out value="${section.title}"/></div>
                     <c:forEach var="lesson" items="${section.lessons}">
-                        <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
-                           class="lesson-link ${lesson.id == currentLesson.id ? 'active' : ''}">
-                            <c:choose>
-                                <c:when test="${completedLessonIds.contains(lesson.id)}">
-                                    <span class="tick">✓</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="dot"></span>
-                                </c:otherwise>
-                            </c:choose>
-                            <span><c:out value="${lesson.title}"/></span>
-                        </a>
+                        <c:set var="isLessonLocked" value="${lessonLockedMap != null && lessonLockedMap[lesson.id] == true}" />
+                        <c:choose>
+                            <c:when test="${isLessonLocked}">
+                                <div class="lesson-link locked" title="Bài học đang bị khóa. Bạn cần hoàn thành bài học trước để mở khóa!" onclick="alert('Bài học này đang bị khóa. Bạn cần hoàn thành bài học trước để mở khóa!');">
+                                    <span class="lock-icon" style="color:#94a3b8;font-size:12px;margin-right:2px;"><i class="fa-solid fa-lock"></i></span>
+                                    <span><c:out value="${lesson.title}"/></span>
+                                    <c:if test="${lesson.assessmentType == 'quiz'}"><span class="badge" style="background:#fef3c7;color:#b45309;font-size:10px;padding:2px 6px;margin-left:auto;"><i class="fa-solid fa-circle-question"></i> Quiz</span></c:if>
+                                    <c:if test="${lesson.assessmentType == 'code'}"><span class="badge" style="background:#e0e7ff;color:#4338ca;font-size:10px;padding:2px 6px;margin-left:auto;"><i class="fa-solid fa-code"></i> Code</span></c:if>
+                                    <c:if test="${lesson.assessmentType == 'assignment'}"><span class="badge" style="background:#ccfbf1;color:#0f766e;font-size:10px;padding:2px 6px;margin-left:auto;"><i class="fa-solid fa-paperclip"></i> Bài tập</span></c:if>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${lesson.id}"
+                                   class="lesson-link ${lesson.id == currentLesson.id ? 'active' : ''}">
+                                    <c:choose>
+                                        <c:when test="${completedLessonIds.contains(lesson.id)}">
+                                            <span class="tick">✓</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="dot"></span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <span><c:out value="${lesson.title}"/></span>
+                                    <c:if test="${lesson.assessmentType == 'quiz'}"><span class="badge" style="background:#fef3c7;color:#b45309;font-size:10px;padding:2px 6px;margin-left:auto;"><i class="fa-solid fa-circle-question"></i> Quiz</span></c:if>
+                                    <c:if test="${lesson.assessmentType == 'code'}"><span class="badge" style="background:#e0e7ff;color:#4338ca;font-size:10px;padding:2px 6px;margin-left:auto;"><i class="fa-solid fa-code"></i> Code</span></c:if>
+                                    <c:if test="${lesson.assessmentType == 'assignment'}"><span class="badge" style="background:#ccfbf1;color:#0f766e;font-size:10px;padding:2px 6px;margin-left:auto;"><i class="fa-solid fa-paperclip"></i> Bài tập</span></c:if>
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
                     </c:forEach>
 
                     <%-- Quiz cho chương này --%>
@@ -353,29 +433,32 @@
                             allowfullscreen>
                     </iframe>
                     <%-- IN-VIDEO INTERACTIVE QUIZ OVERLAY (H5P / COURSERA STYLE) --%>
-                    <div id="inVideoQuizOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.92); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
-                        <div style="max-width:580px; width:95%; background:#1e293b; border:1.5px solid #3b82f6; border-radius:14px; padding:22px 26px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:left;">
+                    <div id="inVideoQuizOverlay" class="in-video-quiz-overlay" style="display:none !important; position:absolute; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(15,23,42,0.92); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center; overflow-y:auto;">
+                        <div style="max-width:580px; width:95%; background:#1e293b; border:1.5px solid #3b82f6; border-radius:14px; padding:22px 26px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:left; margin:auto;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                 <span style="background:#2563eb; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px;">
                                     <i class="fa-solid fa-lightbulb"></i> CÂU HỎI TƯƠNG TÁC GIỮA VIDEO
                                 </span>
                                 <span style="font-size:11.5px; color:#94a3b8;"><i class="fa-solid fa-lock"></i> Video đã tạm dừng</span>
                             </div>
-                            <h3 id="ivqContent" style="margin:0 0 16px 0; font-size:15.5px; color:#f8fafc; font-weight:600; line-height:1.5;">...</h3>
-                            <div id="ivqOptionsList" style="display:flex; flex-direction:column; gap:9px; margin-bottom:16px;">
+                            <h3 id="ivqContent" class="ivq-content" style="margin:0 0 16px 0; font-size:15.5px; color:#f8fafc; font-weight:600; line-height:1.5;">...</h3>
+                            <div id="ivqOptionsList" class="ivq-options-list" style="display:flex; flex-direction:column; gap:9px; margin-bottom:16px;">
                                 <!-- Radio options -->
                             </div>
-                            <div id="ivqMessage" style="font-size:13px; margin-bottom:14px; display:none; padding:10px 14px; border-radius:8px;"></div>
-                            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                                <button type="button" id="ivqSubmitBtn" class="btn" style="background:#3b82f6; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:8px; border:none; cursor:pointer;" onclick="verifyInVideoQuiz()">
+                            <div id="ivqMessage" class="ivq-message" style="font-size:13px; margin-bottom:14px; display:none; padding:10px 14px; border-radius:8px;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px;">
+                                <button type="button" class="btn" style="background:#334155; color:#cbd5e1; border:none; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="rewindVideo(10)">
+                                    <i class="fa-solid fa-rotate-left"></i> Xem lại 10s trước
+                                </button>
+                                <button type="button" id="ivqSubmitBtn" class="btn ivq-submit-btn" style="background:#3b82f6; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:8px; border:none; cursor:pointer;" onclick="verifyInVideoQuiz()">
                                     Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <%-- IN-VIDEO CODE CHECKPOINT LOCK OVERLAY --%>
-                    <div id="inVideoCodeLockOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.94); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
-                        <div style="max-width:540px; width:95%; background:#1e293b; border:1.5px solid #f59e0b; border-radius:14px; padding:24px 28px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:center;">
+                    <div id="inVideoCodeLockOverlay" class="in-video-code-overlay" style="display:none !important; position:absolute; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(15,23,42,0.94); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center; overflow-y:auto;">
+                        <div style="max-width:540px; width:95%; background:#1e293b; border:1.5px solid #f59e0b; border-radius:14px; padding:24px 28px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:center; margin:auto;">
                             <div style="width:52px; height:52px; border-radius:50%; background:#78350f; color:#fde68a; display:inline-flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px;">
                                 <i class="fa-solid fa-lock"></i>
                             </div>
@@ -383,22 +466,27 @@
                             <p style="margin:0 0 18px 0; font-size:13.5px; color:#cbd5e1; line-height:1.6;">
                                 Video đã bị tạm dừng tại mốc thời gian này. Bạn cần làm bài tập thực hành ở khung bên dưới và <strong>Nộp bài ĐẠT (Pass 100% Test Cases)</strong> để mở khóa xem tiếp video!
                             </p>
-                            <button type="button" class="btn" style="background:#d97706; color:#fff; font-weight:700; font-size:14px; padding:11px 24px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="focusOnExercise()">
-                                <i class="fa-solid fa-code"></i> Thực Hành Viết Code Ngay <i class="fa-solid fa-arrow-down"></i>
-                            </button>
+                            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                                <button type="button" class="btn" style="background:#334155; color:#cbd5e1; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="rewindVideo(10)">
+                                    <i class="fa-solid fa-rotate-left"></i> Xem lại 10s trước
+                                </button>
+                                <button type="button" class="btn" style="background:#d97706; color:#fff; font-weight:700; font-size:14px; padding:11px 24px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="focusOnExercise()">
+                                    <i class="fa-solid fa-code"></i> Thực Hành Viết Code Ngay <i class="fa-solid fa-arrow-down"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <%-- Custom Video Controls --%>
                 <div class="custom-yt-controls" id="customControls">
-                    <button id="ytPlayPauseBtn" class="yt-control-btn"><i class="fa-solid fa-play"></i></button>
+                    <button id="ytPlayPauseBtn" type="button" class="yt-control-btn" title="Phát / Tạm dừng"><i class="fa-solid fa-play"></i></button>
                     <span id="ytVideoTime" class="yt-time-display">0:00 / 0:00</span>
-                    <div class="yt-progress-container" id="ytProgressBarContainer">
+                    <div class="yt-progress-container" id="ytProgressBarContainer" title="Tua video (Click trên thanh)">
                         <div class="yt-progress-bg">
                             <div class="yt-progress-fill" id="ytProgressBarFill"></div>
                         </div>
                     </div>
-                    <button id="ytMuteBtn" class="yt-control-btn"><i class="fa-solid fa-volume-high"></i></button>
+                    <button id="ytMuteBtn" type="button" class="yt-control-btn" title="Bật / Tắt âm thanh"><i class="fa-solid fa-volume-high"></i></button>
                 </div>
                 <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
                 <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
@@ -419,37 +507,40 @@
                 </div>
             </c:when>
 
-            <%-- Trường hợp 2: Link video file trực tiếp (.mp4...) -> dùng thẻ video như cũ --%>
+            <%-- Trường hợp 2: Link video file trực tiếp (.mp4...) -> dùng thẻ video với thanh điều khiển tuỳ biến --%>
             <c:when test="${not empty currentLesson.videoUrl}">
-                <div class="video-wrap" style="position:relative;">
-                    <video id="html5-video" controls width="100%" preload="metadata">
+                <div class="video-wrap" style="position:relative; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
+                    <video id="html5-video" width="100%" preload="metadata" style="display:block; width:100%; cursor:pointer;">
                         <source src="${currentLesson.videoUrl}" type="video/mp4" />
                         Trình duyệt của bạn không hỗ trợ thẻ video.
                     </video>
                     <%-- IN-VIDEO INTERACTIVE QUIZ OVERLAY FOR HTML5 VIDEO --%>
-                    <div id="inVideoQuizOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.92); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
-                        <div style="max-width:580px; width:95%; background:#1e293b; border:1.5px solid #3b82f6; border-radius:14px; padding:22px 26px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:left;">
+                    <div id="inVideoQuizOverlayHtml5" class="in-video-quiz-overlay" style="display:none !important; position:absolute; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(15,23,42,0.92); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center; overflow-y:auto;">
+                        <div style="max-width:580px; width:95%; background:#1e293b; border:1.5px solid #3b82f6; border-radius:14px; padding:22px 26px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:left; margin:auto;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                                 <span style="background:#2563eb; color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px;">
                                     <i class="fa-solid fa-lightbulb"></i> CÂU HỎI TƯƠNG TÁC GIỮA VIDEO
                                 </span>
-                                <span style="font-size:11.5px; color:#f87171; font-weight:600;"><i class="fa-solid fa-lock"></i> Video đã bị khóa</span>
+                                <span style="font-size:11.5px; color:#94a3b8;"><i class="fa-solid fa-lock"></i> Video đã tạm dừng</span>
                             </div>
-                            <h3 id="ivqContent" style="margin:0 0 16px 0; font-size:15.5px; color:#f8fafc; font-weight:600; line-height:1.5;">...</h3>
-                            <div id="ivqOptionsList" style="display:flex; flex-direction:column; gap:9px; margin-bottom:16px;">
+                            <h3 class="ivq-content" style="margin:0 0 16px 0; font-size:15.5px; color:#f8fafc; font-weight:600; line-height:1.5;">...</h3>
+                            <div class="ivq-options-list" style="display:flex; flex-direction:column; gap:9px; margin-bottom:16px;">
                                 <!-- Radio options -->
                             </div>
-                            <div id="ivqMessage" style="font-size:13px; margin-bottom:14px; display:none; padding:10px 14px; border-radius:8px;"></div>
-                            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                                <button type="button" id="ivqSubmitBtn" class="btn" style="background:#3b82f6; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:8px; border:none; cursor:pointer;" onclick="verifyInVideoQuiz()">
+                            <div class="ivq-message" style="font-size:13px; margin-bottom:14px; display:none; padding:10px 14px; border-radius:8px;"></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px;">
+                                <button type="button" class="btn" style="background:#334155; color:#cbd5e1; border:none; padding:9px 16px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="rewindVideo(10)">
+                                    <i class="fa-solid fa-rotate-left"></i> Xem lại 10s trước
+                                </button>
+                                <button type="button" class="btn ivq-submit-btn" style="background:#3b82f6; color:#fff; font-weight:700; font-size:13px; padding:9px 20px; border-radius:8px; border:none; cursor:pointer;" onclick="verifyInVideoQuiz()">
                                     Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <%-- IN-VIDEO CODE CHECKPOINT LOCK OVERLAY FOR HTML5 VIDEO --%>
-                    <div id="inVideoCodeLockOverlay" style="display:none !important; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.94); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center;">
-                        <div style="max-width:540px; width:95%; background:#1e293b; border:1.5px solid #f59e0b; border-radius:14px; padding:24px 28px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:center;">
+                    <div id="inVideoCodeLockOverlayHtml5" class="in-video-code-overlay" style="display:none !important; position:absolute; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(15,23,42,0.94); backdrop-filter:blur(8px); z-index:99; padding:20px; box-sizing:border-box; color:#fff; flex-direction:column; justify-content:center; align-items:center; overflow-y:auto;">
+                        <div style="max-width:540px; width:95%; background:#1e293b; border:1.5px solid #f59e0b; border-radius:14px; padding:24px 28px; box-shadow:0 16px 40px rgba(0,0,0,0.6); text-align:center; margin:auto;">
                             <div style="width:52px; height:52px; border-radius:50%; background:#78350f; color:#fde68a; display:inline-flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px;">
                                 <i class="fa-solid fa-lock"></i>
                             </div>
@@ -457,11 +548,27 @@
                             <p style="margin:0 0 18px 0; font-size:13.5px; color:#cbd5e1; line-height:1.6;">
                                 Video đã bị tạm dừng tại mốc thời gian này. Bạn cần làm bài tập thực hành ở khung bên dưới và <strong>Nộp bài ĐẠT (Pass 100% Test Cases)</strong> để mở khóa xem tiếp video!
                             </p>
-                            <button type="button" class="btn" style="background:#d97706; color:#fff; font-weight:700; font-size:14px; padding:11px 24px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="focusOnExercise()">
-                                <i class="fa-solid fa-code"></i> Thực Hành Viết Code Ngay <i class="fa-solid fa-arrow-down"></i>
-                            </button>
+                            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                                <button type="button" class="btn" style="background:#334155; color:#cbd5e1; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" onclick="rewindVideo(10)">
+                                    <i class="fa-solid fa-rotate-left"></i> Xem lại 10s trước
+                                </button>
+                                <button type="button" class="btn" style="background:#d97706; color:#fff; font-weight:700; font-size:14px; padding:11px 24px; border-radius:8px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;" onclick="focusOnExercise()">
+                                    <i class="fa-solid fa-code"></i> Thực Hành Viết Code Ngay <i class="fa-solid fa-arrow-down"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
+                </div>
+                <%-- Custom Video Controls for HTML5 Video --%>
+                <div class="custom-yt-controls" id="customControlsHtml5">
+                    <button id="html5PlayPauseBtn" type="button" class="yt-control-btn" title="Phát / Tạm dừng"><i class="fa-solid fa-play"></i></button>
+                    <span id="html5VideoTime" class="yt-time-display">0:00 / 0:00</span>
+                    <div class="yt-progress-container" id="html5ProgressBarContainer" title="Tua video (Click trên thanh)">
+                        <div class="yt-progress-bg">
+                            <div class="yt-progress-fill" id="html5ProgressBarFill"></div>
+                        </div>
+                    </div>
+                    <button id="html5MuteBtn" type="button" class="yt-control-btn" title="Bật / Tắt âm thanh"><i class="fa-solid fa-volume-high"></i></button>
                 </div>
                 <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
                 <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
@@ -707,45 +814,183 @@
 
         <hr class="divider">
 
-        <%-- Form đánh dấu hoàn thành --%>
+        <%-- Form đánh dấu hoàn thành & Thẻ đánh giá điều kiện mở khóa --%>
         <c:choose>
             <c:when test="${enrollment != null}">
                 <div class="complete-card">
                     <h3><i class="fa-solid fa-circle-check"></i> Tiến độ bài học</h3>
-                    <form action="${pageContext.request.contextPath}/student/lessons/complete" method="post">
-                        <input type="hidden" name="lessonId" value="${currentLesson.id}" />
-                        <input type="hidden" name="courseId" value="${course.id}" />
-                        <div class="form-check">
-                            <input type="checkbox" name="completed" id="completedCheck"
-                                   <c:if test="${completedLessonIds.contains(currentLesson.id)}">checked</c:if> />
-                            <label class="form-check-label" for="completedCheck">
-                                Đánh dấu bài học này đã hoàn thành
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-success">💾 Lưu tiến độ</button>
-                    </form>
-                </div>
-                <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
-                <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
-                        <div style="display:flex; align-items:center; gap:14px;">
-                            <div style="width:42px; height:42px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">
-                                <i class="fa-solid fa-circle-pause"></i>
-                            </div>
-                            <div>
-                                <div style="font-weight:700; color:#92400E; font-size:15px;"><i class="fa-solid fa-lock"></i> ĐIỂM DỪNG VIDEO (INTERACTIVE CHECKPOINT)</div>
-                                <div style="font-size:13px; color:#B45309;" id="checkpointNoticeMsg">Video đã tự động tạm dừng tại mốc thời gian bài học. Bạn cần thực hành và <strong>Nộp bài ĐẠT (Pass 100% Test cases)</strong> để mở khóa xem tiếp!</div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn" style="background:#D97706; color:#fff; font-weight:700; font-size:13px; padding:10px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="focusOnExercise()">
-                            <i class="fa-solid fa-code"></i> Thực Hành Ngay <i class="fa-solid fa-arrow-down"></i>
-                        </button>
-                    </div>
+
+                    <c:choose>
+                        <%-- Trường hợp 1: Bài học yêu cầu Quiz --%>
+                        <c:when test="${currentLesson.assessmentType == 'quiz'}">
+                            <c:choose>
+                                <c:when test="${hasPassedAssessment || completedLessonIds.contains(currentLesson.id)}">
+                                    <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:12px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <div style="width:40px; height:40px; border-radius:50%; background:#d1fae5; color:#059669; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">
+                                                <i class="fa-solid fa-check"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:700; color:#065f46; font-size:14.5px;">Bạn đã hoàn thành bài kiểm tra Quiz!</div>
+                                                <div style="font-size:13px; color:#047857;">Bài học này đã được hệ thống tự động ghi nhận hoàn thành. Bài học tiếp theo đã được mở khóa.</div>
+                                            </div>
+                                        </div>
+                                        <c:if test="${assessmentQuiz != null}">
+                                            <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${assessmentQuiz.id}&lessonId=${currentLesson.id}" class="btn" style="background:#059669; color:#fff; font-size:13px; font-weight:700; padding:8px 16px; border-radius:8px; text-decoration:none; flex-shrink:0;">
+                                                <i class="fa-solid fa-rotate-right"></i> Xem lại Quiz
+                                            </a>
+                                        </c:if>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div style="background:#fffbeb; border:2px solid #f59e0b; border-radius:14px; padding:20px 24px; box-shadow:0 4px 16px rgba(245,158,11,0.12); margin-bottom:12px;">
+                                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+                                            <div style="display:flex; gap:14px; flex:1; min-width:260px;">
+                                                <div style="width:46px; height:46px; border-radius:12px; background:#fef3c7; color:#d97706; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">
+                                                    <i class="fa-solid fa-lock"></i>
+                                                </div>
+                                                <div>
+                                                    <div style="font-weight:800; color:#92400e; font-size:16px;">Yêu cầu hoàn thành: Bài kiểm tra Quiz</div>
+                                                    <div style="font-size:13.5px; color:#b45309; margin-top:4px; line-height:1.5;">
+                                                        Bài học này có bài kiểm tra bắt buộc: <strong><c:out value="${assessmentQuiz != null ? assessmentQuiz.title : 'Quiz'}"/></strong>.
+                                                        <c:if test="${assessmentQuiz != null}">
+                                                            (Điểm cần đạt: <strong>${assessmentQuiz.passScore}/100</strong>)
+                                                        </c:if>
+                                                        <br>Bạn phải vượt qua bài kiểm tra này để hoàn thành bài học và mở khóa bài tiếp theo!
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <c:if test="${assessmentQuiz != null}">
+                                                <a href="${pageContext.request.contextPath}/student/quizzes/intro?id=${assessmentQuiz.id}&lessonId=${currentLesson.id}" class="btn" style="background:#d97706; color:#fff; font-size:14px; font-weight:700; padding:11px 20px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; flex-shrink:0; box-shadow:0 4px 12px rgba(217,119,6,0.3);">
+                                                    <i class="fa-solid fa-pen-to-square"></i> Làm bài Quiz ngay
+                                                </a>
+                                            </c:if>
+                                        </div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:when>
+
+                        <%-- Trường hợp 2: Bài học yêu cầu Code --%>
+                        <c:when test="${currentLesson.assessmentType == 'code'}">
+                            <c:choose>
+                                <c:when test="${hasPassedAssessment || completedLessonIds.contains(currentLesson.id)}">
+                                    <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:12px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <div style="width:40px; height:40px; border-radius:50%; background:#d1fae5; color:#059669; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">
+                                                <i class="fa-solid fa-check"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:700; color:#065f46; font-size:14.5px;">Bạn đã hoàn thành bài tập Code (100% Test Cases Passed)!</div>
+                                                <div style="font-size:13px; color:#047857;">Bài học này đã được hệ thống tự động ghi nhận hoàn thành. Bài học tiếp theo đã được mở khóa.</div>
+                                            </div>
+                                        </div>
+                                        <button type="button" onclick="focusOnExercise()" class="btn" style="background:#059669; color:#fff; font-size:13px; font-weight:700; padding:8px 16px; border-radius:8px; border:none; cursor:pointer; flex-shrink:0;">
+                                            <i class="fa-solid fa-code"></i> Xem lại Code
+                                        </button>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div style="background:#eff6ff; border:2px solid #3b82f6; border-radius:14px; padding:20px 24px; box-shadow:0 4px 16px rgba(59,130,246,0.12); margin-bottom:12px;">
+                                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+                                            <div style="display:flex; gap:14px; flex:1; min-width:260px;">
+                                                <div style="width:46px; height:46px; border-radius:12px; background:#dbeafe; color:#1d4ed8; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">
+                                                    <i class="fa-solid fa-laptop-code"></i>
+                                                </div>
+                                                <div>
+                                                    <div style="font-weight:800; color:#1e40af; font-size:16px;">Yêu cầu hoàn thành: Bài tập lập trình Code</div>
+                                                    <div style="font-size:13.5px; color:#1d4ed8; margin-top:4px; line-height:1.5;">
+                                                        Bài học này có bài tập thực hành viết code bắt buộc. Bạn cần lập trình và nộp bài vượt qua <strong>100% Test Cases</strong> trong khung biên dịch bên dưới để hoàn thành bài học và mở khóa bài tiếp theo!
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="focusOnExercise()" class="btn" style="background:#2563eb; color:#fff; font-size:14px; font-weight:700; padding:11px 20px; border-radius:10px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; flex-shrink:0; box-shadow:0 4px 12px rgba(37,99,235,0.3);">
+                                                <i class="fa-solid fa-terminal"></i> Viết Code & Nộp bài <i class="fa-solid fa-arrow-down"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:when>
+
+                        <%-- Trường hợp 3: Bài học yêu cầu Nộp Assignment --%>
+                        <c:when test="${currentLesson.assessmentType == 'assignment'}">
+                            <c:choose>
+                                <c:when test="${hasPassedAssessment || completedLessonIds.contains(currentLesson.id)}">
+                                    <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:12px; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <div style="width:40px; height:40px; border-radius:50%; background:#d1fae5; color:#059669; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">
+                                                <i class="fa-solid fa-check"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight:700; color:#065f46; font-size:14.5px;">Bạn đã nộp bài tập Assignment thành công!</div>
+                                                <div style="font-size:13px; color:#047857;">Bài học này đã được hệ thống tự động ghi nhận hoàn thành. Bài học tiếp theo đã được mở khóa.</div>
+                                            </div>
+                                        </div>
+                                        <c:if test="${assessmentAssignment != null}">
+                                            <a href="${pageContext.request.contextPath}/student/assignments/view?id=${assessmentAssignment.id}" class="btn" style="background:#059669; color:#fff; font-size:13px; font-weight:700; padding:8px 16px; border-radius:8px; text-decoration:none; flex-shrink:0;">
+                                                <i class="fa-solid fa-eye"></i> Xem bài nộp
+                                            </a>
+                                        </c:if>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div style="background:#f0fdfa; border:2px solid #0d9488; border-radius:14px; padding:20px 24px; box-shadow:0 4px 16px rgba(13,148,136,0.12); margin-bottom:12px;">
+                                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+                                            <div style="display:flex; gap:14px; flex:1; min-width:260px;">
+                                                <div style="width:46px; height:46px; border-radius:12px; background:#ccfbf1; color:#0f766e; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">
+                                                    <i class="fa-solid fa-paperclip"></i>
+                                                </div>
+                                                <div>
+                                                    <div style="font-weight:800; color:#134e4a; font-size:16px;">Yêu cầu hoàn thành: Nộp bài tập Assignment</div>
+                                                    <div style="font-size:13.5px; color:#0f766e; margin-top:4px; line-height:1.5;">
+                                                        Bài học này yêu cầu bạn nộp bài tập: <strong><c:out value="${assessmentAssignment != null ? assessmentAssignment.title : 'Bài tập'}"/></strong>.
+                                                        <br>Bạn cần tải lên tệp bài làm để hoàn thành bài học và mở khóa bài tiếp theo!
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <c:if test="${assessmentAssignment != null}">
+                                                <a href="${pageContext.request.contextPath}/student/assignments/view?id=${assessmentAssignment.id}" class="btn" style="background:#0d9488; color:#fff; font-size:14px; font-weight:700; padding:11px 20px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; flex-shrink:0; box-shadow:0 4px 12px rgba(13,148,136,0.3);">
+                                                    <i class="fa-solid fa-upload"></i> Nộp bài tập ngay
+                                                </a>
+                                            </c:if>
+                                        </div>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:when>
+
+                        <%-- Trường hợp 4: Không có assessment (none hoặc rỗng) -> Thủ công như cũ --%>
+                        <c:otherwise>
+                            <form action="${pageContext.request.contextPath}/student/lessons/complete" method="post">
+                                <input type="hidden" name="lessonId" value="${currentLesson.id}" />
+                                <input type="hidden" name="courseId" value="${course.id}" />
+                                <div class="form-check">
+                                    <input type="checkbox" name="completed" id="completedCheck"
+                                           <c:if test="${completedLessonIds.contains(currentLesson.id)}">checked</c:if> />
+                                    <label class="form-check-label" for="completedCheck">
+                                        Đánh dấu bài học này đã hoàn thành
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-success">💾 Lưu tiến độ</button>
+                            </form>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </c:when>
             <c:when test="${isPreview}">
                 <div class="complete-card" style="border-left: 4px solid #076FA4; background: #F0F9FF;">
                     <h3 style="color:#0369A1; margin-bottom:12px;"><i class="fa-solid fa-eye" style="color:#076FA4;"></i> Tiến độ bài học (Chế độ xem trước)</h3>
+                    <c:if test="${currentLesson.assessmentType != null && currentLesson.assessmentType != 'none'}">
+                        <div style="background:#e0f2fe; border:1px solid #7dd3fc; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px; color:#0369a1;">
+                            <i class="fa-solid fa-lock"></i> <strong>Cấu hình bài học:</strong> 
+                            <c:choose>
+                                <c:when test="${currentLesson.assessmentType == 'quiz'}">Học viên phải đạt Quiz: <strong><c:out value="${assessmentQuiz != null ? assessmentQuiz.title : ''}"/></strong> để mở khóa bài tiếp theo.</c:when>
+                                <c:when test="${currentLesson.assessmentType == 'code'}">Học viên phải hoàn thành 100% test cases bài tập Code để mở khóa bài tiếp theo.</c:when>
+                                <c:when test="${currentLesson.assessmentType == 'assignment'}">Học viên phải nộp bài tập: <strong><c:out value="${assessmentAssignment != null ? assessmentAssignment.title : ''}"/></strong> để mở khóa bài tiếp theo.</c:when>
+                            </c:choose>
+                        </div>
+                    </c:if>
                     <div class="form-check" style="margin-bottom:12px; opacity:0.75;">
                         <input type="checkbox" id="previewCompletedCheck" disabled />
                         <label class="form-check-label" for="previewCompletedCheck" style="cursor:not-allowed; color:#64748B;">
@@ -756,25 +1001,8 @@
                         <i class="fa-solid fa-lock"></i> Chỉ xem nội dung (Không thể tick tiến độ)
                     </button>
                     <p style="font-size:13px; color:#64748B; margin-top:12px; margin-bottom:0;">
-                        <i class="fa-solid fa-circle-info"></i> Bạn đang xem giao diện học viên với tư cách Giảng viên / Quản trị viên (chỉ xem, không thể thao tác lưu tiến độ).
+                        <i class="fa-solid fa-circle-info"></i> Bạn đang xem giao diện học viên với tư cách Giảng viên / Quản trị viên (được mở khóa xem trước tất cả bài học trong khóa).
                     </p>
-                </div>
-                <%-- BANNER ĐIỂM DỪNG VIDEO CHECKPOINT --%>
-                <div id="videoCheckpointNotice" style="display:none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(245,158,11,0.25); animation: pulse 2s infinite;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
-                        <div style="display:flex; align-items:center; gap:14px;">
-                            <div style="width:42px; height:42px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">
-                                <i class="fa-solid fa-circle-pause"></i>
-                            </div>
-                            <div>
-                                <div style="font-weight:700; color:#92400E; font-size:15px;"><i class="fa-solid fa-lock"></i> ĐIỂM DỪNG VIDEO (INTERACTIVE CHECKPOINT)</div>
-                                <div style="font-size:13px; color:#B45309;" id="checkpointNoticeMsg">Video đã tự động tạm dừng tại mốc thời gian bài học. Bạn cần thực hành và <strong>Nộp bài ĐẠT (Pass 100% Test cases)</strong> để mở khóa xem tiếp!</div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn" style="background:#D97706; color:#fff; font-weight:700; font-size:13px; padding:10px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="focusOnExercise()">
-                            <i class="fa-solid fa-code"></i> Thực Hành Ngay <i class="fa-solid fa-arrow-down"></i>
-                        </button>
-                    </div>
                 </div>
             </c:when>
         </c:choose>
@@ -880,34 +1108,95 @@
         return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
+    function formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return "0:00";
+        var m = Math.floor(seconds / 60);
+        var s = Math.floor(seconds % 60);
+        return m + ":" + (s < 10 ? "0" : "") + s;
+    }
+
+    const isPreview = ${isPreview ? 'true' : 'false'};
     let currentExerciseId = null;
     let checkpointData = null;
-    let checkpointPassed = false;
-    let checkpointTriggered = false;
+    let checkpointPassed = isPreview ? true : false;
+    let suppressCheckpointCheck = false;
 
     document.addEventListener("DOMContentLoaded", function() {
         loadLessonExercise();
         loadLessonCheckpoint();
 
+        // Cấu hình sự kiện cho Video HTML5 (nếu có)
         const html5Vid = document.getElementById('html5-video');
+        const html5PlayBtn = document.getElementById('html5PlayPauseBtn');
+        const html5MuteBtn = document.getElementById('html5MuteBtn');
+        const html5Prog = document.getElementById('html5ProgressBarContainer');
+
         if(html5Vid) {
-            html5Vid.addEventListener('timeupdate', function() {
-                checkVideoCheckpoint(html5Vid.currentTime);
-            });
+            function toggleHtml5Play() {
+                if(!isPreview && !checkpointPassed && isCheckpointBlocked(html5Vid.currentTime)) {
+                    lockVideoAtCheckpoint();
+                    return;
+                }
+                if(html5Vid.paused) {
+                    html5Vid.play();
+                } else {
+                    html5Vid.pause();
+                }
+            }
+
+            if(html5PlayBtn) html5PlayBtn.addEventListener('click', toggleHtml5Play);
+            html5Vid.addEventListener('click', toggleHtml5Play);
+
             html5Vid.addEventListener('play', function() {
-                if(isCheckpointBlocked(html5Vid.currentTime)) {
-                    html5Vid.pause();
-                    html5Vid.currentTime = checkpointData.checkpointSeconds;
-                    lockVideoAtCheckpoint();
-                }
+                if(html5PlayBtn) html5PlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
             });
-            html5Vid.addEventListener('seeking', function() {
-                if(isCheckpointBlocked(html5Vid.currentTime)) {
-                    html5Vid.pause();
-                    html5Vid.currentTime = checkpointData.checkpointSeconds;
-                    lockVideoAtCheckpoint();
-                }
+            html5Vid.addEventListener('pause', function() {
+                if(html5PlayBtn) html5PlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
             });
+
+            html5Vid.addEventListener('timeupdate', function() {
+                const current = html5Vid.currentTime;
+                const duration = html5Vid.duration || 0;
+                
+                if (duration > 0) {
+                    const percent = (current / duration) * 100;
+                    const fill = document.getElementById('html5ProgressBarFill');
+                    if (fill) fill.style.width = percent + '%';
+                }
+                const timeDisplay = document.getElementById('html5VideoTime');
+                if (timeDisplay) {
+                    timeDisplay.innerText = formatTime(current) + " / " + formatTime(duration);
+                }
+
+                renderAllCheckpointMarkers();
+                checkVideoCheckpoint(current);
+            });
+
+            html5Vid.addEventListener('loadedmetadata', function() {
+                const duration = html5Vid.duration || 0;
+                const timeDisplay = document.getElementById('html5VideoTime');
+                if (timeDisplay) {
+                    timeDisplay.innerText = formatTime(0) + " / " + formatTime(duration);
+                }
+                renderAllCheckpointMarkers();
+            });
+
+            if(html5MuteBtn) {
+                html5MuteBtn.addEventListener('click', function() {
+                    html5Vid.muted = !html5Vid.muted;
+                    html5MuteBtn.innerHTML = html5Vid.muted
+                        ? '<i class="fa-solid fa-volume-xmark"></i>'
+                        : '<i class="fa-solid fa-volume-high"></i>';
+                });
+            }
+
+            if(html5Prog) {
+                html5Prog.addEventListener('click', function(e) {
+                    onProgressBarClick(e, html5Prog, () => html5Vid.duration, (t) => {
+                        html5Vid.currentTime = t;
+                    });
+                });
+            }
         }
     });
 
@@ -930,8 +1219,9 @@
 
                     const statusBadge = document.getElementById('ex-status-badge');
                     if(statusBadge) {
-                        if(data.isPassed || data.passed) {
+                        if(data.isPassed || data.passed || isPreview) {
                             checkpointPassed = true;
+                            renderAllCheckpointMarkers();
                             statusBadge.style.background = '#065f46';
                             statusBadge.style.color = '#34d399';
                             statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> ĐÃ HOÀN THÀNH (ĐẠT 100%)';
@@ -1004,30 +1294,32 @@
             .then(data => {
                 if(data.success && data.hasCheckpoint) {
                     checkpointData = data;
-                    if(data.isPassed) {
+                    if(data.isPassed || isPreview) {
                         checkpointPassed = true;
                     }
+                    renderAllCheckpointMarkers();
                 }
             })
             .catch(err => console.error("Error loading checkpoint:", err));
     }
 
     function isCheckpointBlocked(currentTime) {
-        if(!checkpointData || !checkpointData.hasCheckpoint || checkpointPassed) return false;
-        if(!checkpointData.checkpointSeconds || checkpointData.checkpointSeconds <= 0) return false;
+        if(isPreview || checkpointPassed) return false;
+        if(!checkpointData || !checkpointData.hasCheckpoint || !checkpointData.checkpointSeconds || checkpointData.checkpointSeconds <= 0) return false;
         if(typeof currentTime !== 'number' || isNaN(currentTime)) return false;
-        return currentTime >= (checkpointData.checkpointSeconds - 0.25);
+        return currentTime >= checkpointData.checkpointSeconds;
     }
 
     function checkVideoCheckpoint(currentTime) {
-        if(!checkpointData || !checkpointData.hasCheckpoint || checkpointPassed) return;
+        if(suppressCheckpointCheck || isPreview || checkpointPassed) return;
+        if(!checkpointData || !checkpointData.hasCheckpoint) return;
         if(isCheckpointBlocked(currentTime)) {
             lockVideoAtCheckpoint();
         }
     }
 
     function lockVideoAtCheckpoint() {
-        if(checkpointPassed || !checkpointData) return;
+        if(isPreview || checkpointPassed || !checkpointData) return;
 
         // Dừng video ngay lập tức và đưa về mốc checkpoint
         if(player) {
@@ -1040,73 +1332,250 @@
             html5Vid.currentTime = checkpointData.checkpointSeconds;
         }
 
-        // Kích hoạt overlay tương ứng để khóa không cho click vào video
-        if(checkpointData.checkpointType === 'quiz') {
+        const ytPlayBtn = document.getElementById('ytPlayPauseBtn');
+        if(ytPlayBtn) ytPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        const html5PlayBtn = document.getElementById('html5PlayPauseBtn');
+        if(html5PlayBtn) html5PlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+
+        // Kích hoạt overlay tương ứng
+        const cpType = (checkpointData.checkpointType || '').toLowerCase();
+        if(cpType === 'quiz') {
             showInVideoQuizOverlay();
-        } else if(checkpointData.checkpointType === 'code') {
+        } else if(cpType === 'code') {
             showInVideoCodeLockOverlay();
             showCodeCheckpointNotice();
         }
     }
 
-    function showInVideoQuizOverlay() {
-        const overlay = document.getElementById('inVideoQuizOverlay');
-        if(!overlay || !checkpointData || !checkpointData.quiz) return;
-        const qContent = document.getElementById('ivqContent');
-        if(qContent) qContent.innerText = checkpointData.quiz.content;
-        const listEl = document.getElementById('ivqOptionsList');
-        if(!listEl) return;
-        listEl.innerHTML = '';
-        checkpointData.quiz.options.forEach((opt) => {
-            const label = document.createElement('label');
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            label.style.gap = '10px';
-            label.style.padding = '10px 14px';
-            label.style.background = '#0f172a';
-            label.style.borderRadius = '8px';
-            label.style.cursor = 'pointer';
-            label.style.border = '1px solid #334155';
-            label.style.transition = 'all 0.2s';
-            label.innerHTML = '<input type="radio" name="ivqOption" value="' + opt.id + '" style="accent-color:#3b82f6; width:16px; height:16px; cursor:pointer;" />' +
-                '<span style="font-size:14px; color:#e2e8f0;">' + escapeHtml(opt.content) + '</span>';
-            listEl.appendChild(label);
-        });
+    function hideAllCheckpointOverlays() {
+        const overlays = document.querySelectorAll('.in-video-quiz-overlay, .in-video-code-overlay, #inVideoQuizOverlay, #inVideoCodeLockOverlay');
+        overlays.forEach(ov => ov.style.setProperty('display', 'none', 'important'));
+    }
 
-        const msgEl = document.getElementById('ivqMessage');
-        if(msgEl) {
-            msgEl.style.display = 'none';
-            msgEl.innerText = '';
+    function rewindVideo(seconds) {
+        hideAllCheckpointOverlays();
+        suppressCheckpointCheck = true;
+        const cpSec = (checkpointData && checkpointData.checkpointSeconds) ? checkpointData.checkpointSeconds : 10;
+        const target = Math.max(0, cpSec - (seconds || 10));
+
+        if(player && typeof player.seekTo === 'function') {
+            player.seekTo(target, true);
+            player.playVideo();
+            const ytPlayBtn = document.getElementById('ytPlayPauseBtn');
+            if(ytPlayBtn) ytPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
         }
-        overlay.style.setProperty('display', 'flex', 'important');
+        const html5Vid = document.getElementById('html5-video');
+        if(html5Vid) {
+            html5Vid.currentTime = target;
+            html5Vid.play();
+            const html5PlayBtn = document.getElementById('html5PlayPauseBtn');
+            if(html5PlayBtn) html5PlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        }
+
+        setTimeout(() => {
+            suppressCheckpointCheck = false;
+        }, 800);
+    }
+
+    function seekVideoTo(targetTime) {
+        suppressCheckpointCheck = true;
+        if(player && typeof player.seekTo === 'function') {
+            player.seekTo(targetTime, true);
+        }
+        const html5Vid = document.getElementById('html5-video');
+        if(html5Vid) {
+            html5Vid.currentTime = targetTime;
+        }
+        setTimeout(() => {
+            suppressCheckpointCheck = false;
+        }, 800);
+    }
+
+    function onProgressBarClick(e, container, getDurationFn, seekToFn) {
+        const rect = container.getBoundingClientRect();
+        const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const duration = getDurationFn();
+        if(!duration || duration <= 0) return;
+        const targetTime = pos * duration;
+
+        if(!isPreview && !checkpointPassed && checkpointData && checkpointData.hasCheckpoint && checkpointData.checkpointSeconds) {
+            if(targetTime >= checkpointData.checkpointSeconds) {
+                // Tua vượt qua checkpoint bị chặn -> dừng lại ở checkpoint và hiển thị câu hỏi/bài tập
+                seekToFn(checkpointData.checkpointSeconds);
+                lockVideoAtCheckpoint();
+                return;
+            }
+        }
+
+        // Tua lùi hoặc tua trong khoảng hợp lệ -> cho phép tự do
+        hideAllCheckpointOverlays();
+        suppressCheckpointCheck = true;
+        seekToFn(targetTime);
+        setTimeout(() => {
+            suppressCheckpointCheck = false;
+        }, 800);
+    }
+
+    function renderCheckpointMarker(containerEl, duration) {
+        if(!containerEl || !checkpointData || !checkpointData.checkpointSeconds || duration <= 0) return;
+        const cpSec = checkpointData.checkpointSeconds;
+        const percent = Math.min(100, Math.max(0, (cpSec / duration) * 100));
+
+        let marker = containerEl.querySelector('.checkpoint-marker-dot');
+        if(!marker) {
+            marker = document.createElement('div');
+            marker.className = 'checkpoint-marker-dot' + (checkpointPassed ? ' passed' : '');
+
+            const tooltip = document.createElement('span');
+            tooltip.className = 'checkpoint-tooltip';
+            marker.appendChild(tooltip);
+
+            marker.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if(isPreview || checkpointPassed) {
+                    seekVideoTo(cpSec);
+                } else {
+                    seekVideoTo(cpSec);
+                    lockVideoAtCheckpoint();
+                }
+            });
+
+            containerEl.appendChild(marker);
+        }
+
+        marker.style.left = percent + '%';
+        if(checkpointPassed) {
+            marker.classList.add('passed');
+        } else {
+            marker.classList.remove('passed');
+        }
+
+        const tooltip = marker.querySelector('.checkpoint-tooltip');
+        if(tooltip) {
+            const isQuiz = (checkpointData.checkpointType || '').toLowerCase() === 'quiz';
+            const typeLabel = isQuiz ? 'Quiz trắc nghiệm' : 'Bài tập Code';
+            const timeStr = formatTime(cpSec);
+            if(checkpointPassed) {
+                tooltip.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#34d399;"></i> Điểm dừng ' + typeLabel + ' (' + timeStr + ') - ĐÃ QUA';
+            } else {
+                tooltip.innerHTML = '<i class="fa-solid fa-flag" style="color:#f59e0b;"></i> Điểm dừng: ' + typeLabel + ' (' + timeStr + ')';
+            }
+        }
+    }
+
+    function renderAllCheckpointMarkers() {
+        if(!checkpointData || !checkpointData.hasCheckpoint || !checkpointData.checkpointSeconds) return;
+
+        let duration = 0;
+        if(player && typeof player.getDuration === 'function') {
+            duration = player.getDuration();
+        }
+        const html5Vid = document.getElementById('html5-video');
+        if(html5Vid && html5Vid.duration && !isNaN(html5Vid.duration)) {
+            duration = html5Vid.duration;
+        }
+
+        if(duration <= 0) return;
+
+        const ytProg = document.getElementById('ytProgressBarContainer');
+        if(ytProg) renderCheckpointMarker(ytProg, duration);
+
+        const html5Prog = document.getElementById('html5ProgressBarContainer');
+        if(html5Prog) renderCheckpointMarker(html5Prog, duration);
+    }
+
+    function showInVideoQuizOverlay() {
+        const overlays = document.querySelectorAll('.in-video-quiz-overlay, #inVideoQuizOverlay');
+        if(!overlays || overlays.length === 0) return;
+
+        overlays.forEach(overlay => {
+            if(!checkpointData || !checkpointData.quiz || !checkpointData.quiz.content) {
+                // Fallback nếu chưa cấu hình câu hỏi
+                const qContent = overlay.querySelector('.ivq-content, #ivqContent');
+                if(qContent) qContent.innerText = 'Điểm dừng tương tác (Chưa cấu hình câu hỏi)';
+                const listEl = overlay.querySelector('.ivq-options-list, #ivqOptionsList');
+                if(listEl) listEl.innerHTML = '<p style="color:#94a3b8; font-size:13px; margin:0;">Giảng viên chưa chọn câu hỏi trắc nghiệm cho điểm dừng này. Bạn có thể nhấn Tiếp tục để xem video.</p>';
+                const btn = overlay.querySelector('.ivq-submit-btn, #ivqSubmitBtn');
+                if(btn) {
+                    btn.innerHTML = 'Tiếp tục xem video <i class="fa-solid fa-arrow-right"></i>';
+                    btn.onclick = function() {
+                        checkpointPassed = true;
+                        hideAllCheckpointOverlays();
+                        renderAllCheckpointMarkers();
+                        if(player && typeof player.playVideo === 'function') player.playVideo();
+                        const html5Vid = document.getElementById('html5-video');
+                        if(html5Vid) html5Vid.play();
+                    };
+                }
+                overlay.style.setProperty('display', 'flex', 'important');
+                return;
+            }
+
+            const qContent = overlay.querySelector('.ivq-content, #ivqContent');
+            if(qContent) qContent.innerText = checkpointData.quiz.content;
+            const listEl = overlay.querySelector('.ivq-options-list, #ivqOptionsList');
+            if(listEl) {
+                listEl.innerHTML = '';
+                (checkpointData.quiz.options || []).forEach((opt) => {
+                    const label = document.createElement('label');
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '10px';
+                    label.style.padding = '10px 14px';
+                    label.style.background = '#0f172a';
+                    label.style.borderRadius = '8px';
+                    label.style.cursor = 'pointer';
+                    label.style.border = '1px solid #334155';
+                    label.style.transition = 'all 0.2s';
+                    label.innerHTML = '<input type="radio" name="ivqOption" value="' + opt.id + '" style="accent-color:#3b82f6; width:16px; height:16px; cursor:pointer;" />' +
+                        '<span style="font-size:14px; color:#e2e8f0;">' + escapeHtml(opt.content) + '</span>';
+                    listEl.appendChild(label);
+                });
+            }
+
+            const msgEl = overlay.querySelector('.ivq-message, #ivqMessage');
+            if(msgEl) {
+                msgEl.style.display = 'none';
+                msgEl.innerText = '';
+            }
+            const btn = overlay.querySelector('.ivq-submit-btn, #ivqSubmitBtn');
+            if(btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>';
+                btn.onclick = verifyInVideoQuiz;
+            }
+            overlay.style.setProperty('display', 'flex', 'important');
+        });
     }
 
     function showInVideoCodeLockOverlay() {
-        const lockOv = document.getElementById('inVideoCodeLockOverlay');
-        if(lockOv) {
-            lockOv.style.setProperty('display', 'flex', 'important');
-        }
+        const lockOvs = document.querySelectorAll('.in-video-code-overlay, #inVideoCodeLockOverlay');
+        lockOvs.forEach(ov => {
+            ov.style.setProperty('display', 'flex', 'important');
+        });
     }
 
     function verifyInVideoQuiz() {
         const selected = document.querySelector('input[name="ivqOption"]:checked');
-        const msgEl = document.getElementById('ivqMessage');
-        const btn = document.getElementById('ivqSubmitBtn');
+        const msgs = document.querySelectorAll('.ivq-message, #ivqMessage');
+        const btns = document.querySelectorAll('.ivq-submit-btn, #ivqSubmitBtn');
 
         if(!selected) {
-            if(msgEl) {
+            msgs.forEach(msgEl => {
                 msgEl.style.display = 'block';
                 msgEl.style.background = '#7f1d1d';
                 msgEl.style.color = '#fca5a5';
                 msgEl.innerText = 'Vui lòng chọn 1 câu trả lời trước khi kiểm tra!';
-            }
+            });
             return;
         }
 
-        if(btn) {
+        if(!checkpointData || !checkpointData.quiz) return;
+
+        btns.forEach(btn => {
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang kiểm tra...';
-        }
+        });
 
         fetch('${pageContext.request.contextPath}/api/checkpoint/verify-quiz', {
             method: 'POST',
@@ -1119,50 +1588,55 @@
         })
         .then(res => res.json())
         .then(data => {
-            if(btn) {
+            btns.forEach(btn => {
                 btn.disabled = false;
                 btn.innerHTML = 'Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>';
-            }
+            });
 
             if(data.success && data.isCorrect) {
-                if(msgEl) {
+                msgs.forEach(msgEl => {
                     msgEl.style.display = 'block';
                     msgEl.style.background = '#065f46';
                     msgEl.style.color = '#a7f3d0';
                     msgEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + (data.explanation || 'Chính xác! Bạn đã trả lời đúng.');
-                }
+                });
                 checkpointPassed = true;
+                renderAllCheckpointMarkers();
 
                 setTimeout(() => {
-                    const ov = document.getElementById('inVideoQuizOverlay');
-                    if(ov) ov.style.setProperty('display', 'none', 'important');
+                    hideAllCheckpointOverlays();
                     if(player && typeof player.playVideo === 'function') {
                         player.playVideo();
+                        const ytPlayBtn = document.getElementById('ytPlayPauseBtn');
+                        if(ytPlayBtn) ytPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                     }
                     const html5Vid = document.getElementById('html5-video');
                     if(html5Vid) {
                         html5Vid.play();
+                        const html5PlayBtn = document.getElementById('html5PlayPauseBtn');
+                        if(html5PlayBtn) html5PlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                     }
-                }, 1600);
+                }, 1400);
             } else {
-                if(msgEl) {
+                msgs.forEach(msgEl => {
                     msgEl.style.display = 'block';
                     msgEl.style.background = '#7f1d1d';
                     msgEl.style.color = '#fca5a5';
                     msgEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ' + (data.message || 'Đáp án chưa chính xác. Vui lòng suy nghĩ và chọn lại!');
-                }
+                });
             }
         })
         .catch(err => {
-            if(btn) {
+            btns.forEach(btn => {
                 btn.disabled = false;
                 btn.innerHTML = 'Kiểm Tra Đáp Án <i class="fa-solid fa-arrow-right"></i>';
-            }
-            if(msgEl) {
+            });
+            msgs.forEach(msgEl => {
                 msgEl.style.display = 'block';
                 msgEl.style.background = '#7f1d1d';
                 msgEl.style.color = '#fca5a5';
                 msgEl.innerText = 'Lỗi kết nối máy chủ: ' + err;
+            });
         });
     }
 
@@ -1345,12 +1819,14 @@
 <script src="${pageContext.request.contextPath}/assets/js/lms-app.js?v=38"></script>
 
 <c:if test="${not empty youtubeEmbedUrl}">
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    var player;
-    var timeUpdater;
+    var player = null;
+    var timeUpdater = null;
 
-    function onYouTubeIframeAPIReady() {
+    function initYouTubePlayer() {
+        if (player) return;
+        var el = document.getElementById('youtube-player');
+        if (!el) return;
         player = new YT.Player('youtube-player', {
             events: {
                 'onReady': onPlayerReady,
@@ -1359,94 +1835,106 @@
         });
     }
 
+    if (window.YT && window.YT.Player) {
+        initYouTubePlayer();
+    } else {
+        var oldYTReady = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = function() {
+            if (typeof oldYTReady === 'function') oldYTReady();
+            initYouTubePlayer();
+        };
+    }
+
     function onPlayerReady(event) {
         // Toggle Play/Pause
-        document.getElementById('ytPlayPauseBtn').addEventListener('click', function() {
-            if(player && player.getCurrentTime && isCheckpointBlocked(player.getCurrentTime())) {
-                lockVideoAtCheckpoint();
-                return;
-            }
-            var state = player.getPlayerState();
-            if (state == YT.PlayerState.PLAYING) {
-                player.pauseVideo();
-            } else {
-                player.playVideo();
-            }
-        });
+        var playBtn = document.getElementById('ytPlayPauseBtn');
+        if (playBtn) {
+            playBtn.addEventListener('click', function() {
+                if (!isPreview && !checkpointPassed && isCheckpointBlocked(player.getCurrentTime())) {
+                    lockVideoAtCheckpoint();
+                    return;
+                }
+                var state = player.getPlayerState();
+                if (state == YT.PlayerState.PLAYING) {
+                    player.pauseVideo();
+                } else {
+                    player.playVideo();
+                }
+            });
+        }
 
         // Toggle Mute
-        document.getElementById('ytMuteBtn').addEventListener('click', function() {
-            if (player.isMuted()) {
-                player.unMute();
-                this.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
-            } else {
-                player.mute();
-                this.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
-            }
-        });
+        var muteBtn = document.getElementById('ytMuteBtn');
+        if (muteBtn) {
+            muteBtn.addEventListener('click', function() {
+                if (player.isMuted()) {
+                    player.unMute();
+                    this.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                } else {
+                    player.mute();
+                    this.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                }
+            });
+        }
 
-        // Seek (Tua video) - CHẶN TUA VƯỢT CHECKPOINT
-        document.getElementById('ytProgressBarContainer').addEventListener('click', function(e) {
-            var rect = this.getBoundingClientRect();
-            var pos = (e.clientX - rect.left) / this.offsetWidth;
-            var targetTime = pos * player.getDuration();
-            if (!checkpointPassed && checkpointData && checkpointData.hasCheckpoint && targetTime >= checkpointData.checkpointSeconds) {
-                player.seekTo(checkpointData.checkpointSeconds, true);
-                player.pauseVideo();
-                lockVideoAtCheckpoint();
-                return;
-            }
-            player.seekTo(targetTime);
-        });
-        
+        // Seek (Tua video) - Hỗ trợ tua tới, tua lùi tự do trước checkpoint
+        var ytProg = document.getElementById('ytProgressBarContainer');
+        if (ytProg) {
+            ytProg.addEventListener('click', function(e) {
+                onProgressBarClick(e, ytProg, () => player.getDuration(), (t) => {
+                    player.seekTo(t, true);
+                });
+            });
+        }
+
         updateTimeDisplay();
+        renderAllCheckpointMarkers();
     }
 
     function onPlayerStateChange(event) {
         var playBtn = document.getElementById('ytPlayPauseBtn');
         if (event.data == YT.PlayerState.PLAYING || event.data == YT.PlayerState.BUFFERING) {
-            if (player && player.getCurrentTime && isCheckpointBlocked(player.getCurrentTime())) {
+            if (!suppressCheckpointCheck && !isPreview && !checkpointPassed && isCheckpointBlocked(player.getCurrentTime())) {
                 lockVideoAtCheckpoint();
                 return;
             }
             if (event.data == YT.PlayerState.PLAYING) {
-                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
                 if (!timeUpdater) {
-                    timeUpdater = setInterval(updateTimeDisplay, 300);
+                    timeUpdater = setInterval(updateTimeDisplay, 250);
                 }
             }
         } else {
-            playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
             clearInterval(timeUpdater);
             timeUpdater = null;
         }
+        renderAllCheckpointMarkers();
     }
 
     function updateTimeDisplay() {
-        if(player && player.getCurrentTime) {
+        if (player && typeof player.getCurrentTime === 'function') {
             var current = player.getCurrentTime();
-            if (isCheckpointBlocked(current)) {
+            if (!suppressCheckpointCheck && !isPreview && !checkpointPassed && isCheckpointBlocked(current)) {
                 lockVideoAtCheckpoint();
                 return;
             }
-            var duration = player.getDuration();
-            
+            var duration = typeof player.getDuration === 'function' ? player.getDuration() : 0;
+
             if (duration > 0) {
                 var percent = (current / duration) * 100;
-                document.getElementById('ytProgressBarFill').style.width = percent + '%';
+                var fill = document.getElementById('ytProgressBarFill');
+                if (fill) fill.style.width = percent + '%';
             }
 
-            document.getElementById('ytVideoTime').innerText = formatTime(current) + " / " + formatTime(duration);
+            var timeEl = document.getElementById('ytVideoTime');
+            if (timeEl) timeEl.innerText = formatTime(current) + " / " + formatTime(duration);
+
+            renderAllCheckpointMarkers();
         }
     }
-
-    function formatTime(seconds) {
-        if(!seconds) return "0:00";
-        var m = Math.floor(seconds / 60);
-        var s = Math.floor(seconds % 60);
-        return m + ":" + (s < 10 ? "0" : "") + s;
-    }
 </script>
+<script src="https://www.youtube.com/iframe_api"></script>
 </c:if>
 
 <!-- ========================================================================= -->

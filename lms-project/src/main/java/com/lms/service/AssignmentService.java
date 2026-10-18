@@ -250,6 +250,23 @@ public class AssignmentService {
         if (!submissionDAO.upsert(s, fileBytes)) {
             throw new RuntimeException("Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!");
         }
+
+        // Tự động đánh dấu hoàn thành bài học nếu bài tập này là điều kiện của bài học
+        try {
+            com.lms.dao.LessonDAO lessonDAO = new com.lms.dao.LessonDAO();
+            com.lms.dao.SectionDAO sectionDAO = new com.lms.dao.SectionDAO();
+            com.lms.service.EnrollmentService enrollmentService = new com.lms.service.EnrollmentService();
+            List<com.lms.model.Lesson> linkedLessons = lessonDAO.findByAssessment("assignment", assignmentId);
+            for (com.lms.model.Lesson l : linkedLessons) {
+                com.lms.model.Section sec = sectionDAO.findById(l.getSectionId());
+                int cId = (sec != null) ? sec.getCourseId() : 0;
+                if (cId > 0) {
+                    enrollmentService.toggleLessonCompletion(studentId, cId, l.getId(), true);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public FileData getAttachmentForStudent(int assignmentId, int studentId) {

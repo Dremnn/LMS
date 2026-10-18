@@ -13,7 +13,8 @@ public class LessonDAO {
     public List<Lesson> findBySectionId(int sectionId) {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT id, section_id, title, video_url, document_url, " +
-                     "duration_minutes, order_index, description, video_checkpoint_seconds, checkpoint_type, checkpoint_ref_id FROM lessons " +
+                     "duration_minutes, order_index, description, video_checkpoint_seconds, checkpoint_type, checkpoint_ref_id, " +
+                     "assessment_type, assessment_ref_id FROM lessons " +
                      "WHERE section_id = ? ORDER BY order_index ASC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -37,7 +38,8 @@ public class LessonDAO {
     public List<Lesson> findByCourseId(int courseId) {
         List<Lesson> list = new ArrayList<>();
         String sql = "SELECT l.id, l.section_id, l.title, l.video_url, l.document_url, " +
-                     "l.duration_minutes, l.order_index, l.description, l.video_checkpoint_seconds, l.checkpoint_type, l.checkpoint_ref_id " +
+                     "l.duration_minutes, l.order_index, l.description, l.video_checkpoint_seconds, l.checkpoint_type, l.checkpoint_ref_id, " +
+                     "l.assessment_type, l.assessment_ref_id " +
                      "FROM lessons l INNER JOIN sections s ON l.section_id = s.id " +
                      "WHERE s.course_id = ? ORDER BY s.order_index ASC, l.order_index ASC";
 
@@ -60,7 +62,8 @@ public class LessonDAO {
     // 3. Tìm 1 bài học theo ID
     public Lesson findById(int id) {
         String sql = "SELECT id, section_id, title, video_url, document_url, " +
-                     "duration_minutes, order_index, description, video_checkpoint_seconds, checkpoint_type, checkpoint_ref_id FROM lessons WHERE id = ?";
+                     "duration_minutes, order_index, description, video_checkpoint_seconds, checkpoint_type, checkpoint_ref_id, " +
+                     "assessment_type, assessment_ref_id FROM lessons WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -231,6 +234,16 @@ public class LessonDAO {
             lesson.setCheckpointRefId(rs.wasNull() ? null : cpRef);
         } catch (SQLException ignored) {}
 
+        try {
+            String aType = rs.getString("assessment_type");
+            lesson.setAssessmentType(aType != null ? aType : "none");
+        } catch (SQLException ignored) {}
+
+        try {
+            int aRef = rs.getInt("assessment_ref_id");
+            lesson.setAssessmentRefId(rs.wasNull() ? null : aRef);
+        } catch (SQLException ignored) {}
+
         return lesson;
     }
 
@@ -247,5 +260,39 @@ public class LessonDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean updateAssessment(int lessonId, String assessmentType, Integer assessmentRefId) {
+        String sql = "UPDATE lessons SET assessment_type = ?, assessment_ref_id = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, (assessmentType != null && !assessmentType.trim().isEmpty()) ? assessmentType.trim() : "none");
+            if (assessmentRefId != null && assessmentRefId > 0) stmt.setInt(2, assessmentRefId); else stmt.setNull(2, Types.INTEGER);
+            stmt.setInt(3, lessonId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Lesson> findByAssessment(String assessmentType, int refId) {
+        List<Lesson> list = new ArrayList<>();
+        String sql = "SELECT id, section_id, title, video_url, document_url, " +
+                     "duration_minutes, order_index, description, video_checkpoint_seconds, checkpoint_type, checkpoint_ref_id, " +
+                     "assessment_type, assessment_ref_id FROM lessons WHERE assessment_type = ? AND assessment_ref_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, assessmentType);
+            stmt.setInt(2, refId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToLesson(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

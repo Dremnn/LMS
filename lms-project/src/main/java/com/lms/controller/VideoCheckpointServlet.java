@@ -88,13 +88,17 @@ public class VideoCheckpointServlet extends HttpServlet {
 
             User currentUser = (User) req.getSession().getAttribute("currentUser");
             boolean isPassed = false;
+            String cpType = lesson.getCheckpointType() != null ? lesson.getCheckpointType().trim().toLowerCase() : "code";
+
             if (currentUser != null) {
-                if ("code".equalsIgnoreCase(lesson.getCheckpointType())) {
+                if ("admin".equalsIgnoreCase(currentUser.getRole()) || "instructor".equalsIgnoreCase(currentUser.getRole())) {
+                    isPassed = true; // Giảng viên và Quản trị viên được xem trước toàn bộ video không bị chặn
+                } else if ("code".equals(cpType)) {
                     CodingExercise ex = exerciseDAO.findByLessonId(lesson.getId());
                     if (ex != null && exerciseDAO.hasStudentPassed(ex.getId(), currentUser.getId())) {
                         isPassed = true;
                     }
-                } else if ("quiz".equalsIgnoreCase(lesson.getCheckpointType())) {
+                } else if ("quiz".equals(cpType)) {
                     Boolean quizPassed = (Boolean) req.getSession().getAttribute("checkpoint_quiz_passed_" + lesson.getId());
                     if (Boolean.TRUE.equals(quizPassed)) {
                         isPassed = true;
@@ -106,11 +110,11 @@ public class VideoCheckpointServlet extends HttpServlet {
             res.addProperty("success", true);
             res.addProperty("hasCheckpoint", true);
             res.addProperty("checkpointSeconds", lesson.getVideoCheckpointSeconds());
-            res.addProperty("checkpointType", lesson.getCheckpointType() != null ? lesson.getCheckpointType() : "code");
+            res.addProperty("checkpointType", cpType);
             res.addProperty("checkpointRefId", lesson.getCheckpointRefId());
             res.addProperty("isPassed", isPassed);
 
-            if ("quiz".equalsIgnoreCase(lesson.getCheckpointType()) && lesson.getCheckpointRefId() != null) {
+            if ("quiz".equals(cpType) && lesson.getCheckpointRefId() != null) {
                 Question question = questionDAO.findById(lesson.getCheckpointRefId());
                 if (question != null) {
                     JsonObject qJson = new JsonObject();

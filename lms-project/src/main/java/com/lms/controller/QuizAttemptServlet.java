@@ -238,6 +238,39 @@ public class QuizAttemptServlet extends HttpServlet {
             if (lessonId != null && !lessonId.trim().isEmpty()) {
                 redirectUrl += "&lessonId=" + lessonId;
             }
+
+            // Tự động đánh dấu hoàn thành bài học nếu bài kiểm tra đạt điểm qua
+            if (attempt != null && Boolean.TRUE.equals(attempt.getPassed())) {
+                try {
+                    com.lms.dao.LessonDAO lessonDAO = new com.lms.dao.LessonDAO();
+                    com.lms.dao.SectionDAO sectionDAO = new com.lms.dao.SectionDAO();
+                    com.lms.service.EnrollmentService enrollmentService = new com.lms.service.EnrollmentService();
+
+                    List<com.lms.model.Lesson> linkedLessons = lessonDAO.findByAssessment("quiz", quizId);
+                    if (lessonId != null && !lessonId.trim().isEmpty()) {
+                        int lId = Integer.parseInt(lessonId.trim());
+                        boolean alreadyIncluded = false;
+                        for (com.lms.model.Lesson l : linkedLessons) {
+                            if (l.getId() == lId) { alreadyIncluded = true; break; }
+                        }
+                        if (!alreadyIncluded) {
+                            com.lms.model.Lesson directLesson = lessonDAO.findById(lId);
+                            if (directLesson != null) linkedLessons.add(directLesson);
+                        }
+                    }
+
+                    for (com.lms.model.Lesson l : linkedLessons) {
+                        com.lms.model.Section s = sectionDAO.findById(l.getSectionId());
+                        int cId = (s != null) ? s.getCourseId() : 0;
+                        if (cId > 0) {
+                            enrollmentService.toggleLessonCompletion(currentUser.getId(), cId, l.getId(), true);
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
             response.sendRedirect(redirectUrl);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
