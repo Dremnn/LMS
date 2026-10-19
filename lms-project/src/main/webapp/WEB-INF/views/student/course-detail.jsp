@@ -244,12 +244,19 @@
     <div class="hero-inner">
         <div class="hero-info">
             <a href="${pageContext.request.contextPath}/courses" class="back-link"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách</a>
-            <c:if test="${not empty course.categoryName}">
-                <!-- Danh mục khóa học -->
-                <span style="font-size:13px;color:#076FA4;background:rgba(157, 185, 203, 0.25);padding:4px 12px;border-radius:20px;font-weight:700;display:inline-block;margin-bottom:12px;">
-                    <i class="fa-solid fa-folder-open"></i> <c:out value="${course.categoryName}"/>
-                </span>
-            </c:if>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <c:if test="${course.bestSeller}">
+                    <span style="font-size:12px;color:#fff;background:linear-gradient(135deg, #F59E0B, #EA580C);padding:4px 12px;border-radius:20px;font-weight:800;display:inline-flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(234, 88, 12, 0.35);text-transform:uppercase;letter-spacing:0.5px;">
+                        <i class="fa-solid fa-fire"></i> Best Seller
+                    </span>
+                </c:if>
+                <c:if test="${not empty course.categoryName}">
+                    <!-- Danh mục khóa học -->
+                    <span style="font-size:13px;color:#076FA4;background:rgba(157, 185, 203, 0.25);padding:4px 12px;border-radius:20px;font-weight:700;display:inline-block;">
+                        <i class="fa-solid fa-folder-open"></i> <c:out value="${course.categoryName}"/>
+                    </span>
+                </c:if>
+            </div>
             <!-- Tiêu đề khóa học -->
             <h1><c:out value="${course.title}"/></h1>
             <c:if test="${not empty success}">

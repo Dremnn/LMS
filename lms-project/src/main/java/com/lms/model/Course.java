@@ -80,6 +80,9 @@ public class Course implements Serializable {
     @Transient
     private List<Section> sectionsCache; // Không map với DB - chỉ dùng tạm khi hiển thị chi tiết
 
+    @Transient
+    private boolean bestSeller;
+
     public Course() {}
 
     // Constructor dùng khi Instructor tạo khóa học mới
@@ -168,4 +171,7 @@ public class Course implements Serializable {
 
     public List<Section> getSections() { return sections; }
     public void setSections(List<Section> sections) { this.sections = sections; }
+
+    public boolean isBestSeller() { return bestSeller; }
+    public void setBestSeller(boolean bestSeller) { this.bestSeller = bestSeller; }
 }

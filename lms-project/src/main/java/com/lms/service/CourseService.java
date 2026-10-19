@@ -29,6 +29,14 @@ public class CourseService {
         return courseDAO.search(keyword, categoryId, sortBy);
     }
 
+    public List<Course> searchCourses(String keyword, Integer categoryId, String sortBy, String filter) {
+        return courseDAO.search(keyword, categoryId, sortBy, filter);
+    }
+
+    public Integer getBestSellerCourseId() {
+        return courseDAO.getBestSellerCourseId();
+    }
+
     // =========================================================================
     // 2. XEM CHI TIẾT KHÓA HỌC (kèm danh sách Section + Lesson lồng nhau)
     // =========================================================================

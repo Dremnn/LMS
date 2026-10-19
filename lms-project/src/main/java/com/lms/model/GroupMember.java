@@ -18,7 +18,7 @@ public class GroupMember implements Serializable {
     @JoinColumn(name = "group_id", nullable = false)
     private StudyGroup studyGroup;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 

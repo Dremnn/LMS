@@ -10,6 +10,152 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-design.css?v=50">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/lms-animations.css?v=30">
+    <style>
+        /* Quick Filters Bar */
+        .quick-filters {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+        .quick-filter-label {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #64748B;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .filter-pill {
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid #CBD5E1;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .filter-pill:hover {
+            border-color: #076FA4;
+            color: #076FA4;
+            transform: translateY(-1px);
+        }
+        .filter-pill.active {
+            background: #076FA4;
+            border-color: #076FA4;
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(7, 111, 164, 0.25);
+        }
+        .filter-pill.filter-bestseller-pill {
+            border-color: #F59E0B;
+            color: #B45309;
+            background: #FEF3C7;
+        }
+        .filter-pill.filter-bestseller-pill:hover,
+        .filter-pill.filter-bestseller-pill.active {
+            background: linear-gradient(135deg, #F59E0B, #EA580C);
+            border-color: #EA580C;
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+        }
+
+        /* Best Seller Badge on Course Card */
+        .course-img-wrap {
+            position: relative;
+        }
+        .badge-bestseller {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 2;
+            background: linear-gradient(135deg, #F59E0B, #EA580C);
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.45);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Banner thông báo khi đang lọc Best Seller */
+        .bestseller-filter-notice {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            border: 1px solid #FCD34D;
+            color: #92400E;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+        }
+        .clear-filter-btn {
+            background: #FFFFFF;
+            color: #B45309;
+            padding: 5px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 700;
+            border: 1px solid #FCD34D;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        .clear-filter-btn:hover {
+            background: #92400E;
+            color: #FFFFFF;
+        }
+
+        /* Dark Mode Support */
+        body.dark-theme .filter-pill {
+            background: #182535;
+            border-color: #093C62;
+            color: #9DB9CB;
+        }
+        body.dark-theme .filter-pill:hover {
+            color: #FFFFFF;
+            border-color: #38BDF8;
+        }
+        body.dark-theme .filter-pill.active {
+            background: #076FA4;
+            color: #FFFFFF;
+        }
+        body.dark-theme .filter-pill.filter-bestseller-pill {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #FBBF24;
+        }
+        body.dark-theme .filter-pill.filter-bestseller-pill.active {
+            background: linear-gradient(135deg, #F59E0B, #EA580C);
+            color: #FFFFFF;
+        }
+        body.dark-theme .bestseller-filter-notice {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #FDE68A;
+        }
+        body.dark-theme .clear-filter-btn {
+            background: #182535;
+            color: #FDE68A;
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+    </style>
 </head>
 <body class="mesh-bg ${cookie.app_theme.value == 'dark' ? 'dark-theme' : ''}">
 <%
@@ -111,6 +257,9 @@
 <!-- ========================================================================= -->
 <div class="search-section">
     <form action="${pageContext.request.contextPath}/courses" method="get" class="search-form">
+        <c:if test="${not empty filter}">
+            <input type="hidden" name="filter" value="<c:out value='${filter}'/>">
+        </c:if>
         <!-- Ô nhập từ khóa tìm kiếm theo tên/mô tả khóa học (param: keyword) -->
         <input type="text" name="keyword" class="search-input"
                placeholder="Tìm kiếm khóa học..." value="<c:out value='${keyword}' default=''/>">
@@ -123,15 +272,36 @@
                 </option>
             </c:forEach>
         </select>
-        <!-- Dropdown sắp xếp: newest (Mới nhất), popular (Lượt mua), rating (Sao) (param: sortBy) -->
+        <!-- Dropdown sắp xếp: newest (Mới nhất), bestseller (Bán chạy nhất), rating (Sao) (param: sortBy) -->
         <select name="sortBy" class="search-select">
             <option value="newest" <c:if test="${sortBy == 'newest' || empty sortBy}">selected</c:if>>Mới nhất</option>
-            <option value="popular" <c:if test="${sortBy == 'popular'}">selected</c:if>>Phổ biến nhất</option>
+            <option value="bestseller" <c:if test="${sortBy == 'bestseller' || sortBy == 'popular'}">selected</c:if>>Bán chạy nhất (Best Seller)</option>
             <option value="rating" <c:if test="${sortBy == 'rating'}">selected</c:if>>Đánh giá cao nhất</option>
         </select>
         <!-- Nút Submit thực hiện tìm kiếm -->
         <button type="submit" class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
     </form>
+
+    <!-- Thanh lọc nhanh (Quick Filters) -->
+    <div class="quick-filters">
+        <span class="quick-filter-label"><i class="fa-solid fa-sliders"></i> Lọc nhanh:</span>
+        <a href="${pageContext.request.contextPath}/courses" 
+           class="filter-pill ${empty filter && (sortBy == 'newest' || empty sortBy) ? 'active' : ''}">
+           Tất cả
+        </a>
+        <a href="${pageContext.request.contextPath}/courses?filter=bestseller" 
+           class="filter-pill filter-bestseller-pill ${filter == 'bestseller' ? 'active' : ''}">
+           <i class="fa-solid fa-fire"></i> Khóa học Best Seller
+        </a>
+        <a href="${pageContext.request.contextPath}/courses?sortBy=bestseller" 
+           class="filter-pill ${sortBy == 'bestseller' || sortBy == 'popular' ? 'active' : ''}">
+           <i class="fa-solid fa-arrow-trend-up"></i> Sắp xếp bán chạy nhất
+        </a>
+        <a href="${pageContext.request.contextPath}/courses?sortBy=rating" 
+           class="filter-pill ${sortBy == 'rating' ? 'active' : ''}">
+           <i class="fa-solid fa-star"></i> Đánh giá cao nhất
+        </a>
+    </div>
 </div>
 
 <!-- ========================================================================= -->
@@ -139,6 +309,13 @@
 <!-- Duyệt qua danh sách ${courses} trả về từ CourseBrowseServlet -->
 <!-- ========================================================================= -->
 <div class="lms-main">
+    <c:if test="${filter == 'bestseller'}">
+        <div class="bestseller-filter-notice">
+            <span><i class="fa-solid fa-fire"></i> Đang lọc khóa học <strong>Bán chạy nhất (Best Seller)</strong> trên hệ thống UTEdu LMS.</span>
+            <a href="${pageContext.request.contextPath}/courses" class="clear-filter-btn"><i class="fa-solid fa-xmark"></i> Bỏ lọc</a>
+        </div>
+    </c:if>
+
     <p class="result-info">
         <c:choose>
             <c:when test="${not empty courses}">Tìm thấy <strong>${courses.size()}</strong> khóa học</c:when>
@@ -153,6 +330,9 @@
                 <c:forEach var="course" items="${courses}" varStatus="vs">
                     <div class="course-card reveal reveal-d${(vs.index % 3) + 1}">
                         <div class="course-img-wrap">
+                            <c:if test="${course.bestSeller}">
+                                <div class="badge-bestseller"><i class="fa-solid fa-fire"></i> Best Seller</div>
+                            </c:if>
                             <c:choose>
                                 <c:when test="${not empty course.thumbnailUrl}">
                                     <img class="course-card-img" src="${course.thumbnailUrl}" alt="<c:out value='${course.title}'/>"

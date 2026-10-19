@@ -83,16 +83,16 @@
                 
                 <div class="member-list">
                     <c:forEach var="member" items="${members}">
-                        <div class="member-item ${member.student.id == currentUser.id ? 'me' : ''}">
+                        <div class="member-item ${not empty member.student && member.student.id == currentUser.id ? 'me' : ''}">
                             <div class="avatar-placeholder">
-                                ${member.student.fullName.substring(0,1).toUpperCase()}
+                                ${not empty member.student && not empty member.student.fullName ? member.student.fullName.substring(0,1).toUpperCase() : 'U'}
                             </div>
                             <div>
                                 <strong style="display: block; color: #1e293b;">
-                                    <c:out value="${member.student.fullName}"/>
-                                    <c:if test="${member.student.id == currentUser.id}"> (Bạn)</c:if>
+                                    <c:out value="${not empty member.student ? member.student.fullName : 'Học viên'}"/>
+                                    <c:if test="${not empty member.student && member.student.id == currentUser.id}"> (Bạn)</c:if>
                                 </strong>
-                                <span style="font-size: 12px; color: #64748b;"><c:out value="${member.student.email}"/></span>
+                                <span style="font-size: 12px; color: #64748b;"><c:out value="${not empty member.student ? member.student.email : ''}"/></span>
                             </div>
                             
                             <c:if test="${member.role == 'LEADER'}">

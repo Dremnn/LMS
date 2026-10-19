@@ -232,6 +232,9 @@
         </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <a href="${pageContext.request.contextPath}/instructor/groups?courseId=${course.id}" class="btn" style="background:#0284c7;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 4px 14px rgba(2,132,199,0.35);">
+            <i class="fa-solid fa-users"></i> Quản lý nhóm
+        </a>
         <c:choose>
             <c:when test="${not empty firstLessonId}">
                 <a href="${pageContext.request.contextPath}/student/lessons/view?lessonId=${firstLessonId}" class="btn" style="background:#10B981;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 4px 14px rgba(16,185,129,0.35);">

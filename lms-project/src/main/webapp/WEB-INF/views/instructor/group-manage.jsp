@@ -39,7 +39,7 @@
 <header class="page-header">
     <h1><i class="fa-solid fa-users"></i> Quản lý Nhóm</h1>
     <p>Khóa học: <strong><c:out value="${course.title}" /></strong></p>
-    <a href="${pageContext.request.contextPath}/instructor/dashboard" style="color:#a0aec0; text-decoration:none; font-size:14px; margin-top:8px; display:inline-block;"><i class="fa-solid fa-arrow-left"></i> Quay lại Dashboard</a>
+    <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" style="color:#a0aec0; text-decoration:none; font-size:14px; margin-top:8px; display:inline-block;"><i class="fa-solid fa-arrow-left"></i> Quay lại Quản lý khóa học</a>
 </header>
 
 <div class="main">
@@ -57,8 +57,8 @@
                 <label style="font-size:14px; font-weight:bold;">Số thành viên mỗi nhóm:</label>
                 <input type="number" name="membersPerGroup" value="5" min="2" max="20" style="padding:8px; border:1px solid #cbd5e0; border-radius:6px; width:80px; margin-left:8px;">
             </div>
-            <button type="submit" class="btn-primary" onclick="return confirm('Bạn có chắc chắn muốn chia nhóm cho các học viên còn lại?');">
-                Chạy tự động
+            <button type="submit" class="btn-primary" style="display:inline-flex; align-items:center; gap:8px;" onclick="return confirm('Bạn có chắc chắn muốn chia nhóm cho các học viên còn lại?');">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Chia nhóm tự động
             </button>
         </form>
     </div>
@@ -84,7 +84,7 @@
                             <c:forEach var="member" items="${groupMembersMap[group.id]}">
                                 <li class="member-item">
                                     <i class="fa-solid fa-user" style="color:#cbd5e0; margin-right:8px;"></i>
-                                    <c:out value="${member.student.fullName}"/>
+                                    <c:out value="${not empty member.student ? member.student.fullName : 'Học viên'}"/>
                                     <c:if test="${member.role == 'LEADER'}">
                                         <span class="member-role role-leader">LEADER</span>
                                     </c:if>
@@ -106,7 +106,7 @@
                                     <div style="background: #f0fdf4; padding: 12px; border-radius: 6px; border: 1px solid #bbf7d0; margin-bottom: 12px;">
                                         <p style="font-size: 12px; font-weight: bold; color: #166534; margin-bottom: 4px;"><i class="fa-solid fa-check-circle"></i> Đã nộp bài</p>
                                         <a href="${submission.fileUrl}" target="_blank" style="font-size: 13px; color: #2563eb; text-decoration: none; word-break: break-all;">Mở bài làm <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px;"></i></a>
-                                        <p style="font-size: 11px; color: #475569; margin-top: 4px;">Bởi: ${submission.submitter.fullName}</p>
+                                        <p style="font-size: 11px; color: #475569; margin-top: 4px;">Bởi: <c:out value="${not empty submission.submitter ? submission.submitter.fullName : 'Học viên'}"/></p>
                                     </div>
                                     
                                     <form action="${pageContext.request.contextPath}/instructor/groups" method="post" style="display: flex; flex-direction: column; gap: 8px;">

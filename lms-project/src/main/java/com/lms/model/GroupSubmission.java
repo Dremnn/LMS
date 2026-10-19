@@ -24,7 +24,7 @@ public class GroupSubmission implements Serializable {
     @JoinColumn(name = "group_id", nullable = false)
     private StudyGroup studyGroup;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "submitter_id", nullable = false)
     private User submitter;
 

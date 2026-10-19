@@ -18,8 +18,26 @@ public class CourseDAO {
     // categoryId: lọc theo danh mục (null = tất cả danh mục)
     // sortBy: "newest" | "popular" | "rating" (mặc định "newest")
     // Chỉ lấy các khóa học có status = 'published', 'warning', 'appealed'
-    // (Student vẫn thấy khóa học bị cảnh cáo nhưng sẽ thấy banner thông báo)
+    // Lấy ID của khóa học bán chạy nhất (Best Seller)
+    public Integer getBestSellerCourseId() {
+        String sql = "SELECT id FROM courses WHERE status IN ('published', 'warning', 'appealed') AND total_students > 0 ORDER BY total_students DESC, created_at DESC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public List<Course> search(String keyword, Integer categoryId, String sortBy) {
+        return search(keyword, categoryId, sortBy, null);
+    }
+
+    public List<Course> search(String keyword, Integer categoryId, String sortBy, String filter) {
         List<Course> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
@@ -47,15 +65,26 @@ public class CourseDAO {
             params.add(categoryId);
         }
 
+        // Thêm điều kiện lọc Best Seller (chỉ lấy khóa học bán chạy nhất)
+        if ("bestseller".equalsIgnoreCase(filter)) {
+            sql.append("AND c.total_students = (" +
+                       "    SELECT MAX(c2.total_students) " +
+                       "    FROM courses c2 " +
+                       "    WHERE c2.status IN ('published', 'warning', 'appealed') AND c2.total_students > 0" +
+                       ") ");
+        }
+
         // Sắp xếp theo tiêu chí được chọn
-        if ("popular".equals(sortBy)) {
-            sql.append("ORDER BY c.total_students DESC");
+        if ("popular".equals(sortBy) || "bestseller".equals(sortBy)) {
+            sql.append("ORDER BY c.total_students DESC, c.created_at DESC");
         } else if ("rating".equals(sortBy)) {
-            sql.append("ORDER BY c.avg_rating DESC");
+            sql.append("ORDER BY c.avg_rating DESC, c.created_at DESC");
         } else {
             // Mặc định: mới nhất trước
             sql.append("ORDER BY c.created_at DESC");
         }
+
+        Integer bestSellerId = getBestSellerCourseId();
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
@@ -67,7 +96,11 @@ public class CourseDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    list.add(mapResultSetToCourse(rs));
+                    Course course = mapResultSetToCourse(rs);
+                    if (bestSellerId != null && course.getId() == bestSellerId) {
+                        course.setBestSeller(true);
+                    }
+                    list.add(course);
                 }
             }
         } catch (SQLException e) {
@@ -153,7 +186,12 @@ public class CourseDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return mapResultSetToCourse(rs);
+                    Course course = mapResultSetToCourse(rs);
+                    Integer bestSellerId = getBestSellerCourseId();
+                    if (bestSellerId != null && course.getId() == bestSellerId) {
+                        course.setBestSeller(true);
+                    }
+                    return course;
                 }
             }
         } catch (SQLException e) {

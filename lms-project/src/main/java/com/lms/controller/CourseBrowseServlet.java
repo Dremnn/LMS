@@ -54,6 +54,7 @@ public class CourseBrowseServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String keyword = request.getParameter("keyword");
+        String filter = request.getParameter("filter");
 
         String categoryIdStr = request.getParameter("categoryId");
         Integer categoryId = (categoryIdStr != null && !categoryIdStr.isEmpty())
@@ -64,13 +65,14 @@ public class CourseBrowseServlet extends HttpServlet {
             sortBy = "newest";
         }
 
-        List<Course> courses = courseService.searchCourses(keyword, categoryId, sortBy);
+        List<Course> courses = courseService.searchCourses(keyword, categoryId, sortBy, filter);
 
         request.setAttribute("courses", courses);
         request.setAttribute("categories", categoryDAO.findAll());
         request.setAttribute("keyword", keyword);
         request.setAttribute("selectedCategoryId", categoryId);
         request.setAttribute("sortBy", sortBy);
+        request.setAttribute("filter", filter);
 
         request.getRequestDispatcher("/WEB-INF/views/student/course-browse.jsp")
                 .forward(request, response);

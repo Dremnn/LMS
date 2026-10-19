@@ -234,6 +234,8 @@
                                     <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>
                                     <!-- Nút Quản lý nội dung (Thêm/Sửa/Xóa Chương & Bài học): chuyển sang /instructor/courses/manage -->
                                     <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info"><i class="fa-solid fa-folder-open"></i> Nội dung</a>
+                                    <!-- Nút Quản lý nhóm học tập: chuyển sang /instructor/groups -->
+                                    <a href="${pageContext.request.contextPath}/instructor/groups?courseId=${course.id}" class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;"><i class="fa-solid fa-users"></i> Nhóm</a>
                                     
                                     <!-- Nút ĐĂNG KHÓA HỌC (Submit): POST về /instructor/courses/submit -> CourseService.publishCourse -->
                                     <c:if test="${course.status == 'draft'}">
