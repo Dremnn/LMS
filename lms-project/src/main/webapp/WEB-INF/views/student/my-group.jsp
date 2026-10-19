@@ -85,7 +85,12 @@
                     <c:forEach var="member" items="${members}">
                         <div class="member-item ${member.student.id == currentUser.id ? 'me' : ''}">
                             <div class="avatar-placeholder">
-                                ${member.student.fullName.substring(0,1).toUpperCase()}
+                                <c:choose>
+                                    <c:when test="${not empty member.student.fullName}">
+                                        ${member.student.fullName.substring(0,1).toUpperCase()}
+                                    </c:when>
+                                    <c:otherwise>U</c:otherwise>
+                                </c:choose>
                             </div>
                             <div>
                                 <strong style="display: block; color: #1e293b;">
@@ -114,7 +119,7 @@
                     <div class="status-box ${submission.score != null ? 'status-graded' : 'status-submitted'}">
                         <h4 style="margin-bottom: 8px;"><i class="fa-solid fa-circle-check"></i> Trạng thái: Đã nộp bài</h4>
                         <p style="font-size: 14px; margin-bottom: 4px;"><strong>Link bài làm:</strong> <a href="${submission.fileUrl}" target="_blank">${submission.fileUrl}</a></p>
-                        <p style="font-size: 14px; margin-bottom: 4px;"><strong>Người nộp:</strong> ${submission.submitter.fullName}</p>
+                        <p style="font-size: 14px; margin-bottom: 4px;"><strong>Người nộp:</strong> <c:out value="${submission.submitter != null && not empty submission.submitter.fullName ? submission.submitter.fullName : 'Học viên'}" /></p>
                         
                         <c:if test="${submission.score != null}">
                             <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 12px 0;">

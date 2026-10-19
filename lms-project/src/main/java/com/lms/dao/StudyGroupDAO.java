@@ -49,10 +49,41 @@ public class StudyGroupDAO {
         EntityTransaction trans = em.getTransaction();
         try {
             trans.begin();
+            em.createQuery("DELETE FROM GroupMember gm WHERE gm.studyGroup.id = :groupId")
+              .setParameter("groupId", groupId)
+              .executeUpdate();
+            em.createQuery("DELETE FROM GroupSubmission gs WHERE gs.studyGroup.id = :groupId")
+              .setParameter("groupId", groupId)
+              .executeUpdate();
             StudyGroup group = em.find(StudyGroup.class, groupId);
             if (group != null) {
                 em.remove(group);
             }
+            trans.commit();
+            return true;
+        } catch (Exception e) {
+            if (trans.isActive()) trans.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean deleteAllGroupsByCourse(int courseId) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            em.createQuery("DELETE FROM GroupMember gm WHERE gm.studyGroup.course.id = :courseId")
+              .setParameter("courseId", courseId)
+              .executeUpdate();
+            em.createQuery("DELETE FROM GroupSubmission gs WHERE gs.studyGroup.course.id = :courseId")
+              .setParameter("courseId", courseId)
+              .executeUpdate();
+            em.createQuery("DELETE FROM StudyGroup g WHERE g.course.id = :courseId")
+              .setParameter("courseId", courseId)
+              .executeUpdate();
             trans.commit();
             return true;
         } catch (Exception e) {
@@ -122,7 +153,8 @@ public class StudyGroupDAO {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
             TypedQuery<GroupMember> q = em.createQuery(
-                "SELECT gm FROM GroupMember gm WHERE gm.studyGroup.id = :groupId", GroupMember.class);
+                "SELECT gm FROM GroupMember gm JOIN FETCH gm.student LEFT JOIN FETCH gm.studyGroup WHERE gm.studyGroup.id = :groupId ORDER BY gm.id ASC", 
+                GroupMember.class);
             q.setParameter("groupId", groupId);
             return q.getResultList();
         } finally {
@@ -146,7 +178,7 @@ public class StudyGroupDAO {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
             TypedQuery<StudyGroup> q = em.createQuery(
-                "SELECT gm.studyGroup FROM GroupMember gm WHERE gm.studyGroup.course.id = :courseId AND gm.student.id = :studentId", 
+                "SELECT g FROM GroupMember gm JOIN gm.studyGroup g LEFT JOIN FETCH g.course WHERE g.course.id = :courseId AND gm.student.id = :studentId", 
                 StudyGroup.class);
             q.setParameter("courseId", courseId);
             q.setParameter("studentId", studentId);

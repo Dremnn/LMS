@@ -244,6 +244,12 @@
                 </a>
             </c:otherwise>
         </c:choose>
+        <a href="${pageContext.request.contextPath}/instructor/groups?courseId=${course.id}" class="btn" style="background:#0284c7;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 4px 14px rgba(2,132,199,0.35);">
+            <i class="fa-solid fa-people-group"></i> Quản lý Nhóm
+        </a>
+        <a href="${pageContext.request.contextPath}/instructor/courses/students?courseId=${course.id}" class="btn" style="background:#059669;color:#fff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;box-shadow:0 4px 14px rgba(5,150,105,0.35);">
+            <i class="fa-solid fa-user-graduate"></i> Tiến độ Học viên
+        </a>
         <a href="${pageContext.request.contextPath}/courses/detail?id=${course.id}" class="btn" style="background:rgba(255,255,255,0.18);color:#fff;border:1.5px solid rgba(255,255,255,0.4);border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:all 0.2s;">
             <i class="fa-solid fa-circle-info"></i> Trang giới thiệu
         </a>
@@ -653,6 +659,30 @@
                 <div class="quiz-empty-card">Chưa có bài tập nào được tạo.</div>
             </c:otherwise>
         </c:choose>
+    </div>
+
+    <%-- ===== PHẦN NHÓM HỌC TẬP ===== --%>
+    <div class="quiz-section-block" style="margin-top:24px;border-left-color:#0284c7;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:12px;">
+            <h3><i class="fa-solid fa-people-group" style="color:#0284c7;"></i> Nhóm học tập &amp; Bài tập nhóm</h3>
+            <a href="${pageContext.request.contextPath}/instructor/groups?courseId=${course.id}"
+               class="btn btn-primary btn-sm" style="background:#0284c7;border-color:#0284c7;display:inline-flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-gear"></i> Quản lý &amp; Chia nhóm
+            </a>
+        </div>
+        <p class="quiz-section-desc">Tự động hoặc thủ công chia nhóm học viên trong khóa học để làm đồ án/bài tập nhóm, theo dõi thành viên và chấm điểm bài nộp chung.</p>
+    </div>
+
+    <%-- ===== PHẦN TIẾN ĐỘ HỌC VIÊN & CẢNH CÁO ===== --%>
+    <div class="quiz-section-block" style="margin-top:24px;border-left-color:#059669;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:12px;">
+            <h3><i class="fa-solid fa-user-graduate" style="color:#059669;"></i> Danh sách Học viên &amp; Tiến độ học tập</h3>
+            <a href="${pageContext.request.contextPath}/instructor/courses/students?courseId=${course.id}"
+               class="btn btn-primary btn-sm" style="background:#059669;border-color:#059669;display:inline-flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-chart-pie"></i> Xem tiến độ &amp; Cảnh cáo
+            </a>
+        </div>
+        <p class="quiz-section-desc">Theo dõi tiến độ học tập chi tiết của từng học viên trong khóa học, phát hiện các trường hợp chậm tiến độ và gửi cảnh cáo trực tiếp.</p>
     </div>
 </div>
 

@@ -33,6 +33,18 @@ public class Enrollment implements Serializable {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "warning_message")
+    private String warningMessage;
+
+    @Column(name = "warning_at")
+    private LocalDateTime warningAt;
+
+    @Column(name = "appeal_message")
+    private String appealMessage;
+
+    @Column(name = "warning_status")
+    private String warningStatus; // "none", "warning", "appealed"
+
     // Quan hệ ORM
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", insertable = false, updatable = false)
@@ -51,6 +63,18 @@ public class Enrollment implements Serializable {
 
     @Transient
     private int totalLessons;
+
+    @Transient
+    private String studentFullName;
+
+    @Transient
+    private String studentEmail;
+
+    @Transient
+    private String studentAvatarUrl;
+
+    @Transient
+    private String groupName;
 
     public Enrollment() {}
 
@@ -101,4 +125,41 @@ public class Enrollment implements Serializable {
 
     public Course getCourse() { return course; }
     public void setCourse(Course course) { this.course = course; }
+
+    public String getWarningMessage() { return warningMessage; }
+    public void setWarningMessage(String warningMessage) { this.warningMessage = warningMessage; }
+
+    public LocalDateTime getWarningAt() { return warningAt; }
+    public void setWarningAt(LocalDateTime warningAt) { this.warningAt = warningAt; }
+
+    public String getFormattedWarningAt() {
+        if (warningAt == null) return "";
+        return warningAt.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+    }
+
+    public String getAppealMessage() { return appealMessage; }
+    public void setAppealMessage(String appealMessage) { this.appealMessage = appealMessage; }
+
+    public String getWarningStatus() { return warningStatus; }
+    public void setWarningStatus(String warningStatus) { this.warningStatus = warningStatus; }
+
+    public boolean isWarned() {
+        return "warning".equals(warningStatus) || ("warning".equals(status));
+    }
+
+    public boolean isAppealed() {
+        return "appealed".equals(warningStatus);
+    }
+
+    public String getStudentFullName() { return studentFullName; }
+    public void setStudentFullName(String studentFullName) { this.studentFullName = studentFullName; }
+
+    public String getStudentEmail() { return studentEmail; }
+    public void setStudentEmail(String studentEmail) { this.studentEmail = studentEmail; }
+
+    public String getStudentAvatarUrl() { return studentAvatarUrl; }
+    public void setStudentAvatarUrl(String studentAvatarUrl) { this.studentAvatarUrl = studentAvatarUrl; }
+
+    public String getGroupName() { return groupName; }
+    public void setGroupName(String groupName) { this.groupName = groupName; }
 }

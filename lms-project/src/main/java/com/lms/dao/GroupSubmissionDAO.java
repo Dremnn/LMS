@@ -34,7 +34,7 @@ public class GroupSubmissionDAO {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         try {
             TypedQuery<GroupSubmission> q = em.createQuery(
-                "SELECT s FROM GroupSubmission s WHERE s.studyGroup.id = :groupId AND s.assignmentId = :assignmentId", 
+                "SELECT s FROM GroupSubmission s LEFT JOIN FETCH s.submitter LEFT JOIN FETCH s.studyGroup WHERE s.studyGroup.id = :groupId AND s.assignmentId = :assignmentId", 
                 GroupSubmission.class);
             q.setParameter("groupId", groupId);
             q.setParameter("assignmentId", assignmentId);

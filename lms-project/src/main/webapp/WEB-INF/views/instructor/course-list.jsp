@@ -234,6 +234,14 @@
                                     <a href="${pageContext.request.contextPath}/instructor/courses/edit?id=${course.id}" class="btn btn-sm btn-secondary">✏️ Sửa</a>
                                     <!-- Nút Quản lý nội dung (Thêm/Sửa/Xóa Chương & Bài học): chuyển sang /instructor/courses/manage -->
                                     <a href="${pageContext.request.contextPath}/instructor/courses/manage?id=${course.id}" class="btn btn-sm btn-info"><i class="fa-solid fa-folder-open"></i> Nội dung</a>
+                                    <!-- Nút Quản lý nhóm (Chia nhóm, Chấm điểm bài tập nhóm) -->
+                                    <a href="${pageContext.request.contextPath}/instructor/groups?courseId=${course.id}" class="btn btn-sm" style="background:#0284c7;color:#fff;" title="Quản lý &amp; Chia nhóm học tập">
+                                        <i class="fa-solid fa-users"></i> Nhóm
+                                    </a>
+                                    <!-- Nút Danh sách & Tiến độ học viên -->
+                                    <a href="${pageContext.request.contextPath}/instructor/courses/students?courseId=${course.id}" class="btn btn-sm btn-secondary" title="Danh sách học viên, tiến độ &amp; cảnh cáo">
+                                        <i class="fa-solid fa-user-graduate"></i> Học viên
+                                    </a>
                                     
                                     <!-- Nút ĐĂNG KHÓA HỌC (Submit): POST về /instructor/courses/submit -> CourseService.publishCourse -->
                                     <c:if test="${course.status == 'draft'}">

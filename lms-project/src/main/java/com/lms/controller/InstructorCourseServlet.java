@@ -16,7 +16,26 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
-// urlPatterns: dùng 1 Servlet xử lý nhiều đường dẫn con khác nhau (thay vì mỗi hành động 1 Servlet riêng)
+/**
+ * ============================================================================
+ * CONTROLLER: InstructorCourseServlet
+ * ============================================================================
+ * VAI TRÒ (INSTRUCTOR):
+ * - Quản lý vòng đời khóa học thuộc sở hữu của Giảng viên:
+ *   + GET  /instructor/courses        : Xem danh sách khóa học của giảng viên (trạng thái, số học viên, nút thao tác).
+ *   + GET  /instructor/courses/new    : Hiển thị form tạo khóa học mới.
+ *   + POST /instructor/courses/new    : Nhận dữ liệu form tạo khóa học mới (trạng thái khởi tạo: 'draft').
+ *   + GET  /instructor/courses/edit   : Hiển thị form cập nhật thông tin chung của khóa học (kiểm tra quyền sở hữu).
+ *   + POST /instructor/courses/edit   : Lưu thông tin chỉnh sửa (tiêu đề, mô tả, giá, thumbnail).
+ *   + POST /instructor/courses/submit : Đăng khóa học ('draft' -> 'published'), yêu cầu tối thiểu 1 chương & 1 bài học.
+ *   + POST /instructor/courses/delete : Xóa khóa học (chỉ cho phép xóa khi còn là 'draft').
+ *   + POST /instructor/courses/appeal : Gửi đơn kháng cáo lên Admin khi khóa học bị cảnh cáo ('warning' -> 'appealed').
+ * 
+ * VIEW TƯƠNG ỨNG:
+ *   + /WEB-INF/views/instructor/course-list.jsp (Bảng danh sách khóa học của giảng viên)
+ *   + /WEB-INF/views/instructor/course-form.jsp (Form tạo mới hoặc chỉnh sửa khóa học)
+ * ============================================================================
+ */
 @WebServlet(urlPatterns = {
     "/instructor/courses",
     "/instructor/courses/new",
@@ -31,19 +50,29 @@ public class InstructorCourseServlet extends HttpServlet {
     private CourseService courseService;
     private CategoryDAO categoryDAO;
 
+    /**
+     * Khởi tạo các Service và DAO
+     */
     @Override
     public void init() throws ServletException {
         this.courseService = new CourseService();
         this.categoryDAO = new CategoryDAO();
     }
 
-    // Hàm phụ trợ: lấy User hiện tại đang đăng nhập từ session
-    // (AuthFilter đã đảm bảo user không null khi vào tới đây)
+    /**
+     * Hàm phụ trợ lấy thông tin User hiện tại từ Session
+     * (Filter AuthFilter đã đảm bảo role 'instructor' trước khi vào Servlet này)
+     */
     private User getCurrentUser(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         return (User) session.getAttribute("currentUser");
     }
 
+    /**
+     * ------------------------------------------------------------------------
+     * HÀM XỬ LÝ: doGet (Hiển thị danh sách hoặc form khóa học)
+     * ------------------------------------------------------------------------
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -53,7 +82,7 @@ public class InstructorCourseServlet extends HttpServlet {
 
         switch (path) {
             case "/instructor/courses":
-                // Đọc flash messages
+                // 1. Đọc và dọn dẹp các thông báo Flash Message
                 HttpSession sess = request.getSession(false);
                 if (sess != null && sess.getAttribute("flashError") != null) {
                     request.setAttribute("error", sess.getAttribute("flashError"));
@@ -63,26 +92,29 @@ public class InstructorCourseServlet extends HttpServlet {
                     request.setAttribute("successMessage", sess.getAttribute("flashSuccess"));
                     sess.removeAttribute("flashSuccess");
                 }
-                // Danh sách khóa học của Instructor hiện tại
+
+                // 2. Tải danh sách khóa học do chính Giảng viên này tạo
                 List<Course> courses = courseService.getMyCoursesAsInstructor(currentUser.getId());
                 request.setAttribute("courses", courses);
+                
+                // 3. Render bảng danh sách khóa học
                 request.getRequestDispatcher("/WEB-INF/views/instructor/course-list.jsp")
                         .forward(request, response);
                 break;
 
             case "/instructor/courses/new":
-                // Hiển thị form tạo khóa học mới -> cần load sẵn danh sách category cho dropdown
+                // Hiển thị form tạo khóa học mới -> nạp sẵn danh mục Category cho dropdown
                 request.setAttribute("categories", categoryDAO.findAll());
                 request.getRequestDispatcher("/WEB-INF/views/instructor/course-form.jsp")
                         .forward(request, response);
                 break;
 
             case "/instructor/courses/edit":
-                // Hiển thị form sửa khóa học đã có
+                // Hiển thị form sửa thông tin khóa học đã có
                 int courseId = Integer.parseInt(request.getParameter("id"));
                 Course course = courseService.getCourseDetail(courseId);
 
-                // Kiểm tra quyền sở hữu ngay tại Servlet trước khi hiển thị form
+                // KIỂM TRA BẢO MẬT: Giảng viên chỉ được sửa khóa học do chính mình tạo ra!
                 if (course.getInstructorId() != currentUser.getId()) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền sửa khóa học này!");
                     return;
@@ -99,6 +131,11 @@ public class InstructorCourseServlet extends HttpServlet {
         }
     }
 
+    /**
+     * ------------------------------------------------------------------------
+     * HÀM XỬ LÝ: doPost (Tiếp nhận các hành động: Tạo, Sửa, Đăng, Xóa, Kháng cáo)
+     * ------------------------------------------------------------------------
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -110,22 +147,27 @@ public class InstructorCourseServlet extends HttpServlet {
         try {
             switch (path) {
                 case "/instructor/courses/new":
+                    // Xử lý tạo mới khóa học
                     handleCreate(request, currentUser);
                     break;
 
                 case "/instructor/courses/edit":
+                    // Xử lý cập nhật thông tin khóa học
                     handleUpdate(request, currentUser);
                     break;
 
                 case "/instructor/courses/submit":
+                    // Xử lý đăng khóa học công khai (Publish)
                     handleSubmit(request, currentUser);
                     break;
 
                 case "/instructor/courses/delete":
+                    // Xử lý xóa khóa học nháp (Draft)
                     handleDelete(request, currentUser);
                     break;
 
                 case "/instructor/courses/appeal":
+                    // Xử lý gửi kháng cáo khóa học bị cảnh cáo
                     handleAppeal(request, currentUser);
                     break;
 
@@ -134,11 +176,11 @@ public class InstructorCourseServlet extends HttpServlet {
                     return;
             }
 
-            // Sau khi xử lý xong (thành công), quay lại danh sách khóa học
+            // Xử lý thành công -> chuyển hướng về trang danh sách khóa học
             response.sendRedirect(request.getContextPath() + "/instructor/courses");
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            // Nếu lỗi từ appeal hoặc submit/delete -> redirect về danh sách kèm flash error
+            // Xử lý lỗi nghiệp vụ logic (chưa đủ chương/bài để đăng, khóa học không ở draft...)
             if ("/instructor/courses/appeal".equals(path) 
                 || "/instructor/courses/submit".equals(path)
                 || "/instructor/courses/delete".equals(path)) {
@@ -146,7 +188,7 @@ public class InstructorCourseServlet extends HttpServlet {
                 session.setAttribute("flashError", e.getMessage());
                 response.sendRedirect(request.getContextPath() + "/instructor/courses");
             } else {
-                // Lỗi từ create/edit -> forward về form kèm thông báo lỗi
+                // Lỗi khi submit form create/edit -> giữ lại form kèm thông báo lỗi
                 request.setAttribute("error", e.getMessage());
                 request.setAttribute("categories", categoryDAO.findAll());
                 request.getRequestDispatcher("/WEB-INF/views/instructor/course-form.jsp")
@@ -154,6 +196,7 @@ public class InstructorCourseServlet extends HttpServlet {
             }
 
         } catch (SecurityException e) {
+            // Lỗi xâm phạm quyền sở hữu khóa học
             response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
 
         } catch (Exception e) {
@@ -172,6 +215,9 @@ public class InstructorCourseServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Thu thập tham số từ form và tạo khóa học mới
+     */
     private void handleCreate(HttpServletRequest request, User currentUser) {
         String title = request.getParameter("title");
         String description = request.getParameter("description");
@@ -187,6 +233,9 @@ public class InstructorCourseServlet extends HttpServlet {
         courseService.createCourse(currentUser.getId(), title, description, categoryId, price, thumbnailUrl);
     }
 
+    /**
+     * Cập nhật thông tin tiêu đề, mô tả, giá, thumbnail của khóa học
+     */
     private void handleUpdate(HttpServletRequest request, User currentUser) {
         int courseId = Integer.parseInt(request.getParameter("id"));
         String title = request.getParameter("title");
@@ -203,16 +252,26 @@ public class InstructorCourseServlet extends HttpServlet {
         courseService.updateCourse(courseId, currentUser.getId(), title, description, categoryId, price, thumbnailUrl);
     }
 
+    /**
+     * Đăng khóa học (Publish): Chuyển trạng thái từ draft -> published
+     * (Tầng Service sẽ kiểm tra điều kiện bắt buộc: phải có tối thiểu 1 chương và 1 bài học)
+     */
     private void handleSubmit(HttpServletRequest request, User currentUser) {
         int courseId = Integer.parseInt(request.getParameter("id"));
         courseService.publishCourse(courseId, currentUser.getId());
     }
 
+    /**
+     * Xóa khóa học: Chỉ cho phép xóa khi khóa học còn ở trạng thái nháp (draft)
+     */
     private void handleDelete(HttpServletRequest request, User currentUser) {
         int courseId = Integer.parseInt(request.getParameter("id"));
         courseService.deleteCourse(courseId, currentUser.getId());
     }
 
+    /**
+     * Kháng cáo khóa học: Gửi lý do giải trình khi khóa học bị Admin cảnh cáo (warning -> appealed)
+     */
     private void handleAppeal(HttpServletRequest request, User currentUser) {
         int courseId = Integer.parseInt(request.getParameter("id"));
         String appealMessage = request.getParameter("appealMessage");

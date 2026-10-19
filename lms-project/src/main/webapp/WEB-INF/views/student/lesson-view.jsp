@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.lms.model.User" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -416,6 +416,22 @@
     <%-- ===================== NỘI DUNG CHÍNH ===================== --%>
     <main class="content">
         <h1 class="lesson-title"><c:out value="${currentLesson.title}"/></h1>
+
+        <%-- Cảnh cáo từ giảng viên (nếu có) --%>
+        <c:if test="${enrollment != null && (enrollment.warningStatus == 'warning' || enrollment.warningStatus == 'appealed')}">
+            <div style="background:#fffaf0; border:1px solid #f6ad55; border-left:4px solid #ed8936; border-radius:8px; padding:12px 18px; margin-bottom:20px; font-size:13px; color:#c05621; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <strong><i class="fa-solid fa-triangle-exclamation"></i> CẢNH CÁO TỪ GIẢNG VIÊN:</strong>
+                    <span style="margin-left:4px;"><c:out value="${enrollment.warningMessage}"/></span>
+                    <c:if test="${enrollment.warningStatus == 'appealed'}">
+                        <div style="font-size:12px; color:#2a4365; margin-top:4px;">📩 Bạn đã gửi kháng cáo: <c:out value="${enrollment.appealMessage}"/></div>
+                    </c:if>
+                </div>
+                <a href="${pageContext.request.contextPath}/student/my-courses" class="btn btn-sm" style="background:#ed8936; color:#fff; text-decoration:none; padding:5px 12px; border-radius:6px; font-weight:600; font-size:12px;">
+                    Xem &amp; Phản hồi
+                </a>
+            </div>
+        </c:if>
 
         <%-- Thông báo lỗi flash (nếu có) --%>
         <c:if test="${not empty error}">

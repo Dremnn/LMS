@@ -159,35 +159,46 @@
             border-color: #C7D2FE;
         }
 
-        /* Thumbnail bên trái */
+        /* Thumbnail bên trái - Fixed size chuẩn chống vỡ layout / phình to */
         .mycourse-thumb {
-            width: 280px;
-            min-width: 280px;
+            width: 260px;
+            min-width: 260px;
+            max-width: 260px;
+            height: 165px;
+            min-height: 165px;
+            max-height: 165px;
+            flex: 0 0 260px;
+            margin: 20px 0 20px 20px;
+            border-radius: 12px;
             position: relative;
             background: #F1F5F9;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            align-self: flex-start;
+            box-shadow: 0 4px 12px rgba(0,0,0,.06);
         }
         .mycourse-thumb img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            border-radius: 12px;
             transition: transform .3s ease;
         }
         .mycourse-card:hover .mycourse-thumb img {
-            transform: scale(1.04);
+            transform: scale(1.05);
         }
 
         /* Nội dung bên phải */
         .mycourse-body {
             flex: 1;
-            padding: 24px 28px;
+            padding: 20px 24px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            min-width: 0;
         }
         .mycourse-title {
             font-size: 19px;
@@ -251,7 +262,19 @@
 
         @media (max-width: 768px) {
             .mycourse-card { flex-direction: column !important; }
-            .mycourse-thumb { width: 100%; min-width: 100%; height: 190px; }
+            .mycourse-thumb { 
+                width: 100% !important; 
+                min-width: 100% !important; 
+                max-width: 100% !important; 
+                height: 190px !important; 
+                min-height: 190px !important;
+                max-height: 190px !important;
+                margin: 0 !important;
+                border-radius: 18px 18px 0 0 !important;
+            }
+            .mycourse-thumb img {
+                border-radius: 18px 18px 0 0 !important;
+            }
             .mycourse-body { padding: 20px; }
             .search-section { border-radius: 24px; padding: 14px; }
             .search-form { flex-direction: column; align-items: stretch; }
@@ -284,6 +307,7 @@
         }
         body.dark-theme .mycourse-thumb {
             background: #111312 !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,.4) !important;
         }
         body.dark-theme .mycourse-title {
             color: #FFFFFF !important;
@@ -570,6 +594,37 @@
                                          style="--progress: ${not empty enrollment.progressPercent ? enrollment.progressPercent : 0}%; width: var(--progress);"></div>
                                 </div>
                             </div>
+
+                            <%-- CẢNH CÁO TỪ GIẢNG VIÊN (UI GIỐNG NHƯ ADMIN CẢNH CÁO KHÓA HỌC) --%>
+                            <c:if test="${enrollment.warningStatus == 'warning' || enrollment.warningStatus == 'appealed'}">
+                                <div style="background:#fffaf0;border:1px solid #f6ad55;border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13px;color:#c05621;">
+                                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                                        <span><strong><i class="fa-solid fa-triangle-exclamation"></i> Cảnh cáo từ giảng viên:</strong> <c:out value="${enrollment.warningMessage}"/></span>
+                                        <c:choose>
+                                            <c:when test="${enrollment.warningStatus == 'warning'}">
+                                                <span class="badge" style="background:#fed7d7; color:#9b2c2c; font-size:11px; padding:3px 8px; border-radius:12px; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span>
+                                            </c:when>
+                                            <c:when test="${enrollment.warningStatus == 'appealed'}">
+                                                <span class="badge" style="background:#bee3f8; color:#2a4365; font-size:11px; padding:3px 8px; border-radius:12px; font-weight:700;"><i class="fa-solid fa-envelope"></i> Đang kháng cáo</span>
+                                            </c:when>
+                                        </c:choose>
+                                    </div>
+                                    <c:if test="${enrollment.warningStatus == 'appealed' && not empty enrollment.appealMessage}">
+                                        <div style="font-size:12px;color:#2a4365;margin-top:8px;background:#ebf8ff;padding:8px 12px;border-radius:6px;border:1px solid #bee3f8;">
+                                            <strong>📩 Phản hồi của bạn:</strong> <c:out value="${enrollment.appealMessage}"/>
+                                        </div>
+                                    </c:if>
+                                    <c:if test="${enrollment.warningStatus == 'warning'}">
+                                        <form action="${pageContext.request.contextPath}/student/courses/appeal" method="post" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;" onsubmit="return confirm('Xác nhận gửi phản hồi / kháng cáo đến giảng viên?');">
+                                            <input type="hidden" name="enrollmentId" value="${enrollment.id}">
+                                            <input type="text" name="appealMessage" placeholder="Nhập phản hồi / lý do chậm tiến độ để gửi giảng viên..." required maxlength="500" style="flex:1;min-width:220px;padding:7px 12px;border:1px solid #f6ad55;border-radius:6px;font-size:13px;outline:none;background:#fff;">
+                                            <button type="submit" class="btn btn-sm" style="background:#ed8936;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;">
+                                                <i class="fa-solid fa-paper-plane"></i> Gửi kháng cáo
+                                            </button>
+                                        </form>
+                                    </c:if>
+                                </div>
+                            </c:if>
                         </div>
 
                         <div class="course-footer">
